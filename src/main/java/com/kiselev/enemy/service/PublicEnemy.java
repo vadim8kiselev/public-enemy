@@ -25,7 +25,7 @@ public class PublicEnemy {
 
             InstagramProfile latestProfile = mongo.read(actualProfile.getPk());
 
-            Map<String, Object> messages = instagram.compare(actualProfile, latestProfile);
+            List<String> messages = instagram.compare(actualProfile, latestProfile);
 
             if (!messages.isEmpty()) {
                 write(messages);
@@ -35,22 +35,7 @@ public class PublicEnemy {
         }
     }
 
-    // TODO: rewrite printing reports
-    @SuppressWarnings("unchecked")
-    private void write(Map<String, Object> messages) {
-        for (Map.Entry<String, Object> message : messages.entrySet()) {
-            String key = message.getKey();
-            Object value = message.getValue();
-
-            if (value instanceof String) {
-                System.out.println(key + " " + value);
-            } else if (value instanceof Map) {
-                write((Map<String, Object>) value);
-            } else {
-                if (value != null) {
-                    throw new RuntimeException("Something bad is happened, please check me out");
-                }
-            }
-        }
+    private void write(List<String> messages) {
+        messages.forEach(System.out::println);
     }
 }
