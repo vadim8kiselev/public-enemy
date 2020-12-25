@@ -1,0 +1,151 @@
+package com.kiselev.enemy.network.instagram.model;
+
+import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
+import com.kiselev.enemy.utils.flow.model.Info;
+import com.kiselev.enemy.utils.flow.model.SocialNetwork;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+import com.kiselev.enemy.network.instagram.api.internal.payload.InstagramProfilePic;
+import com.kiselev.enemy.network.instagram.api.internal.payload.InstagramUser;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+
+@Data
+@Document
+@Accessors(fluent = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class InstagramProfile implements Info {
+
+    private String id;
+
+    @Id
+    @EqualsAndHashCode.Include
+    private String username;
+
+    private String name;
+    private String category;
+    private String biography;
+
+    private String external_url;
+
+    private boolean has_anonymous_profile_picture;
+
+    private boolean is_private;
+    private boolean is_verified;
+    private boolean is_business;
+    private boolean is_favorite;
+
+    private URL photo;
+
+    private String public_phone_number;
+    private String public_email;
+
+    private String location;
+
+    @ToString.Exclude
+    private List<InstagramProfile> friends;
+
+    @ToString.Exclude
+    private List<InstagramProfile> followers;
+
+    @ToString.Exclude
+    private List<InstagramProfile> following;
+
+    @ToString.Exclude
+    private List<InstagramPost> posts;
+
+//    @ToString.Exclude
+//    private List<InstagramPost> stories;
+
+    private LocalDateTime timestamp;
+
+    public InstagramProfile(InstagramUser profile) {
+        this.timestamp = LocalDateTime.now();
+
+        this.id = String.valueOf(profile.getPk());
+        this.username = profile.getUsername();
+        this.name = profile.getFull_name();
+        this.category = profile.getCategory();
+        this.biography = profile.getBiography();
+
+        this.external_url = profile.getExternal_url();
+
+        this.has_anonymous_profile_picture = profile.isHas_anonymous_profile_picture();
+
+        this.is_private = profile.is_private();
+
+        this.is_verified = profile.is_verified();
+        this.is_business = profile.is_business();
+        this.is_favorite = profile.is_favorite();
+
+        InstagramProfilePic info = profile.getHd_profile_pic_url_info();
+        if (info != null) {
+            this.photo = info.getUrl();
+        }
+
+        this.public_phone_number = profile.getPublic_phone_number();
+        this.public_email = profile.getPublic_email();
+
+        this.location = location(profile);
+    }
+
+    public InstagramProfile(User profile) {
+        this.timestamp = LocalDateTime.now();
+
+        this.id = String.valueOf(profile.getPk());
+        this.username = profile.getUsername();
+        this.name = profile.getName();
+        this.category = profile.getCategory();
+        this.biography = profile.getBiography();
+
+        this.external_url = profile.getExternal_url();
+
+        this.has_anonymous_profile_picture = profile.isHasAnonymousPhoto();
+
+        this.is_private = profile.isPrivate();
+
+        this.is_verified = profile.isVerified();
+        this.is_business = profile.isBusiness();
+        this.is_favorite = profile.isFavorite();
+
+        User.ProfilePic info = profile.getHd_profile_pic_url_info();
+        if (info != null) {
+            this.photo = info.getUrl();
+        }
+
+        this.public_phone_number = profile.getPhoneNumber();
+        this.public_email = profile.getEmail();
+
+//        this.location = location(profile);
+    }
+
+    private String location(InstagramUser profile) {
+        return String.join(" ", Arrays.asList(
+                profile.getPublic_phone_country_code(),
+                profile.getCity_name(),
+                profile.getAddress_street(),
+                profile.getZip()
+        ));
+    }
+
+    @Override
+    public String name() {
+        return String.format(
+                type().template(),
+                name,
+                username
+        );
+    }
+
+    @Override
+    public SocialNetwork type() {
+        return SocialNetwork.IG;
+    }
+}

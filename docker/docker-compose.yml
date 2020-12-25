@@ -23,6 +23,6 @@ services:
     networks:
       - instagram
 
-networks:  
+networks:
   instagram:
     driver: bridge
