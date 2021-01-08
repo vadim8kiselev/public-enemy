@@ -12,7 +12,9 @@ import java.util.List;
 @AllArgsConstructor(staticName = "of")
 public class Analysis<Profile extends Info> {
 
+    public static final Integer LIMIT_LIST = 3;
+
     private byte[] photo;
 
-    private List<Message<Profile>> messages;
+    private List<EnemyMessage<Profile>> messages;
 }

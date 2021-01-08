@@ -1,10 +1,8 @@
 package com.kiselev.enemy.network.vk.api.request;
 
-import com.kiselev.enemy.network.vk.api.internal.ApiRequest;
 import com.kiselev.enemy.network.vk.api.response.FollowingResponse;
 import com.vk.api.sdk.objects.users.Fields;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package com.kiselev.enemy.network.vk.service.tracker.flow.processor;
 
 import com.google.common.collect.Lists;
-import com.kiselev.enemy.utils.flow.message.Message;
+import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.kiselev.enemy.utils.flow.utils.FlowUtils;
 import com.kiselev.enemy.utils.flow.annotation.EnemyValue;
 import com.kiselev.enemy.utils.flow.annotation.EnemyValues;
@@ -21,9 +21,9 @@ public class VKEnemyFlowProcessor implements VKFlowProcessor {
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<Message<VKProfile>> process(VKProfile actual, VKProfile latest) {
+    public List<EnemyMessage<VKProfile>> process(VKProfile actual, VKProfile latest) {
         Class<VKProfile> clazz = VKProfile.class;
-        List<Message<VKProfile>> messages = Lists.newArrayList();
+        List<EnemyMessage<VKProfile>> messages = Lists.newArrayList();
 
         for (Field field : clazz.getDeclaredFields()) {
             EnemyValue enemyValue = field.getAnnotation(EnemyValue.class);

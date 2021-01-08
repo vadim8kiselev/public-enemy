@@ -16,6 +16,7 @@ import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.accounts.LoginResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGChallengeUtils;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
+import com.kiselev.enemy.network.instagram.utils.InstagramUtils;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -23,10 +24,18 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Data
 @Slf4j
@@ -51,6 +60,9 @@ public class IGClient {
     private boolean loggedIn = false;
     private Profile selfProfile;
 
+    private boolean available;
+    private LocalDateTime isNotAvailableFrom;
+
     public IGClient(String username, String password) {
         this.username = username;
         this.password = password;
@@ -58,9 +70,10 @@ public class IGClient {
         this.phoneId = IGUtils.randomUuid();
         this.deviceId = IGUtils.generateDeviceId(username, password);
         this.httpClient = IGUtils.defaultHttpClientBuilder().build();
-        this.device = IGAndroidDevice.GOOD_DEVICES[0];
+        this.device = IGAndroidDevice.GOOD_DEVICES[new Random().nextInt(IGAndroidDevice.GOOD_DEVICES.length)];
         this.sessionId = IGUtils.randomUuid();
         this.actions = new IGClientActions(this);
+        this.available = true;
     }
 
     @SneakyThrows
@@ -88,7 +101,6 @@ public class IGClient {
         return client;
     }
 
-
     private LoginResponse authenticateWithTwoFactors(IGClient client, LoginResponse response) {
         return IGChallengeUtils.resolveTwoFactor(
                 client,
@@ -108,6 +120,8 @@ public class IGClient {
         System.out.print(message);
         return scanner.nextLine();
     }
+
+
 
 
     public CompletableFuture<LoginResponse> sendLoginRequest() {
@@ -139,35 +153,56 @@ public class IGClient {
                             .execute(this);
                 })
                 .thenApply((response) -> {
+                    if (response == null) {
+                        throw new RuntimeException("Response is null");
+                    }
                     this.setLoggedInState(response);
                     return response;
                 });
     }
 
     public <T extends IGResponse> CompletableFuture<T> sendRequest(@NonNull IGRequest<T> request) {
-        CompletableFuture<Pair<Response, String>> responseFuture = new CompletableFuture<>();
-        log.info("Sending request : {}", request.formUrl(this).toString());
+        return sendRequestWithoutRetry(
+                request,
+                0
+        );
+    }
+
+    public <T extends IGResponse> CompletableFuture<T> sendRequestWithoutRetry(@NonNull IGRequest<T> request, Integer retry) {
+//        if(retry >= 3) {
+//            CompletableFuture<T> failedFuture = new CompletableFuture<>();
+//            failedFuture.completeExceptionally(
+//                    new RuntimeException("Max retry attempts!")
+//            );
+//            return failedFuture;
+//        }
+
+        CompletableFuture<Pair<Response, String>> future = new CompletableFuture<>();
+
+//        log.info("Sending request : {}", request.formUrl(this).toString());
+
         this.httpClient
                 .newCall(request.formRequest(this))
                 .enqueue(new Callback() {
                     @Override
                     public void onResponse(Call call, Response res) throws IOException {
-                        log.info("Response for {} : {}", call.request().url().toString(), res.code());
+//                        log.info("Response for {} : {}", call.request().url().toString(), res.code());
                         try (ResponseBody body = res.body()) {
-                            responseFuture.complete(new Pair<>(res, body.string()));
+                            future.complete(new Pair<>(res, body.string()));
                         }
                     }
 
                     @Override
                     public void onFailure(Call call, IOException exception) {
-                        responseFuture.completeExceptionally(exception);
+                        future.completeExceptionally(exception);
                     }
                 });
 
-        return responseFuture
+        return future
                 .thenApply(res -> {
                     setFromResponseHeaders(res.getFirst());
-                    log.info("Response for {} with body (truncated) : {}",
+                    log.info("[{}]: {}, Body: {}",
+                            username,
                             res.getFirst().request().url(),
                             IGUtils.truncate(res.getSecond()));
 
@@ -175,22 +210,21 @@ public class IGClient {
                 })
                 .exceptionally(
                         (throwable) -> {
-//                Throwable cause = throwable.getCause();
-//                if (cause instanceof IGChallengeRequiredException) {
-//                    LoginResponse response = ((IGChallengeRequiredException) cause).getResponse();
-//                    if (response.getChallenge() != null) {
-//                        response = IGClient.this.authenticateWithChallenge(IGClient.this, response);
-//                        IGClient.this.setLoggedInState(response);
-//                    }
-//                }
+                            Throwable cause = throwable.getCause();
+                            if ("Please wait a few minutes before you try again.".equals(cause.getMessage())) {
+//                                InstagramUtils.sleep(60000);
+//                                return sendRequestWithoutRetry(request, retry + 1).join();
+                                throw new CompletionException("Please wait a few minutes before you try again.", cause);
+                            }
+                            if ("Sorry, there was a problem with your request.".equals(cause.getMessage())) {
+                                throw new CompletionException("Sorry, there was a problem with your request.", cause);
+                            }
 
                             log.error(throwable.getMessage());
                             return null;
-//                throw new CompletionException(throwable.getCause());
                         });
-
-//                        (throwable) -> this.exceptionallyHandler.handle(throwable, request.getResponseType()));
     }
+
 
 
     private void setLoggedInState(LoginResponse response) {
@@ -246,13 +280,28 @@ public class IGClient {
 //        }
 //    }
 
-
     public IGClientActions actions() {
         return this.actions;
     }
 
-    @FunctionalInterface
-    public interface LoginHandler {
-        LoginResponse accept(IGClient client, LoginResponse response);
+
+    public void markUnavailable() {
+        this.available = false;
+        this.isNotAvailableFrom = LocalDateTime.now();
+    }
+
+    public void markAvailable() {
+        this.available = true;
+        this.isNotAvailableFrom = null;
+    }
+
+    public boolean isAvailable() {
+        return this.available
+                && isNotAvailableFrom == null;
+    }
+
+    public boolean isNotAvailable() {
+        return !this.available
+                && isNotAvailableFrom != null && isNotAvailableFrom.until(LocalDateTime.now(), ChronoUnit.MINUTES) > 1;
     }
 }

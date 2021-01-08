@@ -9,7 +9,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
     networks:
-      - instagram
+      - enemy
   mongo-express:
     image: mongo-express
     container_name: mongo-express
@@ -21,8 +21,8 @@ services:
     depends_on:
       - mongo
     networks:
-      - instagram
+      - enemy
 
 networks:
-  instagram:
+  enemy:
     driver: bridge

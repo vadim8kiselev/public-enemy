@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.kiselev.enemy.network.instagram.api.internal.payload.*;
 import com.kiselev.enemy.network.instagram.api.internal2.models.location.Location;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.ImageVersionsMeta;
+import com.kiselev.enemy.network.instagram.api.internal2.models.media.UserTags;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.VideoVersionsMeta;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.*;
 import com.kiselev.enemy.network.instagram.utils.InstagramUtils;
@@ -44,6 +45,8 @@ public class InstagramPost {
 
     @ToString.Exclude
     private List<InstagramProfile> tags;
+
+    private String caption;
 
     @ToString.Exclude
     private List<InstagramProfile> likes;
@@ -96,6 +99,11 @@ public class InstagramPost {
         this.type = MediaType.by(post.getMedia_type());
 
         this.location = location(post.getLocation());
+
+        Comment.Caption caption = post.getCaption();
+        if (caption != null) {
+            this.caption = caption.getText();
+        }
 
         switch (type) {
             case PHOTO: {

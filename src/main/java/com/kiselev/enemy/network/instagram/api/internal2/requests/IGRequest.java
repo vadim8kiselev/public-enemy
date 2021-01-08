@@ -73,6 +73,11 @@ public abstract class IGRequest<T extends IGResponse> {
         igResponse.setStatusCode(response.getFirst().code());
         if (!response.getFirst().isSuccessful() || Objects.equals(igResponse.getStatus(), "fail")) {
 
+            if (igResponse instanceof LoginResponse) {
+                LoginResponse loginResponse = (LoginResponse) igResponse;
+                throw new IGResponseException(loginResponse);
+            }
+
             throw new IGResponseException(igResponse);
         }
 

@@ -1,6 +1,5 @@
 package com.kiselev.enemy.network.vk.api.request;
 
-import com.kiselev.enemy.network.vk.api.internal.ApiRequest;
 import com.kiselev.enemy.network.vk.api.response.ConversationsResponse;
 import com.vk.api.sdk.objects.base.UserGroupFields;
 import com.vk.api.sdk.objects.enums.MessagesFilter;

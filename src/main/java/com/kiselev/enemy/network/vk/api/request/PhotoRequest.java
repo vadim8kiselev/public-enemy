@@ -1,9 +1,7 @@
 package com.kiselev.enemy.network.vk.api.request;
 
-import com.kiselev.enemy.network.vk.api.internal.ApiRequest;
 import com.kiselev.enemy.network.vk.api.response.PhotoResponse;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

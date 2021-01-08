@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class AnalyticsUtils {
 
     public static <Profile extends Info, Type> Prediction<Type> predict(Function<Profile, Type> function,
-                                                                  List<Profile> predictionGroup) {
+                                                                        List<Profile> predictionGroup) {
         List<Type> predictionCandidates = predictionGroup.stream()
                 .map(function)
                 .filter(Objects::nonNull)
@@ -47,5 +47,27 @@ public class AnalyticsUtils {
         }
 
         return null;
+    }
+
+    public static <Profile extends Info> List<Prediction<Profile>> top(List<Profile> group, Integer limit) {
+        Map<Profile, Long> likersHeatMap = group.stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        return likersHeatMap.entrySet().stream()
+                .sorted(Map.Entry.<Profile, Long>comparingByValue().reversed())
+                .map(entry -> Prediction.of(entry.getKey(), entry.getValue()))
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    public static <Profile extends Info> List<Profile> topObjects(List<Profile> group, Integer limit) {
+        Map<Profile, Long> likersHeatMap = group.stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        return likersHeatMap.entrySet().stream()
+                .sorted(Map.Entry.<Profile, Long>comparingByValue().reversed())
+                .map(Map.Entry::getKey)
+                .limit(limit)
+                .collect(Collectors.toList());
     }
 }

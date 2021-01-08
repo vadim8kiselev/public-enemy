@@ -2,15 +2,19 @@ package com.kiselev.enemy.network.instagram.api;
 
 import com.google.common.collect.Lists;
 import com.kiselev.enemy.network.instagram.api.client.InstagramClient;
+import com.kiselev.enemy.network.instagram.api.internal2.models.feed.Reel;
+import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.Comment;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.TimelineMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
+import com.kiselev.enemy.network.instagram.api.internal2.requests.feed.FeedUserReelMediaRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.feed.FeedUserRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.friendships.FriendshipsFeedsRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaGetCommentsRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaGetLikersRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.users.UsersUsernameInfoRequest;
+import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUserReelsMediaResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUserResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUsersResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaGetCommentsResponse;
@@ -54,6 +58,18 @@ public class InstagramAPI {
             }
         }
         return null;
+    }
+
+    public List<Profile> friends(Long profilePk) {
+        List<Profile> friends = Lists.newArrayList();
+
+        List<Profile> followers = followers(profilePk);
+        List<Profile> following = following(profilePk);
+
+        friends.addAll(followers);
+        friends.retainAll(following);
+
+        return friends;
     }
 
     public List<Profile> followers(Long profilePk) {
@@ -194,6 +210,24 @@ public class InstagramAPI {
 
         return comments;
     }
+
+    public List<ReelMedia> stories(Long profilePk) {
+        FeedUserReelsMediaResponse response = client.request(
+                new FeedUserReelMediaRequest(profilePk)
+        );
+
+        Reel reel = response.getReel();
+        if (reel != null) {
+            return reel.getItems();
+        }
+        return null;
+    }
+
+
+
+
+
+
 //
 //    // Also check for InstagramGetReelsTrayFeedRequest
 //    public List<InstagramStoryItem> stories(Long profilePk) {

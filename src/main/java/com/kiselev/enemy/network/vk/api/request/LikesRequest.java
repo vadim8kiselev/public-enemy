@@ -1,6 +1,5 @@
 package com.kiselev.enemy.network.vk.api.request;
 
-import com.kiselev.enemy.network.vk.api.internal.ApiRequest;
 import com.kiselev.enemy.network.vk.api.response.LikeResponse;
 import com.vk.api.sdk.objects.enums.LikesFilter;
 import com.vk.api.sdk.objects.enums.LikesFriendsOnly;

@@ -123,10 +123,10 @@ public class GroupFull extends Group {
     private BoolInt isSubscribed;
 
     @SerializedName("city")
-    private BaseObject city;
+    private String city;
 
     @SerializedName("country")
-    private Country country;
+    private String country;
 
     /**
      * Information whether community is verified

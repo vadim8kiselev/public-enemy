@@ -4,7 +4,7 @@ import com.kiselev.enemy.data.telegram.handler.TelegramHandler;
 import com.kiselev.enemy.data.telegram.service.TelegramAPI;
 import com.kiselev.enemy.data.telegram.utils.TelegramUtils;
 import com.kiselev.enemy.utils.flow.message.Analysis;
-import com.kiselev.enemy.utils.flow.message.Message;
+import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.kiselev.enemy.utils.flow.model.Info;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
@@ -62,7 +62,7 @@ public class Telegram {
         }
     }
 
-    public <Profile extends Info> void send(Long requestId, List<Message<Profile>> messages) {
+    public <Profile extends Info> void send(Long requestId, List<EnemyMessage<Profile>> messages) {
         if (enabled) {
             List<String> answers = TelegramUtils.answers(messages);
             service.send(bot, requestId, answers);
@@ -70,7 +70,7 @@ public class Telegram {
         }
     }
 
-    public <Profile extends Info> void send(List<Message<Profile>> messages) {
+    public <Profile extends Info> void send(List<EnemyMessage<Profile>> messages) {
         if (enabled) {
             List<String> answers = TelegramUtils.answers(messages);
             service.send(bot, id, answers);

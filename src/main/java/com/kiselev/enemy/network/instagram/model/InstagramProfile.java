@@ -1,5 +1,6 @@
 package com.kiselev.enemy.network.instagram.model;
 
+import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
 import com.kiselev.enemy.utils.flow.model.Info;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
@@ -9,6 +10,7 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 import com.kiselev.enemy.network.instagram.api.internal.payload.InstagramProfilePic;
 import com.kiselev.enemy.network.instagram.api.internal.payload.InstagramUser;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -29,7 +31,7 @@ public class InstagramProfile implements Info {
     @EqualsAndHashCode.Include
     private String username;
 
-    private String name;
+    private String fullName;
     private String category;
     private String biography;
 
@@ -50,6 +52,9 @@ public class InstagramProfile implements Info {
     private String location;
 
     @ToString.Exclude
+    private List<ReelMedia> stories;
+
+    @ToString.Exclude
     private List<InstagramProfile> friends;
 
     @ToString.Exclude
@@ -61,6 +66,9 @@ public class InstagramProfile implements Info {
     @ToString.Exclude
     private List<InstagramPost> posts;
 
+    @ToString.Exclude
+    private List<InstagramProfile> likes;
+
 //    @ToString.Exclude
 //    private List<InstagramPost> stories;
 
@@ -71,7 +79,7 @@ public class InstagramProfile implements Info {
 
         this.id = String.valueOf(profile.getPk());
         this.username = profile.getUsername();
-        this.name = profile.getFull_name();
+        this.fullName = profile.getFull_name();
         this.category = profile.getCategory();
         this.biography = profile.getBiography();
 
@@ -101,7 +109,7 @@ public class InstagramProfile implements Info {
 
         this.id = String.valueOf(profile.getPk());
         this.username = profile.getUsername();
-        this.name = profile.getName();
+        this.fullName = profile.getName();
         this.category = profile.getCategory();
         this.biography = profile.getBiography();
 
@@ -139,7 +147,7 @@ public class InstagramProfile implements Info {
     public String name() {
         return String.format(
                 type().template(),
-                name,
+                username, //StringUtils.isNoneEmpty(fullName) ? fullName : username,
                 username
         );
     }

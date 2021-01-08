@@ -1,8 +1,11 @@
 package com.kiselev.enemy.network.instagram.service;
 
 import com.google.common.collect.Lists;
+import com.kiselev.enemy.network.instagram.api.internal2.models.media.UserTags;
+import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.Comment;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.TimelineMedia;
+import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
 import com.kiselev.enemy.network.instagram.model.InstagramCommentary;
 import com.kiselev.enemy.network.instagram.model.InstagramPost;
@@ -26,15 +29,10 @@ public class InstagramService {
     }
 
     public List<InstagramProfile> friends(String id) {
-        List<InstagramProfile> friends = Lists.newArrayList();
-
-        List<InstagramProfile> followers = followers(id);
-        List<InstagramProfile> following = following(id);
-
-        friends.addAll(followers);
-        friends.retainAll(following);
-
-        return friends;
+        List<User> friends = api.friends(Long.valueOf(id));
+        return friends.stream()
+                .map(InstagramInternalProfile::new)
+                .collect(Collectors.toList());
     }
 
     private List<InstagramProfile> followers(String id) {
@@ -72,129 +70,11 @@ public class InstagramService {
                 .collect(Collectors.toList());
     }
 
-//    private InstagramProfile readProfile(InstagramUser instagramUser) {
-//        InstagramProfile profile = mapper.profile(
-//                instagramUser
-//        );
-//
-//        /*List<InstagramPhoto> photos = readPhotos(
-//                instagramUser
-//        );
-//        profile.setPhotos(
-//                photos
-//        );
-//        profile.setMainPhoto(
-//                InstagramUtils.selectMainPhoto(photos)
-//        );*/
-//
-//        profile.setStories(
-//                readStories(instagramUser)
-//        );
-//
-//        return profile;
-//    }
-//
-//
-//        post.setLikers(readLikers(instagramFeedItem));
-//
-//        post.setCommentaries(readCommentaries(instagramFeedItem));
-//
-//        post.setCaption(mapper.commentary(instagramFeedItem.getCaption()));
-//
-//        return post;
-//    }
-//
-//    private List<InstagramPhoto> readPhotos(InstagramFeedItem instagramFeedItem) {
-//        List<ImageMeta> imageMetas = Lists.newArrayList();
-//
-//        Optional.ofNullable(instagramFeedItem)
-//                .map(InstagramFeedItem::getVideo_versions)
-//                .ifPresent(
-//                        imageMetas::addAll
-//                );
-//
-//        Optional.ofNullable(instagramFeedItem)
-//                .map(InstagramFeedItem::getImage_versions2)
-//                .map(ImageVersions::getCandidates)
-//                .ifPresent(
-//                        imageMetas::addAll
-//                );
-//
-//        return imageMetas.stream()
-//                .map(mapper::photo)
-//                .sorted(Comparator.comparing(InstagramPhoto::getUrl))
-//                .collect(Collectors.toList());
-//    }
-//
-//    private List<InstagramProfile> readLikers(InstagramFeedItem instagramFeedItem) {
-//        List<InstagramUserSummary> rawLikers = api.likers(instagramFeedItem.getPk());
-//
-//        List<InstagramUser> likers = rawLikers.stream()
-//                .map(InstagramUserSummary::getUsername)
-//                .map(api::profile)
-//                .collect(Collectors.toList());
-//
-//        return readProfiles(
-//                likers
-//        );
-//    }
-//
-//    private List<InstagramCommentary> readCommentaries(InstagramFeedItem instagramFeedItem) {
-//        List<InstagramComment> comments = api.commentaries(instagramFeedItem.getId());
-//
-//        return comments.stream()
-//                .map(mapper::commentary)
-//                .collect(Collectors.toList());
-//    }
-//
-//    private List<InstagramProfile> readUserTags(InstagramFeedItem instagramFeedItem) {
-//        Stream<InstagramFeedUserTag> userTagStream = Optional.ofNullable(instagramFeedItem)
-//                .map(InstagramFeedItem::getUsertags)
-//                .map(InstagramUserTagsContainer::getIn)
-//                .map(InstagramUtils::safeStream)
-//                .orElseGet(Stream::empty);
-//
-//        List<InstagramUser> userTags = userTagStream
-//                .map(InstagramFeedUserTag::getUser)
-//                .map(InstagramUserSummary::getUsername)
-//                .map(api::profile)
-//                .collect(Collectors.toList());
-//
-//        return readProfiles(
-//                userTags
-//        );
-//    }
-//
-//    private List<InstagramStory> readStories(InstagramUser instagramUser) {
-//        List<InstagramStoryItem> stories = api.stories(instagramUser.getPk());
-//
-//        return stories.stream()
-//                .map(this::readStory)
-//                .sorted(Comparator.comparing(InstagramStory::getPk))
-//                .collect(Collectors.toList());
-//    }
-//
-//    private InstagramStory readStory(InstagramStoryItem instagramStoryItem) {
-//        InstagramStory story = mapper.story(instagramStoryItem);
-//
-//        List<InstagramPhoto> photos = readPhotos(instagramStoryItem);
-//
-//        story.setPhotos(
-//                photos
-//        );
-//
-//        story.setMainPhoto(
-//                InstagramUtils.selectMainPhoto(
-//                        photos
-//                )
-//        );
-//
-//        story.setViewers(
-//                readStoryViewers(instagramStoryItem)
-//        );
-//
-//        return story;
-//    }
+    private List<ReelMedia> stories(String id) {
+        return api.stories(Long.valueOf(id));
+    }
+
+
 //
 //
 //    private List<InstagramProfile> readStoryViewers(InstagramStoryItem instagramStoryItem) {
@@ -219,6 +99,14 @@ public class InstagramService {
     private class InstagramInternalProfile extends InstagramProfile {
         public InstagramInternalProfile(User profile) {
             super(profile);
+        }
+
+        @Override
+        public List<ReelMedia> stories() {
+            if (super.stories() == null) {
+                super.stories(InstagramService.this.stories(id()));
+            }
+            return super.stories();
         }
 
         @Override
@@ -252,32 +140,43 @@ public class InstagramService {
             }
             return super.posts();
         }
+
+        @Override
+        public List<InstagramProfile> likes() {
+            if (super.likes() == null) {
+                List<InstagramPost> posts = posts();
+
+                List<InstagramProfile> likes = posts.stream()
+                        .map(InstagramPost::likes)
+                        .flatMap(List::stream)
+                        .collect(Collectors.toList());
+
+                super.likes(likes);
+            }
+            return super.likes();
+        }
     }
 
     private class InstagramInternalPost extends InstagramPost {
 
         public InstagramInternalPost(TimelineMedia post) {
             super(post);
+            propagateTags(post);
         }
 
-        //        @Override
-//        public List<InstagramProfile> tags() {
-//            if (super.tags() == null) {
-//                List<String> tagsIds = super.tags().stream()
-//                        .map(InstagramProfile::id)
-//                        .collect(Collectors.toList());
-//
-//                List<InstagramUser> tags = api.profiles(tagsIds);
-//
-//                super.tags(tags.stream()
-//                        .map(InstagramProfile::new)
-//                        .collect(Collectors.toList()));
-//
-//            }
-//            return Lists.newArrayList(
-//                    super.tags()
-//            );
-//        }
+        public void propagateTags(TimelineMedia post) {
+            if (super.tags() == null) {
+                UserTags usertags = post.getUsertags();
+
+                if (usertags != null) {
+                    super.tags(usertags.getIn().stream()
+                            .map(UserTags.UserTag::getUser)
+                            .map(Profile::getUsername)
+                            .map(InstagramService.this::profile)
+                            .collect(Collectors.toList()));
+                }
+            }
+        }
 
         @Override
         public List<InstagramProfile> likes() {

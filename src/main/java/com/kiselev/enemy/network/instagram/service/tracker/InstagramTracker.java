@@ -4,7 +4,7 @@ import com.kiselev.enemy.data.mongo.Mongo;
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
 import com.kiselev.enemy.network.instagram.service.InstagramService;
 import com.kiselev.enemy.network.instagram.service.tracker.flow.InstagramFlowProcessor;
-import com.kiselev.enemy.utils.flow.message.Message;
+import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -25,11 +25,11 @@ public class InstagramTracker {
 
     private final List<InstagramFlowProcessor> processors;
 
-    public List<Message<InstagramProfile>> track(String identifier) {
+    public List<EnemyMessage<InstagramProfile>> track(String identifier) {
         InstagramProfile actualProfile = ig.profile(identifier);
         InstagramProfile latestProfile = mongo.ig().read(identifier);
 
-        List<Message<InstagramProfile>> messages = flow(actualProfile, latestProfile);
+        List<EnemyMessage<InstagramProfile>> messages = flow(actualProfile, latestProfile);
         if (CollectionUtils.isNotEmpty(messages)) {
             mongo.ig().save(actualProfile);
         }
@@ -37,10 +37,10 @@ public class InstagramTracker {
         return messages;
     }
 
-    public List<Message<InstagramProfile>> flow(InstagramProfile actual, InstagramProfile latest) {
+    public List<EnemyMessage<InstagramProfile>> flow(InstagramProfile actual, InstagramProfile latest) {
         if (latest == null) {
             return Collections.singletonList(
-                    Message.of(actual, DEFAULT_MESSAGE)
+                    EnemyMessage.of(actual, DEFAULT_MESSAGE)
             );
         }
 

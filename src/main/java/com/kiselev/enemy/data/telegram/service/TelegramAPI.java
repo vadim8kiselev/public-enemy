@@ -62,7 +62,7 @@ public class TelegramAPI {
                                     + "Message: %s\n"
                                     + "Reason:  %s",
                             id,
-                            message,
+                            escapedMessage,
                             response.description()
                     )
             );

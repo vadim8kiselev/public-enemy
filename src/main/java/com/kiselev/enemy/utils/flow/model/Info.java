@@ -1,6 +1,6 @@
 package com.kiselev.enemy.utils.flow.model;
 
-import com.kiselev.enemy.utils.flow.message.Message;
+import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 
 public interface Info extends Id {
 
@@ -8,7 +8,7 @@ public interface Info extends Id {
 
     default String header() {
         return String.format(
-                Message.HEADER_TEMPLATE,
+                EnemyMessage.HEADER_TEMPLATE,
                 type().name(),
                 name()
         );

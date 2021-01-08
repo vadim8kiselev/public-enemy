@@ -6,6 +6,7 @@ import com.kiselev.enemy.utils.flow.model.Info;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import com.kiselev.enemy.network.vk.utils.BaseObjectDeserializer;
 import com.vk.api.sdk.objects.audio.Audio;
+import com.vk.api.sdk.objects.base.BaseObject;
 import com.vk.api.sdk.objects.base.BoolInt;
 import com.vk.api.sdk.objects.base.Sex;
 import com.vk.api.sdk.objects.users.*;
@@ -44,12 +45,10 @@ public class Profile implements Info {
     private String birthDate;
 
     @SerializedName("country")
-    @JsonAdapter(BaseObjectDeserializer.class)
-    private String country;
+    private BaseObject country;
 
     @SerializedName("city")
-    @JsonAdapter(BaseObjectDeserializer.class)
-    private String city;
+    private BaseObject city;
 
     @SerializedName("home_town")
     private String homeTown;
@@ -62,6 +61,9 @@ public class Profile implements Info {
 
     @SerializedName("site")
     private String site;
+
+    @SerializedName("instagram")
+    private String instagram;
 
     @SerializedName("status_audio")
     private Audio statusAudio;
@@ -134,6 +136,10 @@ public class Profile implements Info {
 
     @SerializedName("photo_max")
     private URL photo;
+
+    public String fullName() {
+        return this.firstName + " " + this.lastName;
+    }
 
     @Override
     public String name() {

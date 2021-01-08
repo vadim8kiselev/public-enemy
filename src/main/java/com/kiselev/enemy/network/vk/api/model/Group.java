@@ -1,6 +1,8 @@
 package com.kiselev.enemy.network.vk.api.model;
 
+import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
+import com.kiselev.enemy.network.vk.utils.BaseObjectDeserializer;
 import com.kiselev.enemy.utils.flow.model.Id;
 import com.vk.api.sdk.objects.base.BaseObject;
 import com.vk.api.sdk.objects.base.BoolInt;
@@ -16,61 +18,30 @@ import java.util.List;
 @Accessors(fluent = true)
 public class Group implements Id {
 
-    private static final String GROUP_URL_TEMPLATE = "https://vk\\.com/club%s";
+    private static final String GROUP_URL_TEMPLATE = "[%s](https://vk.com/club%s)";
 
     @SerializedName("id")
     private String id;
 
-    @SerializedName("name")
-    private String name;
-
-    @SerializedName("deactivated")
-    private String deactivated;
-
-    @SerializedName("is_closed")
-    private GroupIsClosed isClosed;
-
-    @SerializedName("photo_100")
-    private URL photo100;
-
-    @SerializedName("photo_200")
-    private URL photo200;
-
-    @SerializedName("photo_50")
-    private URL photo50;
-
     @SerializedName("screen_name")
     private String screenName;
 
-    @SerializedName("city")
-    private BaseObject city;
+    @SerializedName("name")
+    private String title;
 
     @SerializedName("country")
-    private Country country;
+    @JsonAdapter(BaseObjectDeserializer.class)
+    private String country;
 
-    @SerializedName("verified")
-    private BoolInt verified;
+    @SerializedName("city")
+    @JsonAdapter(BaseObjectDeserializer.class)
+    private String city;
 
     @SerializedName("description")
     private String description;
 
-    @SerializedName("wiki_page")
-    private String wikiPage;
-
-    @SerializedName("members_count")
-    private Integer membersCount;
-
-    @SerializedName("counters")
-    private CountersGroup counters;
-
-    @SerializedName("cover")
-    private Cover cover;
-
     @SerializedName("status")
     private String status;
-
-    @SerializedName("main_album_id")
-    private Integer mainAlbumId;
 
     @SerializedName("links")
     private List<LinksItem> links;
@@ -84,6 +55,39 @@ public class Group implements Id {
     @SerializedName("addresses")
     private AddressesInfo addresses;
 
+    @SerializedName("verified")
+    private BoolInt verified;
+
+    @SerializedName("is_closed")
+    private GroupIsClosed isClosed;
+
+    @SerializedName("deactivated")
+    private String deactivated;
+
+    @SerializedName("photo_100")
+    private URL photo100;
+
+    @SerializedName("photo_200")
+    private URL photo200;
+
+    @SerializedName("photo_50")
+    private URL photo50;
+
+    @SerializedName("wiki_page")
+    private String wikiPage;
+
+    @SerializedName("members_count")
+    private Integer membersCount;
+
+    @SerializedName("cover")
+    private Cover cover;
+
+    @SerializedName("main_album_id")
+    private Integer mainAlbumId;
+
+    @SerializedName("counters")
+    private CountersGroup counters;
+
     @Override
     public String id() {
         return id;
@@ -93,6 +97,7 @@ public class Group implements Id {
     public String name() {
         return String.format(
                 GROUP_URL_TEMPLATE,
+                title,
                 id
         );
     }

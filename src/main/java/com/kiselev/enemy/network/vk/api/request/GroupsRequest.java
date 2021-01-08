@@ -1,7 +1,5 @@
 package com.kiselev.enemy.network.vk.api.request;
 
-import com.kiselev.enemy.network.vk.api.constants.VKConstants;
-import com.kiselev.enemy.network.vk.api.internal.ApiRequest;
 import com.kiselev.enemy.network.vk.api.response.GroupResponse;
 import com.vk.api.sdk.objects.groups.Fields;
 import com.vk.api.sdk.objects.groups.Filter;

@@ -1,4 +1,4 @@
-package com.kiselev.enemy.network.vk.api.internal;
+package com.kiselev.enemy.network.vk.api.utils;
 
 import com.vk.api.sdk.client.ClientResponse;
 import com.vk.api.sdk.client.TransportClient;
@@ -203,7 +203,7 @@ public class HttpTransportClient implements TransportClient {
                 builder.append("\t\t").append(time);
             }
 
-            LOG.info(builder.toString());
+//            LOG.info(builder.toString());
         }
     }
 

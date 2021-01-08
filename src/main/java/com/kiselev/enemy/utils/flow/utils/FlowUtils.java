@@ -1,6 +1,6 @@
 package com.kiselev.enemy.utils.flow.utils;
 
-import com.kiselev.enemy.utils.flow.message.Message;
+import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.kiselev.enemy.utils.flow.model.Id;
 import com.kiselev.enemy.utils.flow.model.Info;
 
@@ -10,10 +10,10 @@ import java.util.stream.Collectors;
 
 public class FlowUtils {
 
-    public static <Profile extends Info> Message<Profile> attribute(Function<Profile, String> function,
-                                                                    Profile actual,
-                                                                    Profile latest,
-                                                                    String message) {
+    public static <Profile extends Info> EnemyMessage<Profile> attribute(Function<Profile, String> function,
+                                                                         Profile actual,
+                                                                         Profile latest,
+                                                                         String message) {
         String actualValue = function.apply(actual);
         String latestValue = function.apply(latest);
         return attribute(actual,
@@ -22,12 +22,12 @@ public class FlowUtils {
                 message);
     }
 
-    public static <Profile extends Info> Message<Profile> attribute(Profile actual,
-                                                                    String actualValue,
-                                                                    String latestValue,
-                                                                    String message) {
+    public static <Profile extends Info> EnemyMessage<Profile> attribute(Profile actual,
+                                                                         String actualValue,
+                                                                         String latestValue,
+                                                                         String message) {
         if (!Objects.equals(actualValue, latestValue)) {
-            return Message.of(
+            return EnemyMessage.of(
                     actual,
                     String.format(message, latestValue, actualValue)
             );
@@ -35,10 +35,10 @@ public class FlowUtils {
         return null;
     }
 
-    public static <Profile extends Info, Type extends Id> List<Message<Profile>> attributes(Function<Profile, List<Type>> function,
-                                                                                            Profile actual,
-                                                                                            Profile latest,
-                                                                                            String message) {
+    public static <Profile extends Info, Type extends Id> List<EnemyMessage<Profile>> attributes(Function<Profile, List<Type>> function,
+                                                                                                 Profile actual,
+                                                                                                 Profile latest,
+                                                                                                 String message) {
         List<Type> actualValues = function.apply(actual);
         List<Type> latestValues = function.apply(latest);
         Map<String, Type> actualMap = actualValues.stream()
@@ -63,7 +63,7 @@ public class FlowUtils {
                 .collect(Collectors.toSet());
 
         return newItems.stream()
-                .map(item -> Message.of(actual, String.format(message, item.name())))
+                .map(item -> EnemyMessage.of(actual, String.format(message, item.name())))
                 .collect(Collectors.toList());
     }
 }

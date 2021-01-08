@@ -9,6 +9,7 @@ import com.kiselev.enemy.utils.flow.annotation.EnemyValue;
 import com.kiselev.enemy.utils.flow.annotation.EnemyValues;
 import com.kiselev.enemy.utils.flow.model.Info;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
+import com.vk.api.sdk.objects.base.BaseObject;
 import com.vk.api.sdk.objects.base.BoolInt;
 import com.vk.api.sdk.objects.base.Sex;
 import lombok.Data;
@@ -19,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static com.kiselev.enemy.network.vk.model.constants.VKMessages.*;
 
@@ -39,11 +41,13 @@ public class VKProfile implements Info {
     @EnemyValue(message = LAST_NAME_MESSAGE)
     private String lastName;
 
+    private String fullName;
+
     @EnemyValue(message = SEX_MESSAGE)
     private Sex sex;
 
     @EnemyValue(message = AGE_MESSAGE)
-    private String age;
+    private Integer age;
 
     @EnemyValue(message = BIRTHDAY_MESSAGE)
     private String birthday;
@@ -56,8 +60,14 @@ public class VKProfile implements Info {
     @EnemyValue(message = CITY_MESSAGE)
     private String city;
 
+    private String countryCode;
+
+    private String cityCode;
+
     @EnemyValue(message = HOME_TOWN_MESSAGE)
     private String homeTown;
+
+    private String instagram;
 
     private boolean isFriend;
 
@@ -87,6 +97,8 @@ public class VKProfile implements Info {
 
     private List<VKProfile> relatives;
 
+    private List<VKProfile> likes;
+
     private LocalDateTime timestamp;
 
     public VKProfile(Profile profile) {
@@ -96,13 +108,17 @@ public class VKProfile implements Info {
         this.screenName = profile.screenName();
         this.firstName = profile.firstName();
         this.lastName = profile.lastName();
+        this.fullName = profile.firstName() + " " + profile.lastName();
         this.sex = profile.sex();
-        this.age = VKUtils.date(profile.birthDate());
+        this.age = VKUtils.age(profile.birthDate());
         this.birthday = profile.birthDate();
         this.photo = profile.photo();
-        this.country = profile.country();
-        this.city = profile.city();
+        this.country = VKUtils.title(profile.country());
+        this.city = VKUtils.title(profile.city());
+        this.countryCode = VKUtils.code(profile.country());
+        this.cityCode = VKUtils.code(profile.city());
         this.homeTown = profile.homeTown();
+        this.instagram = profile.instagram();
         this.isFriend = BoolInt.YES == profile.isFriend();
         this.isPrivate = profile.isPrivate();
         this.isDeactivated = profile.deactivated();
@@ -127,7 +143,7 @@ public class VKProfile implements Info {
     public String name() {
         return String.format(
                 type().template(),
-                firstName + " " + lastName,
+                fullName,
                 screenName != null ? screenName : ("id" + id)
         );
     }

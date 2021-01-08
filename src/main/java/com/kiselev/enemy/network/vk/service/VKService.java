@@ -1,23 +1,30 @@
 package com.kiselev.enemy.network.vk.service;
 
-import com.kiselev.enemy.network.vk.api.VKAPI;
+import com.google.common.collect.Lists;
+import com.kiselev.enemy.network.vk.api.internal.VKInternalAPI;
 import com.kiselev.enemy.network.vk.api.model.Group;
 import com.kiselev.enemy.network.vk.api.model.Photo;
 import com.kiselev.enemy.network.vk.api.model.Post;
 import com.kiselev.enemy.network.vk.api.model.Profile;
+import com.kiselev.enemy.network.vk.api.request.SearchRequest;
 import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.vk.api.sdk.objects.likes.Type;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class VKService {
 
-    private final VKAPI api;
+    private final VKInternalAPI api;
+
+    public VKInternalAPI api() {
+        return api;
+    }
 
     public VKProfile profile(String profileId) {
         Profile profile = api.profile(profileId);
@@ -90,6 +97,15 @@ public class VKService {
 //                }
 //                return relatives;
 //            }
+
+
+            @Override
+            public List<VKProfile> likes() {
+                if (super.likes() == null) {
+                    super.likes(VKService.this.likes(id()));
+                }
+                return super.likes();
+            }
         };
     }
 
@@ -131,7 +147,9 @@ public class VKService {
     }
 
     public List<Group> communities(String id) {
-        return api.communities(id);
+        return Lists.newArrayList(
+                api.communities(id)
+        );
     }
 
     public List<Post> posts(String id) {
@@ -145,5 +163,33 @@ public class VKService {
         }
 
         return posts;
+    }
+
+    public List<VKProfile> likes(String id) {
+        List<VKProfile> likes = Lists.newArrayList();
+
+        List<Photo> photos = photos(id);
+        List<VKProfile> photoslikes = photos.stream()
+                .map(Photo::likes)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+        likes.addAll(photoslikes);
+
+        List<Post> posts = posts(id);
+        List<VKProfile> postslikes = posts.stream()
+                .map(Post::likes)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+        likes.addAll(postslikes);
+
+        return likes;
+    }
+
+    public List<VKProfile> search(SearchRequest.Query query) {
+        return api.search(query).stream()
+                .map(VKProfile::new)
+                .collect(Collectors.toList());
     }
 }

@@ -4,7 +4,7 @@ import com.kiselev.enemy.data.mongo.Mongo;
 import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.network.vk.service.VKService;
 import com.kiselev.enemy.network.vk.service.tracker.flow.VKFlowProcessor;
-import com.kiselev.enemy.utils.flow.message.Message;
+import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -25,11 +25,11 @@ public class VKTracker {
 
     private final List<VKFlowProcessor> processors;
 
-    public List<Message<VKProfile>> track(String identifier) {
+    public List<EnemyMessage<VKProfile>> track(String identifier) {
         VKProfile actualProfile = vk.profile(identifier);
         VKProfile latestProfile = mongo.vk().read(identifier);
 
-        List<Message<VKProfile>> messages = flow(actualProfile, latestProfile);
+        List<EnemyMessage<VKProfile>> messages = flow(actualProfile, latestProfile);
         if (CollectionUtils.isNotEmpty(messages)) {
             mongo.vk().save(actualProfile);
         }
@@ -37,10 +37,10 @@ public class VKTracker {
         return messages;
     }
 
-    public List<Message<VKProfile>> flow(VKProfile actual, VKProfile latest) {
+    public List<EnemyMessage<VKProfile>> flow(VKProfile actual, VKProfile latest) {
         if (latest == null) {
             return Collections.singletonList(
-                    Message.of(actual, DEFAULT_MESSAGE)
+                    EnemyMessage.of(actual, DEFAULT_MESSAGE)
             );
         }
 

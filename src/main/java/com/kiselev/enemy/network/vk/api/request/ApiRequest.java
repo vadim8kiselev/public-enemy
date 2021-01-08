@@ -1,8 +1,10 @@
-package com.kiselev.enemy.network.vk.api.internal;
+package com.kiselev.enemy.network.vk.api.request;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
+import com.kiselev.enemy.network.vk.api.utils.HttpTransportClient;
 import com.kiselev.enemy.network.vk.utils.GsonHolder;
+import com.kiselev.enemy.network.vk.utils.VKUtils;
 import com.vk.api.sdk.client.ClientResponse;
 import com.vk.api.sdk.client.Lang;
 import com.vk.api.sdk.client.TransportClient;
@@ -12,7 +14,6 @@ import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.exceptions.ExceptionMapper;
 import com.vk.api.sdk.objects.base.Error;
 import com.vk.api.sdk.queries.EnumParam;
-import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -106,6 +107,7 @@ public abstract class ApiRequest<R, T> {
         }
 
         try {
+//            System.out.println(response);
             return gson.fromJson(response, responseClass);
         } catch (JsonSyntaxException e) {
             LOG.error("Invalid JSON: " + textResponse, e);
@@ -116,6 +118,7 @@ public abstract class ApiRequest<R, T> {
     public String executeAsString() throws ClientException {
         ClientResponse response;
         try {
+            VKUtils.timeout();
             response = transportClient.post(url, getBody());
         } catch (IOException e) {
             LOG.error("Problems with request: " + url, e);
@@ -139,15 +142,6 @@ public abstract class ApiRequest<R, T> {
         }
 
         return response.getContent();
-    }
-
-    public ClientResponse executeAsRaw() throws ClientException {
-        try {
-            return transportClient.post(url, getBody());
-        } catch (IOException e) {
-            LOG.error("Problems with request: " + url, e);
-            throw new ClientException("I/O exception");
-        }
     }
 
 
@@ -272,7 +266,9 @@ public abstract class ApiRequest<R, T> {
      * @return a reference to this {@code ApiRequest} object to fulfill the "Builder" pattern.
      */
     public R unsafeParam(String key, String value) {
-        params.put(key, value);
+        if (value != null) {
+            params.put(key, value);
+        }
         return getThis();
     }
 

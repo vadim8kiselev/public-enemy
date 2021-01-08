@@ -1,4 +1,4 @@
-package com.kiselev.enemy.network.vk.api.internal;
+package com.kiselev.enemy.network.vk.api.utils;
 
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.logging.log4j.LogManager;

@@ -1,6 +1,6 @@
 package com.kiselev.enemy.data.telegram.utils;
 
-import com.kiselev.enemy.utils.flow.message.Message;
+import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.kiselev.enemy.utils.flow.model.Info;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +17,9 @@ public class TelegramUtils {
     public static String escapeMessage(String message) {
         return message
                 .replaceAll("\\.", "\\\\.")
+                .replaceAll("\\_", "\\\\_")
+//                .replaceAll("\\[", "\\\\[")
+//                .replaceAll("\\]", "\\\\]")
 //                .replaceAll("\\(", "\\\\(")
 //                .replaceAll("\\)", "\\\\)")
                 .replaceAll("\\-", "\\\\-");
@@ -32,13 +35,13 @@ public class TelegramUtils {
         return null;
     }
 
-    public static <Profile extends Info> List<String> answers(List<Message<Profile>> messages) {
+    public static <Profile extends Info> List<String> answers(List<EnemyMessage<Profile>> messages) {
         Map<Profile, String> groupedMessages = messages.stream()
                 .filter(Objects::nonNull)
                 .filter(profileMessage -> StringUtils.isNotEmpty(profileMessage.getMessage()))
                 .collect(Collectors.groupingBy(
-                        Message::getProfile,
-                        Collectors.mapping(Message::getMessage, Collectors.joining("\n"))
+                        EnemyMessage::getProfile,
+                        Collectors.mapping(EnemyMessage::getMessage, Collectors.joining("\n\n"))
                 ));
 
         return groupedMessages.entrySet().stream()

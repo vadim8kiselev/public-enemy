@@ -11,5 +11,5 @@ public class Prediction<Type> {
 
     private Type value;
 
-    private Long percent;
+    private Long statistics;
 }

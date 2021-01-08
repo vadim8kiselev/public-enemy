@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @Data
 @Builder
 @RequiredArgsConstructor(staticName = "of")
-public class Message<Profile extends Info> {
+public class EnemyMessage<Profile extends Info> {
 
     public static final String HEADER_TEMPLATE = "\\[%s\\] %s\n";
 
