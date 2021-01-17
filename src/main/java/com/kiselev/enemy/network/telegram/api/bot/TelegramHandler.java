@@ -75,7 +75,7 @@ public class TelegramHandler {
                 api.send(requestId, String.format("Unknown type of command: \"%s\"", request));
             }
         } else {
-            api.send(requestId, String.format("Illegal arguments\\: id\\=\"%s\", text\\=\"%s\"", requestId, request));
+            api.send(me, String.format("Illegal arguments\\: id\\=\"%s\", text\\=\"%s\"", requestId, request));
         }
     }
 
