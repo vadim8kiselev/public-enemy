@@ -19,6 +19,9 @@ import java.util.regex.Pattern;
 public class ProfilingUtils {
 
     public static String identifier(SocialNetwork socialNetwork, String request) {
+        if (request == null) {
+            return null;
+        }
         Pattern pattern = socialNetwork.pattern();
         Matcher matcher = pattern.matcher(request);
 
