@@ -33,7 +33,7 @@ public class TelegramHandler {
     private final List<TelegramCommand> commands;
 
     @Value("${com.kiselev.enemy.telegram.id:}")
-    private Number me;
+    private Integer me;
 
     @Value("${com.kiselev.enemy.telegram.bot.enabled}")
     private Boolean enabled;
