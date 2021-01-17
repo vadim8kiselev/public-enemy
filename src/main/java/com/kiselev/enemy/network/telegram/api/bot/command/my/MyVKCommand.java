@@ -7,6 +7,7 @@ import com.kiselev.enemy.service.PublicEnemyService;
 import com.kiselev.enemy.utils.flow.message.Analysis;
 import com.pengrad.telegrambot.model.Update;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class MyVKCommand implements TelegramCommand {
     public void execute(Update update, String... args) {
         Integer requestId = update.message().from().id();
 
-        if (vkIdentifier != null) {
+        if (StringUtils.isNotEmpty(vkIdentifier)) {
             Analysis<VKProfile> vkResponse = publicEnemy.vk().analyze(vkIdentifier);
             publicEnemy.tg().send(requestId, TelegramMessage.analysis(vkResponse));
         }
