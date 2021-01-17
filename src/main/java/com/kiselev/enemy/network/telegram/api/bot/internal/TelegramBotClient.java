@@ -117,9 +117,9 @@ public class TelegramBotClient {
     }
 
     private String toParamValue(Object obj) {
-        if (obj.getClass().isPrimitive() ||
+        if (obj != null && (obj.getClass().isPrimitive() ||
                 obj.getClass().isEnum() ||
-                obj.getClass().getName().startsWith("java.lang")) {
+                obj.getClass().getName().startsWith("java.lang"))) {
             return String.valueOf(obj);
         }
         return gson.toJson(obj);
