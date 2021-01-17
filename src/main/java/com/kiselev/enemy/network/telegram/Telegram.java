@@ -6,6 +6,7 @@ import com.kiselev.enemy.network.telegram.service.TelegramService;
 import com.kiselev.enemy.utils.flow.model.Info;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.api.message.TLMessage;
@@ -31,8 +32,10 @@ public class Telegram {
     }
 
     public <Profile extends Info> void send(Number id, TelegramMessage<Profile> message) {
-        telegram.send(me, message);
         telegram.send(id, message);
+        if (ObjectUtils.notEqual(me, id)) {
+            telegram.send(me, message);
+        }
     }
 
     @SneakyThrows
