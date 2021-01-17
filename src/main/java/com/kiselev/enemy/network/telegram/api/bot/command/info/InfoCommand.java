@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class InfoCommand implements TelegramCommand {
 
-    private final TelegramService telegram;
-
     private final PublicEnemyService publicEnemy;
 
     @Override
@@ -42,6 +40,6 @@ public class InfoCommand implements TelegramCommand {
 //            return;
 //        }
 
-        telegram.send(requestId, TelegramMessage.message("This command is currently not supported"));
+        publicEnemy.tg().send(requestId, TelegramMessage.message("This command is currently not supported"));
     }
 }

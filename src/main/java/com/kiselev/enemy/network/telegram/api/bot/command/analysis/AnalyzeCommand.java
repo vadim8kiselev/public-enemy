@@ -17,8 +17,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AnalyzeCommand implements TelegramCommand {
 
-    private final TelegramService service;
-
     private final PublicEnemyService publicEnemy;
 
     @Override
@@ -34,14 +32,14 @@ public class AnalyzeCommand implements TelegramCommand {
         String vkId = ProfilingUtils.identifier(SocialNetwork.VK, request);
         if (vkId != null) {
             Analysis<VKProfile> vkResponse = publicEnemy.vk().analyze(vkId);
-            service.send(requestId, TelegramMessage.analysis(vkResponse));
+            publicEnemy.tg().send(requestId, TelegramMessage.analysis(vkResponse));
             return;
         }
 
         String igId = ProfilingUtils.identifier(SocialNetwork.IG, request);
         if (igId != null) {
             Analysis<InstagramProfile> igResponse = publicEnemy.ig().analyze(igId);
-            service.send(requestId, TelegramMessage.analysis(igResponse));
+            publicEnemy.tg().send(requestId, TelegramMessage.analysis(igResponse));
             return;
         }
     }
