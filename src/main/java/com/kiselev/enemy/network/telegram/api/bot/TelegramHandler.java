@@ -10,6 +10,7 @@ import com.pengrad.telegrambot.request.GetUpdates;
 import com.pengrad.telegrambot.response.GetUpdatesResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -70,7 +71,14 @@ public class TelegramHandler {
             TelegramCommand command = recognizeCommand(request);
 
             if (command != null) {
-                command.execute(update);
+                try {
+                    command.execute(update);
+                } catch (Exception exception) {
+                    api.send(requestId, String.format("Id: \"%s\", Text: \"%s\", Error:\n%s", requestId, request, exception.getMessage()));
+                    if (ObjectUtils.notEqual(requestId, me)) {
+                        api.send(me, String.format("Id: \"%s\", Text: \"%s\", Error:\n%s", requestId, request, exception.getMessage()));
+                    }
+                }
             } else {
                 api.send(requestId, String.format("Unknown type of command: \"%s\"", request));
             }
