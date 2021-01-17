@@ -6,7 +6,6 @@ import com.kiselev.enemy.network.telegram.model.TelegramMessage;
 import com.kiselev.enemy.utils.flow.model.Info;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.api.message.TLMessage;
 import org.telegram.api.user.TLUser;
@@ -51,7 +50,7 @@ public class TelegramService {
 
         switch (type) {
             case ANALYSIS:
-                api.bot().send(id, message.data(), message.analysis());
+                api.bot().sendPhoto(id, message.data(), message.analysis());
                 return;
             case MULTI:
                 api.bot().send(id, message.messages());

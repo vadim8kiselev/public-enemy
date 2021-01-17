@@ -44,14 +44,14 @@ public class TelegramHandler {
     @PostConstruct
     public void initialize() {
         if (enabled) {
-            poll(
-                    updates -> {
-                        for (Update update : updates) {
-                            handle(update);
-                        }
-                        return CONFIRMED_UPDATES_ALL;
-                    },
-                    new GetUpdates());
+            UpdatesListener listener = updates -> {
+                for (Update update : updates) {
+                    handle(update);
+                }
+                return CONFIRMED_UPDATES_ALL;
+            };
+
+            poll(listener, new GetUpdates());
         }
     }
 
@@ -74,16 +74,16 @@ public class TelegramHandler {
                 try {
                     command.execute(update);
                 } catch (Exception exception) {
-                    api.send(requestId, String.format("Id: \"%s\", Text: \"%s\", Error:\n%s", requestId, request, exception.getMessage()));
+                    api.sendRaw(requestId, String.format("Id: \"%s\", Text: \"%s\", Error:\n%s", requestId, request, exception.getMessage()));
                     if (ObjectUtils.notEqual(requestId, me)) {
-                        api.send(me, String.format("Id: \"%s\", Text: \"%s\", Error:\n%s", requestId, request, exception.getMessage()));
+                        api.sendRaw(me, String.format("Id: \"%s\", Text: \"%s\", Error:\n%s", requestId, request, exception.getMessage()));
                     }
                 }
             } else {
-                api.send(requestId, String.format("Unknown type of command: \"%s\"", request));
+                api.sendRaw(requestId, String.format("Unknown type of command: \"%s\"", request));
             }
         } else {
-            api.send(me, String.format("Illegal arguments\\: id\\=\"%s\", text\\=\"%s\"", requestId, request));
+            api.sendRaw(me, String.format("Illegal arguments\\: id\\=\"%s\", text\\=\"%s\"", requestId, request));
         }
     }
 

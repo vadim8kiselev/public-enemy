@@ -2,17 +2,14 @@ package com.kiselev.enemy.network.telegram.api.bot;
 
 import com.kiselev.enemy.network.telegram.api.bot.internal.TelegramBotClient;
 import com.kiselev.enemy.network.telegram.utils.TelegramUtils;
-import com.pengrad.telegrambot.model.request.ForceReply;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
-import com.pengrad.telegrambot.response.BaseResponse;
 import com.pengrad.telegrambot.response.SendResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -50,9 +47,9 @@ public class TelegramBotAPI {
         }
     }
 
-    public void send(Number id, byte[] photo, List<String> messages) {
+    public void sendPhoto(Number id, byte[] photo, List<String> messages) {
         for (String message : messages) {
-            send(id, photo, message);
+            sendPhoto(id, photo, message);
         }
     }
 
@@ -77,7 +74,24 @@ public class TelegramBotAPI {
         }
     }
 
-    public void send(Number id, byte[] photo, String message) {
+    public void sendRaw(Number id, String message) {
+        SendResponse response = api.send(
+                new SendMessage(id, message)
+        );
+        if (!response.isOk()) {
+            throw new RuntimeException(
+                    String.format("Cannot send a message to recipient with id [%s]\n"
+                                    + "Message: %s\n"
+                                    + "Reason:  %s",
+                            id,
+                            message,
+                            response.description()
+                    )
+            );
+        }
+    }
+
+    public void sendPhoto(Number id, byte[] photo, String message) {
         String escapedMessage = TelegramUtils.escapeMessage(message);
 
         SendResponse response = api.send(
