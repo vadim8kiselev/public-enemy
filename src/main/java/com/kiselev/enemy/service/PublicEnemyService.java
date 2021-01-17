@@ -1,6 +1,7 @@
 package com.kiselev.enemy.service;
 
 import com.kiselev.enemy.network.instagram.Instagram;
+import com.kiselev.enemy.network.telegram.Telegram;
 import com.kiselev.enemy.network.vk.VK;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -9,9 +10,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PublicEnemyService {
 
+    private final Telegram telegram;
+
     private final Instagram ig;
 
     private final VK vk;
+
+    public Telegram tg() {
+        return telegram;
+    }
 
     public Instagram ig() {
         return ig;

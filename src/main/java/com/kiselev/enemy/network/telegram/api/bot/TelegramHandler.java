@@ -1,6 +1,6 @@
-package com.kiselev.enemy.network.telegram.service.handler;
+package com.kiselev.enemy.network.telegram.api.bot;
 
-import com.kiselev.enemy.network.telegram.api.bot.TelegramBotAPI;
+import com.kiselev.enemy.network.telegram.api.bot.command.TelegramCommand;
 import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,7 +28,8 @@ public class TelegramHandler {
 
     private final List<TelegramCommand> commands;
 
-    private CompletableFuture<String> future;
+    @Value("${com.kiselev.enemy.telegram.id:}")
+    private Number me;
 
     @Value("${com.kiselev.enemy.telegram.bot.enabled}")
     private Boolean enabled;
@@ -40,25 +40,20 @@ public class TelegramHandler {
     @PostConstruct
     public void initialize() {
         if (enabled) {
-            UpdatesListener listener = updates -> {
-                for (Update update : updates) {
-                    handle(update);
-                }
-                return CONFIRMED_UPDATES_ALL;
-            };
-
-            poll(listener, new GetUpdates());
+            poll(
+                    updates -> {
+                        for (Update update : updates) {
+                            handle(update);
+                        }
+                        return CONFIRMED_UPDATES_ALL;
+                    },
+                    new GetUpdates());
         }
     }
 
     public void handle(Update update) {
         Integer requestId = update.message().from().id();
         String request = update.message().text();
-
-        if (future != null) {
-            future.complete(request);
-            future = null;
-        }
 
         TelegramCommand command = recognizeCommand(request);
 
@@ -119,11 +114,5 @@ public class TelegramHandler {
     @SneakyThrows
     private void sleep() {
         Thread.sleep(timeout);
-    }
-
-    public String ask(Number id, String question) {
-        api.ask(id, question);
-        this.future = new CompletableFuture<>();
-        return this.future.join();
     }
 }

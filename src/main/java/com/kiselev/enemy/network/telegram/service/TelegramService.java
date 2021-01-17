@@ -22,9 +22,6 @@ public class TelegramService {
 
     private final TelegramAPI api;
 
-    @Value("${com.kiselev.enemy.telegram.id:}")
-    private Number id;
-
     public TelegramAPI api() {
         return api;
     }
@@ -47,10 +44,6 @@ public class TelegramService {
                     Map.Entry::getKey,
                     Map.Entry::getValue
                 ));
-    }
-
-    public <Profile extends Info> void send(TelegramMessage<Profile> message) {
-        send(id, message);
     }
 
     public <Profile extends Info> void send(Number id, TelegramMessage<Profile> message) {

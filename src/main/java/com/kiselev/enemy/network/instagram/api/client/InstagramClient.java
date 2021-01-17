@@ -45,9 +45,7 @@ public class InstagramClient {
                         String username = usernameAndPassword[0];
                         String password = usernameAndPassword[1];
 
-                        return IGClient.authenticate(
-                                username,
-                                password);
+                        return IGClient.authenticate(username, password);
                     })
                     .collect(Collectors.toList());
         }

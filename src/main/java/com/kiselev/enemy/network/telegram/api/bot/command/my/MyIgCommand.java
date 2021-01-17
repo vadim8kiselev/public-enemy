@@ -1,9 +1,8 @@
-package com.kiselev.enemy.network.telegram.service.handler.command.my;
+package com.kiselev.enemy.network.telegram.api.bot.command.my;
 
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
 import com.kiselev.enemy.network.telegram.model.TelegramMessage;
-import com.kiselev.enemy.network.telegram.service.TelegramService;
-import com.kiselev.enemy.network.telegram.service.handler.TelegramCommand;
+import com.kiselev.enemy.network.telegram.api.bot.command.TelegramCommand;
 import com.kiselev.enemy.service.PublicEnemyService;
 import com.kiselev.enemy.utils.flow.message.Analysis;
 import com.pengrad.telegrambot.model.Update;

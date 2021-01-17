@@ -1,4 +1,4 @@
-package com.kiselev.enemy.network.telegram.service.handler;
+package com.kiselev.enemy.network.telegram.api.bot.command;
 
 import com.pengrad.telegrambot.model.Update;
 

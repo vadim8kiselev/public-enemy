@@ -1,4 +1,4 @@
-package com.kiselev.enemy.utils.console;
+package com.kiselev.enemy.utils.asker.console;
 
 import java.util.Scanner;
 

@@ -13,6 +13,7 @@ import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.accounts.LoginResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGChallengeUtils;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
+import com.kiselev.enemy.utils.asker.console.Reader;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -28,7 +29,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Scanner;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -100,20 +101,18 @@ public class IGClient {
         return IGChallengeUtils.resolveTwoFactor(
                 client,
                 response,
-                () -> readFromKeyboard("Input two factors security code: "));
+                readCode("Input two factors security code: "));
     }
 
     private LoginResponse authenticateWithChallenge(IGClient client, LoginResponse response) {
         return IGChallengeUtils.resolveChallenge(
                 client,
                 response,
-                () -> readFromKeyboard("Input challenge security code: "));
+                readCode("Input challenge security code: "));
     }
 
-    private String readFromKeyboard(String message) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print(message);
-        return scanner.nextLine();
+    private Callable<String> readCode(String question) {
+        return () -> Reader.ask(question);
     }
 
 

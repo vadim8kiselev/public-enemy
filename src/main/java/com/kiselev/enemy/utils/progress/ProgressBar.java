@@ -29,13 +29,13 @@ public class ProgressBar {
 
         double percent = (current * 100 + 0.0) / total;
 
-        telegram.send(telegramIdentifier, String.format(TEMPLATE,
-                socialNetwork.name(),
-                label,
-                object.name(),
-                current,
-                total,
-                FORMAT.format(percent)));
+//        telegram.send(telegramIdentifier, String.format(TEMPLATE,
+//                socialNetwork.name(),
+//                label,
+//                object.name(),
+//                current,
+//                total,
+//                FORMAT.format(percent)));
     }
 
     public void bar(SocialNetwork socialNetwork, String label, List<String> objects, String object) {
@@ -44,12 +44,12 @@ public class ProgressBar {
 
         double percent = (current * 100 + 0.0) / total;
 
-        telegram.send(telegramIdentifier, String.format(TEMPLATE,
-                socialNetwork.name(),
-                label,
-                object,
-                current,
-                total,
-                FORMAT.format(percent)));
+//        telegram.send(telegramIdentifier, String.format(TEMPLATE,
+//                socialNetwork.name(),
+//                label,
+//                object,
+//                current,
+//                total,
+//                FORMAT.format(percent)));
     }
 }

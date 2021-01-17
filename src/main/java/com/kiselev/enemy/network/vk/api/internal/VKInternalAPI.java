@@ -56,7 +56,7 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
 
         return profiles.stream()
                 .findFirst()
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(() -> new IllegalArgumentException("Profile not found by id " + profileId));
     }
 
     @Override
