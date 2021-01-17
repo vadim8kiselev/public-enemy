@@ -3,7 +3,9 @@ package com.kiselev.enemy.network.telegram.api.bot;
 import com.kiselev.enemy.network.telegram.api.bot.command.TelegramCommand;
 import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.UpdatesListener;
+import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.request.GetUpdates;
 import com.pengrad.telegrambot.response.GetUpdatesResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,15 +55,27 @@ public class TelegramHandler {
     }
 
     public void handle(Update update) {
-        Integer requestId = update.message().from().id();
-        String request = update.message().text();
+        Integer requestId = Optional.ofNullable(update)
+                .map(Update::message)
+                .map(Message::from)
+                .map(User::id)
+                .orElse(null);
 
-        TelegramCommand command = recognizeCommand(request);
+        String request = Optional.ofNullable(update)
+                .map(Update::message)
+                .map(Message::text)
+                .orElse(null);
 
-        if (command != null) {
-            command.execute(update);
+        if (requestId != null && request != null) {
+            TelegramCommand command = recognizeCommand(request);
+
+            if (command != null) {
+                command.execute(update);
+            } else {
+                api.send(requestId, String.format("Unknown type of command: \"%s\"", request));
+            }
         } else {
-            api.send(requestId, String.format("Unknown type of command: \"%s\"", request));
+            api.send(requestId, String.format("Illegal arguments: id=\"%s\", text=\"%s\"", requestId, request));
         }
     }
 
