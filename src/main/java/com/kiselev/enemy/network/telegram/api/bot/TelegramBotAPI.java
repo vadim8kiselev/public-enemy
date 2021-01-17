@@ -21,7 +21,7 @@ public class TelegramBotAPI {
         return api;
     }
 
-//    public void ask(Number id, String question) {
+//    public void ask(Integer id, String question) {
 //        SendResponse response = api.send(
 //                new SendMessage(id, question)
 //                        .replyMarkup(new ForceReply())
@@ -41,19 +41,19 @@ public class TelegramBotAPI {
 //        }
 //    }
 
-    public void send(Number id, List<String> messages) {
+    public void send(Integer id, List<String> messages) {
         for (String message : messages) {
             send(id, message);
         }
     }
 
-    public void sendPhoto(Number id, byte[] photo, List<String> messages) {
+    public void sendPhoto(Integer id, byte[] photo, List<String> messages) {
         for (String message : messages) {
             sendPhoto(id, photo, message);
         }
     }
 
-    public void send(Number id, String message) {
+    public void send(Integer id, String message) {
         String escapedMessage = TelegramUtils.escapeMessage(message);
 
         SendResponse response = api.send(
@@ -74,7 +74,7 @@ public class TelegramBotAPI {
         }
     }
 
-    public void sendRaw(Number id, String message) {
+    public void sendRaw(Integer id, String message) {
         SendResponse response = api.send(
                 new SendMessage(id, message)
         );
@@ -91,7 +91,7 @@ public class TelegramBotAPI {
         }
     }
 
-    public void sendPhoto(Number id, byte[] photo, String message) {
+    public void sendPhoto(Integer id, byte[] photo, String message) {
         String escapedMessage = TelegramUtils.escapeMessage(message);
 
         SendResponse response = api.send(

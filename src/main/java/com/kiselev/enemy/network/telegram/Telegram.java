@@ -21,7 +21,7 @@ public class Telegram {
     private final TelegramService telegram;
 
     @Value("${com.kiselev.enemy.telegram.id:}")
-    private Number me;
+    private Integer me;
 
     public TelegramProfile me() {
         return telegram.me();
@@ -31,7 +31,7 @@ public class Telegram {
         telegram.send(me, message);
     }
 
-    public <Profile extends Info> void send(Number id, TelegramMessage<Profile> message) {
+    public <Profile extends Info> void send(Integer id, TelegramMessage<Profile> message) {
         telegram.send(id, message);
         if (ObjectUtils.notEqual(me, id)) {
             telegram.send(me, message);

@@ -45,7 +45,7 @@ public class TelegramService {
                 ));
     }
 
-    public <Profile extends Info> void send(Number id, TelegramMessage<Profile> message) {
+    public <Profile extends Info> void send(Integer id, TelegramMessage<Profile> message) {
         TelegramMessage.MessageType type = message.getType();
 
         switch (type) {

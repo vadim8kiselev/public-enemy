@@ -38,7 +38,7 @@ public class PublicEnemyTracker {
     private String igIdentifier;
 
     @Value("${com.kiselev.enemy.telegram.id}")
-    private Long telegramIdentifier;
+    private Integer telegramIdentifier;
 
     @SneakyThrows
     @Scheduled(cron = "0 0/1 * * * *")
