@@ -61,6 +61,11 @@ public class PublicEnemyApplication implements CommandLineRunner {
     @Override
     @SneakyThrows
     public void run(String... args) {
+
+    }
+
+    @SneakyThrows
+    public void colors() {
         InstagramProfile vadim8kiselev = instagram.profile("vadim8kiselev");
         List<InstagramPost> posts = vadim8kiselev.posts();
 
