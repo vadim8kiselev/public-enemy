@@ -1,15 +1,13 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.item;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.item.ReelMetadataItem;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 @Data
 @SuperBuilder

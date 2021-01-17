@@ -3,7 +3,6 @@ package com.kiselev.enemy.network.instagram.api.internal2.models.media;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
-
 import lombok.Builder;
 import lombok.Data;
 

@@ -4,7 +4,10 @@ import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.kiselev.enemy.utils.flow.model.Id;
 import com.kiselev.enemy.utils.flow.model.Info;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -44,13 +47,15 @@ public class FlowUtils {
         Map<String, Type> actualMap = actualValues.stream()
                 .collect(Collectors.toMap(
                         Type::id,
-                        post -> post
+                        post -> post,
+                        (first, second) -> second
                 ));
 
         Map<String, Type> latestMap = latestValues.stream()
                 .collect(Collectors.toMap(
                         Type::id,
-                        post -> post
+                        post -> post,
+                        (first, second) -> second
                 ));
 
         Set<String> actualIds = actualMap.keySet();

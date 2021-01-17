@@ -6,7 +6,6 @@ import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGPayload;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPostRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
-
 import lombok.Data;
 
 public class DirectThreadsApproveRequest extends IGPostRequest<IGResponse> {

@@ -1,39 +1,52 @@
 package com.kiselev.enemy.network.instagram.api;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.kiselev.enemy.network.instagram.api.client.InstagramClient;
+import com.kiselev.enemy.network.instagram.api.internal2.models.direct.IGThread;
+import com.kiselev.enemy.network.instagram.api.internal2.models.direct.Inbox;
+import com.kiselev.enemy.network.instagram.api.internal2.models.direct.item.ThreadItem;
 import com.kiselev.enemy.network.instagram.api.internal2.models.feed.Reel;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.Comment;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.TimelineMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
+import com.kiselev.enemy.network.instagram.api.internal2.requests.direct.DirectInboxRequest;
+import com.kiselev.enemy.network.instagram.api.internal2.requests.direct.DirectThreadsRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.feed.FeedUserReelMediaRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.feed.FeedUserRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.friendships.FriendshipsFeedsRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaGetCommentsRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaGetLikersRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.users.UsersUsernameInfoRequest;
+import com.kiselev.enemy.network.instagram.api.internal2.responses.direct.DirectInboxResponse;
+import com.kiselev.enemy.network.instagram.api.internal2.responses.direct.DirectThreadsResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUserReelsMediaResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUserResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUsersResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaGetCommentsResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.users.UserResponse;
+import com.kiselev.enemy.utils.flow.model.SocialNetwork;
+import com.kiselev.enemy.utils.progress.ProgressableAPI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class InstagramAPI {
+public class InstagramAPI extends ProgressableAPI {
 
     private final InstagramClient client;
 
     public List<User> profiles(List<String> usernames) {
         return usernames.stream()
+                .peek(username -> progress.bar(SocialNetwork.IG, "Profiles", usernames, username))
                 .map(this::profile)
                 .collect(Collectors.toList());
     }
@@ -51,16 +64,13 @@ public class InstagramAPI {
             if (user != null) {
                 return user;
             } else {
-                User deletedUser = new User();
-                deletedUser.setPk(0L);
-                deletedUser.setUsername(username);
-                return deletedUser;
+                return User.deleted(username);
             }
         }
         return null;
     }
 
-    public List<Profile> friends(Long profilePk) {
+    public List<Profile> friends(String profilePk) {
         List<Profile> friends = Lists.newArrayList();
 
         List<Profile> followers = followers(profilePk);
@@ -72,17 +82,11 @@ public class InstagramAPI {
         return friends;
     }
 
-    public List<Profile> followers(Long profilePk) {
+    public List<Profile> followers(String profilePk) {
         List<Profile> followers = Lists.newArrayList();
 
         String next = null;
         do {
-//            InstagramGetUserFollowersResult followersResult =
-//                    client.request(new InstagramGetUserFollowersRequest(
-//                            profilePk,
-//                            next
-//                    ));
-
             FeedUsersResponse response = client.request(
                     new FriendshipsFeedsRequest(profilePk,
                             FriendshipsFeedsRequest.FriendshipsFeeds.FOLLOWERS,
@@ -99,10 +103,14 @@ public class InstagramAPI {
                     : null;
         } while (next != null);
 
+        if (followers.size() != followers.stream().distinct().count()) {
+            boolean d = true;
+        }
+
         return followers;
     }
 
-    public List<Profile> following(Long profilePk) {
+    public List<Profile> following(String profilePk) {
         List<Profile> following = Lists.newArrayList();
 
         String next = null;
@@ -132,7 +140,7 @@ public class InstagramAPI {
         return following;
     }
 
-    public List<TimelineMedia> posts(Long profilePk) {
+    public List<TimelineMedia> posts(String profilePk) {
         List<TimelineMedia> posts = Lists.newArrayList();
 
         String next = null;
@@ -223,9 +231,59 @@ public class InstagramAPI {
         return null;
     }
 
+    public Map<Profile, Set<ThreadItem>> history() {
+        List<IGThread> threads = Lists.newArrayList();
+        String cursor = null;
 
+        do {
+            DirectInboxResponse response = client.request(
+                    new DirectInboxRequest()
+                            .cursor(cursor)
+                            .limit(100));
 
+            Inbox inbox = response.getInbox();
+            threads.addAll(inbox.getThreads());
+            cursor = inbox.getOldest_cursor();
 
+        } while (cursor != null);
+
+        return threads.stream()
+//                .peek(thread -> {
+////                    if (CollectionUtils.isEmpty(thread.getUsers())) {
+////                        String json = ProfilingUtils.json(thread);
+////                        List<Profile> left_users = thread.getLeft_users();
+////                        Profile inviter = thread.getInviter();
+////                        ProfilingUtils.file("thread", thread.getThread_id(), json);
+////                    }
+////                })
+////                .filter(thread -> CollectionUtils.isNotEmpty(thread.getUsers()))
+                .peek(thread -> progress.bar(SocialNetwork.IG, "History messages", threads, thread))
+                .collect(Collectors.toMap(
+                        thread -> thread.getUsers().stream().findFirst().orElse(User.deleted(thread.getThread_id())), // look closely
+                        thread -> messages(thread.getThread_id()),
+                        (first, second) -> {
+                            // TODO: Try to merge
+                            return second;
+                        }
+                ));
+    }
+
+    public Set<ThreadItem> messages(String threadId) {
+        Set<ThreadItem> messages = Sets.newHashSet();
+        String cursor = null;
+
+        do {
+            DirectThreadsResponse response = client.request(
+                    new DirectThreadsRequest(threadId, cursor));
+
+            IGThread thread = response.getThread();
+            messages.addAll(thread.getItems());
+
+            cursor = thread.getOldest_cursor();
+        } while (cursor != null);
+
+        return messages;
+    }
 
 
 //

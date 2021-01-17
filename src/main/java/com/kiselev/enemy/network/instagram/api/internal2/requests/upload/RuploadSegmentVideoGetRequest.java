@@ -5,7 +5,6 @@ import com.kiselev.enemy.network.instagram.api.internal2.models.media.UploadPara
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGGetRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
-
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import okhttp3.Request;

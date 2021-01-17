@@ -6,8 +6,11 @@ import com.vk.api.sdk.objects.likes.Type;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface VKAPI {
+
+    Profile me();
 
     Profile profile(String profileId);
 
@@ -33,11 +36,11 @@ public interface VKAPI {
 
     List<Profile> likes(String profileId, String itemId, Type type);
 
-    Map<Profile, List<Message>> history(List<String> profileIds);
+    Map<Profile, Set<Message>> history(List<String> profileIds);
 
-    Map<Profile, List<Message>> history();
+    Map<Profile, Set<Message>> history();
 
-    List<Message> messages(String profileId);
+    Set<Message> messages(String profileId);
 
     List<Profile> search(SearchRequest.Query query);
 }

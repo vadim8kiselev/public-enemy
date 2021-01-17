@@ -4,7 +4,6 @@ import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGPayload;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPostRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.friendships.FriendshipStatusResponse;
-
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FriendshipsActionRequest extends IGPostRequest<FriendshipStatusResponse> {
     @NonNull
-    private Long _pk;
+    private String _pk;
     @NonNull
     private FriendshipsAction action;
 
@@ -20,7 +19,7 @@ public class FriendshipsActionRequest extends IGPostRequest<FriendshipStatusResp
     protected IGPayload getPayload(IGClient client) {
         return new IGPayload() {
             @Getter
-            private long user_id = _pk;
+            private String user_id = _pk;
         };
     }
 

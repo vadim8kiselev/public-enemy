@@ -1,7 +1,5 @@
 package com.kiselev.enemy.network.instagram.api.internal2.requests.direct;
 
-import java.util.Arrays;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -10,11 +8,12 @@ import com.kiselev.enemy.network.instagram.api.internal2.models.IGPayload;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPostRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Arrays;
 
 @RequiredArgsConstructor
 public class DirectThreadsBroadcastRequest extends IGPostRequest<IGResponse> {

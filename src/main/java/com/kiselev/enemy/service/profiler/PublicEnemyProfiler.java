@@ -1,11 +1,11 @@
 package com.kiselev.enemy.service.profiler;
 
-import com.kiselev.enemy.data.telegram.utils.TelegramUtils;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
 import com.kiselev.enemy.network.vk.api.model.Profile;
 import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.service.PublicEnemyService;
+import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,12 +22,12 @@ public class PublicEnemyProfiler {
     private final PublicEnemyService publicEnemyService;
 
     public Object profile(String url) {
-        String vkId = TelegramUtils.identifier(SocialNetwork.VK, url);
+        String vkId = ProfilingUtils.identifier(SocialNetwork.VK, url);
         if (vkId != null) {
             return vkProfile(vkId);
         }
 
-        String igId = TelegramUtils.identifier(SocialNetwork.IG, url);
+        String igId = ProfilingUtils.identifier(SocialNetwork.IG, url);
         if (igId != null) {
             return igProfile(igId);
         }
@@ -47,10 +47,10 @@ public class PublicEnemyProfiler {
                 .collect(Collectors.toList());
 
         Set<com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile> predictedProfiles = igFriends.stream()
-                .map(User::getPk)
+                .map(User::id)
                 .map(publicEnemyService.ig().api().raw()::friends)
                 .flatMap(List::stream)
-                .filter(profile -> vkProfile.fullName().equals(profile.getName()))
+                .filter(profile -> vkProfile.fullName().equals(profile.fullName()))
                 .collect(Collectors.toSet());
 
         return null;

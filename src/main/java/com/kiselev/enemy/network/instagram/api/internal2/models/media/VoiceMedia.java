@@ -1,7 +1,5 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.media;
 
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.Audio;
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.Media;
 import lombok.Data;
 
 @Data

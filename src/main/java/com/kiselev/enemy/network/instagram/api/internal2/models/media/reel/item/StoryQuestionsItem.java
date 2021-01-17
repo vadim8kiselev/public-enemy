@@ -2,8 +2,6 @@ package com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.item
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.item.ReelMetadataItem;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;

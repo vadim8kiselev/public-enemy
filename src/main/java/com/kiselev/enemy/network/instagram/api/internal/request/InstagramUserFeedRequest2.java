@@ -1,9 +1,8 @@
 package com.kiselev.enemy.network.instagram.api.internal.request;
 
+import com.kiselev.enemy.network.instagram.api.internal.payload.InstagramFeedResult;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import com.kiselev.enemy.network.instagram.api.internal.payload.InstagramFeedResult;
-import com.kiselev.enemy.network.instagram.api.internal.request.InstagramGetRequest;
 
 @AllArgsConstructor
 @RequiredArgsConstructor

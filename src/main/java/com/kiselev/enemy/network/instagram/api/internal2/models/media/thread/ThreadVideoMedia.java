@@ -1,13 +1,11 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.media.thread;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.ImageVersions;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.VideoVersionsMeta;
-
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.thread.ThreadMedia;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @JsonTypeName("2")

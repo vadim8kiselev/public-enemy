@@ -3,7 +3,6 @@ package com.kiselev.enemy.network.instagram.api.internal2.requests.news;
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGGetRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.news.NewsInboxResponse;
-
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 

@@ -3,8 +3,6 @@ package com.kiselev.enemy.network.instagram.api.internal2.models.discover;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGBaseModel;
-
-import com.kiselev.enemy.network.instagram.api.internal2.models.discover.SectionalMediaGridItem;
 import lombok.Data;
 
 

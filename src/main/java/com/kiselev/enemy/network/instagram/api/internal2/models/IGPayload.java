@@ -2,8 +2,6 @@ package com.kiselev.enemy.network.instagram.api.internal2.models;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import com.kiselev.enemy.network.instagram.api.internal2.models.IGBaseModel;
 import lombok.Data;
 
 @Data

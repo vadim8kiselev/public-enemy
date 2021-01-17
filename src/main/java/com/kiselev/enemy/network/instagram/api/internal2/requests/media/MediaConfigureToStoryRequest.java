@@ -1,11 +1,5 @@
 package com.kiselev.enemy.network.instagram.api.internal2.requests.media;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
@@ -14,11 +8,12 @@ import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.item.
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPostRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaResponse.MediaConfigureToStoryResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
+import java.util.*;
 
 @AllArgsConstructor
 @RequiredArgsConstructor

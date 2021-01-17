@@ -1,8 +1,5 @@
 package com.kiselev.enemy.network.instagram.api.internal2.actions.simulate;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.actions.async.AsyncAction;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGRequest;
@@ -23,9 +20,11 @@ import com.kiselev.enemy.network.instagram.api.internal2.requests.qe.QeSyncReque
 import com.kiselev.enemy.network.instagram.api.internal2.requests.qp.QpGetCooldowns;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.status.StatusGetViewableStatusesRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.users.UsersArlinkDownloadInfoRequest;
-
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 public class SimulateAction {

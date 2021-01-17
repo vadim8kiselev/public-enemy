@@ -31,6 +31,19 @@ public class Instagram implements SocialNetwork<InstagramProfile> {
         return api;
     }
 
+    public InstagramService service() {
+        return ig;
+    }
+
+    public InstagramAnalyst analyst() {
+        return analyst;
+    }
+
+    @Override
+    public InstagramProfile me() {
+        return ig.me();
+    }
+
     @Override
     public InstagramProfile profile(String identifier) {
         log.info("Instagram profile profiling for identifier {}", identifier);

@@ -1,10 +1,13 @@
 package com.kiselev.enemy.network.vk.api.internal;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.kiselev.enemy.network.vk.api.VKAPI;
 import com.kiselev.enemy.network.vk.api.constants.VKConstants;
 import com.kiselev.enemy.network.vk.api.model.*;
 import com.kiselev.enemy.network.vk.api.request.*;
+import com.kiselev.enemy.utils.flow.model.SocialNetwork;
+import com.kiselev.enemy.utils.progress.ProgressableAPI;
 import com.vk.api.sdk.exceptions.ApiAccessAlbumException;
 import com.vk.api.sdk.objects.base.UserGroupFields;
 import com.vk.api.sdk.objects.likes.Type;
@@ -16,10 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,7 +27,10 @@ import java.util.stream.Collectors;
 @Service
 @Primary
 @RequiredArgsConstructor
-public class VKInternalAPI implements VKAPI {
+public class VKInternalAPI extends ProgressableAPI implements VKAPI {
+
+    @Value("${com.kiselev.enemy.vk.identifier:}")
+    private String vkIdentifier;
 
     @Value("${com.kiselev.enemy.vk.access.tokens}")
     private List<String> tokens;
@@ -37,6 +40,11 @@ public class VKInternalAPI implements VKAPI {
                 .sorted((o1, o2) -> ThreadLocalRandom.current().nextInt(-1, 2))
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("No vk tokens found!"));
+    }
+
+    @Override
+    public Profile me() {
+        return profile(vkIdentifier);
     }
 
     @Override
@@ -282,19 +290,20 @@ public class VKInternalAPI implements VKAPI {
 
     @Override
     @SneakyThrows
-    public Map<Profile, List<Message>> history(List<String> profileIds) {
+    public Map<Profile, Set<Message>> history(List<String> profileIds) {
         List<Profile> profiles = profiles(profileIds);
 
         return profiles.stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
-                        profile -> messages(profile.id())
+                        profile -> messages(profile.id()),
+                        (first, second) -> second
                 ));
     }
 
     @Override
     @SneakyThrows
-    public Map<Profile, List<Message>> history() {
+    public Map<Profile, Set<Message>> history() {
         int offset = 0;
         List<Profile> profiles = Lists.newArrayList();
 
@@ -312,17 +321,19 @@ public class VKInternalAPI implements VKAPI {
         }
 
         return profiles.stream()
+                .peek(profile -> progress.bar(SocialNetwork.VK, "History", profiles, profile))
                 .collect(Collectors.toMap(
                         Function.identity(),
-                        conversation -> messages(conversation.id())
+                        conversation -> messages(conversation.id()),
+                        (first, second) -> second
                 ));
     }
 
     @Override
     @SneakyThrows
-    public List<Message> messages(String profileId) {
+    public Set<Message> messages(String profileId) {
         int offset = 0;
-        List<Message> messages = Lists.newArrayList();
+        Set<Message> messages = Sets.newHashSet();
 
         MessageRequest request = new MessageRequest(token())
                 .userId(profileId)
@@ -338,9 +349,7 @@ public class VKInternalAPI implements VKAPI {
             offset += VKConstants.MESSAGES;
         }
 
-        return messages.stream()
-                .sorted(Comparator.comparing(Message::date, Comparator.reverseOrder()))
-                .collect(Collectors.toList());
+        return messages;
     }
 
     @Override

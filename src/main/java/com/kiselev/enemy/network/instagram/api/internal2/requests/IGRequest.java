@@ -1,26 +1,25 @@
 package com.kiselev.enemy.network.instagram.api.internal2.requests;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
+import com.kiselev.enemy.network.instagram.api.internal2.IGConstants;
+import com.kiselev.enemy.network.instagram.api.internal2.Pair;
+import com.kiselev.enemy.network.instagram.api.internal2.exceptions.IGResponseException;
+import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
+import com.kiselev.enemy.network.instagram.api.internal2.responses.accounts.LoginResponse;
+import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.HttpUrl;
+import okhttp3.Request;
+import okhttp3.Response;
+
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
-import com.kiselev.enemy.network.instagram.api.internal2.IGConstants;
-import com.kiselev.enemy.network.instagram.api.internal2.Pair;
-import com.kiselev.enemy.network.instagram.api.internal2.exceptions.IGChallengeRequiredException;
-import com.kiselev.enemy.network.instagram.api.internal2.exceptions.IGResponseException;
-import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
-import com.kiselev.enemy.network.instagram.api.internal2.responses.accounts.LoginResponse;
-import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
-
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import okhttp3.HttpUrl;
-import okhttp3.Request;
-import okhttp3.Response;
 
 @Slf4j
 public abstract class IGRequest<T extends IGResponse> {
@@ -71,11 +70,16 @@ public abstract class IGRequest<T extends IGResponse> {
     public T parseResponse(Pair<Response, String> response) {
         T igResponse = parseResponse(response.getSecond());
         igResponse.setStatusCode(response.getFirst().code());
-        if (!response.getFirst().isSuccessful() || Objects.equals(igResponse.getStatus(), "fail")) {
+        if (!response.getFirst().isSuccessful()
+                || Objects.equals(igResponse.getStatus(), "fail")) {
 
             if (igResponse instanceof LoginResponse) {
                 LoginResponse loginResponse = (LoginResponse) igResponse;
                 throw new IGResponseException(loginResponse);
+            }
+
+            if ("User not found".equals(igResponse.getMessage())) {
+                return igResponse;
             }
 
             throw new IGResponseException(igResponse);

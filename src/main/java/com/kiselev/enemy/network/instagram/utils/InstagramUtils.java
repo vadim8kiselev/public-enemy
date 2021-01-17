@@ -25,10 +25,8 @@ public class InstagramUtils {
     }
 
     @SneakyThrows
-    public static void randomSleep() {
-        sleep(
-                2000 + (long) (new Random().nextDouble() * (double) (3000 - 2000))
-        );
+    public static void timeout() {
+        sleep(1000 + (long) (new Random().nextDouble() * (double) (3000 - 1000)));
     }
 
     @SneakyThrows

@@ -1,18 +1,14 @@
 package com.kiselev.enemy.network.instagram.api.internal2.actions.async;
 
+import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
+import com.kiselev.enemy.network.instagram.api.internal2.requests.IGRequest;
+
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.IGRequest;
 
 public class AsyncAction {
     private static final ScheduledExecutorService SCHEDULER = new ScheduledThreadPoolExecutor(0);

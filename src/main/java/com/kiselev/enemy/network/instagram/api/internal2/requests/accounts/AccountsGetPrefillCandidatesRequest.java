@@ -5,7 +5,6 @@ import com.kiselev.enemy.network.instagram.api.internal2.IGConstants;
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGBaseModel;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPostRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
-
 import lombok.Data;
 
 public class AccountsGetPrefillCandidatesRequest extends IGPostRequest<IGResponse> {

@@ -5,22 +5,22 @@ import com.kiselev.enemy.network.vk.api.model.Photo;
 import com.kiselev.enemy.network.vk.api.model.Post;
 import com.kiselev.enemy.network.vk.api.model.Profile;
 import com.kiselev.enemy.network.vk.utils.VKUtils;
+import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
 import com.kiselev.enemy.utils.flow.annotation.EnemyValue;
 import com.kiselev.enemy.utils.flow.annotation.EnemyValues;
 import com.kiselev.enemy.utils.flow.model.Info;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
-import com.vk.api.sdk.objects.base.BaseObject;
 import com.vk.api.sdk.objects.base.BoolInt;
 import com.vk.api.sdk.objects.base.Sex;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static com.kiselev.enemy.network.vk.model.constants.VKMessages.*;
 
@@ -42,6 +42,8 @@ public class VKProfile implements Info {
     private String lastName;
 
     private String fullName;
+
+    private String status;
 
     @EnemyValue(message = SEX_MESSAGE)
     private Sex sex;
@@ -67,7 +69,13 @@ public class VKProfile implements Info {
     @EnemyValue(message = HOME_TOWN_MESSAGE)
     private String homeTown;
 
+    private String phone;
+
+    private String site;
+
     private String instagram;
+
+    private String telegram;
 
     private boolean isFriend;
 
@@ -109,6 +117,7 @@ public class VKProfile implements Info {
         this.firstName = profile.firstName();
         this.lastName = profile.lastName();
         this.fullName = profile.firstName() + " " + profile.lastName();
+        this.status = profile.status();
         this.sex = profile.sex();
         this.age = VKUtils.age(profile.birthDate());
         this.birthday = profile.birthDate();
@@ -118,7 +127,15 @@ public class VKProfile implements Info {
         this.countryCode = VKUtils.code(profile.country());
         this.cityCode = VKUtils.code(profile.city());
         this.homeTown = profile.homeTown();
-        this.instagram = profile.instagram();
+        this.phone = ObjectUtils.firstNonNull(profile.mobilePhone(), profile.mobilePhone());
+        this.site = profile.site();
+        this.instagram = ObjectUtils.firstNonNull(
+                profile.instagram(),
+                ProfilingUtils.identifier(SocialNetwork.IG, profile.site()),
+                ProfilingUtils.identifier(SocialNetwork.IG, profile.status()));
+        this.telegram = ObjectUtils.firstNonNull(
+                ProfilingUtils.identifier(SocialNetwork.TG, profile.site()),
+                ProfilingUtils.identifier(SocialNetwork.TG, profile.status()));
         this.isFriend = BoolInt.YES == profile.isFriend();
         this.isPrivate = profile.isPrivate();
         this.isDeactivated = profile.deactivated();

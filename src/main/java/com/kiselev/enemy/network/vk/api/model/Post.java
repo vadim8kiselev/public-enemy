@@ -1,8 +1,8 @@
 package com.kiselev.enemy.network.vk.api.model;
 
 import com.google.gson.annotations.SerializedName;
-import com.kiselev.enemy.utils.flow.model.Id;
 import com.kiselev.enemy.network.vk.model.VKProfile;
+import com.kiselev.enemy.utils.flow.model.Id;
 import com.vk.api.sdk.objects.base.CommentsInfo;
 import com.vk.api.sdk.objects.base.LikesInfo;
 import com.vk.api.sdk.objects.base.RepostsInfo;

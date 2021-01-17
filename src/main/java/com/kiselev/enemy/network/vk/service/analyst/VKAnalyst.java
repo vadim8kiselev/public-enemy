@@ -2,26 +2,19 @@ package com.kiselev.enemy.network.vk.service.analyst;
 
 import com.google.common.collect.Lists;
 import com.kiselev.enemy.network.vk.api.model.Group;
-import com.kiselev.enemy.network.vk.api.model.Profile;
-import com.kiselev.enemy.network.vk.api.request.SearchRequest;
+import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.network.vk.service.VKService;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
 import com.kiselev.enemy.utils.analytics.model.Prediction;
-import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.kiselev.enemy.utils.flow.message.Analysis;
-import com.kiselev.enemy.network.vk.api.model.Photo;
-import com.kiselev.enemy.network.vk.api.model.Post;
-import com.kiselev.enemy.network.vk.model.VKProfile;
-import com.vk.api.sdk.exceptions.ApiException;
+import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -78,7 +71,7 @@ public class VKAnalyst {
         }
 
         if (age == null) {
-            Integer hiddenAge = searchAge(profile, 1, 100);
+            Integer hiddenAge = vk.searchAge(profile, 1, 100);
 
             if (hiddenAge != null && predictedAge == null) {
                 return EnemyMessage.of(
@@ -115,42 +108,6 @@ public class VKAnalyst {
             }
         }
         return null;
-    }
-
-    public Integer searchAge(VKProfile profile, int from, int to) {
-        if (from != to) {
-            int middle = from + (to - from) / 2;
-
-            boolean left = isProfileFound(profile, from, middle);
-            if (left) {
-                return searchAge(profile, from, middle);
-            }
-
-            boolean right = isProfileFound(profile, middle + 1, to);
-            if (right) {
-                return searchAge(profile, middle + 1, to);
-            }
-
-            return null;
-        }
-        return from;
-    }
-
-    @SneakyThrows
-    private boolean isProfileFound(VKProfile profile, int a, int b) {
-        List<VKProfile> profiles = vk.search(request -> request
-                .q(profile.fullName())
-                .city(profile.cityCode())
-                .country(profile.countryCode())
-                .hometown(profile.homeTown())
-                .ageFrom(a)
-                .ageTo(b));
-
-        List<String> ids = profiles.stream()
-                .map(VKProfile::id)
-                .collect(Collectors.toList());
-
-        return ids.contains(profile.id());
     }
 
     public EnemyMessage<VKProfile> country(VKProfile profile) {
@@ -278,7 +235,8 @@ public class VKAnalyst {
 //        Map<VKProfile, Integer> map = profileLikers.stream()
 //                .collect(Collectors.toMap(
 //                        Function.identity(),
-//                        liker -> index(profileLikers, liker) + index(AnalyticsUtils.topObjects(liker.likes(), 3), profile)
+//                        liker -> index(profileLikers, liker) + index(AnalyticsUtils.topObjects(liker.likes(), 3), profile),
+//                        (first, second) -> second
 //                ));
 //
 //        return map.entrySet().stream()

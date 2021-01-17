@@ -1,9 +1,8 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.media;
 
-import java.util.List;
-
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.ImageVersionsMeta;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class ImageVersions {

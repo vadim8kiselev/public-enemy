@@ -1,16 +1,14 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.music;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.util.StdConverter;
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGBaseModel;
-import com.kiselev.enemy.network.instagram.api.internal2.models.music.MusicTrack;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
-
 import lombok.Data;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 public class MusicPlaylist extends IGBaseModel {

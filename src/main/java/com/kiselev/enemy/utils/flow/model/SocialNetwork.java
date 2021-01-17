@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 
 public enum SocialNetwork {
 
+    TG("[%s](https://t.me/%s)", Pattern.compile("((https?://)?t\\.me/)(\\w+)")),
     IG("[%s](https://instagram.com/%s)", Pattern.compile("((https?://)?instagram\\.com/)(\\w+)")),
     VK("[%s](https://vk.com/%s)", Pattern.compile("((https?://)?vk\\.com/)(id\\d+|\\S+)"));
 

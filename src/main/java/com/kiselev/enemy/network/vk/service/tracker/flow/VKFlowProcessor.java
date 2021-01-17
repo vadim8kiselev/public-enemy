@@ -1,8 +1,8 @@
 package com.kiselev.enemy.network.vk.service.tracker.flow;
 
+import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.kiselev.enemy.utils.flow.processor.AbstractFlowProcessor;
-import com.kiselev.enemy.network.vk.model.VKProfile;
 
 import java.util.List;
 

@@ -4,7 +4,6 @@ import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGGetRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPaginatedRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaGetCommentsResponse;
-
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

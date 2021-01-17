@@ -4,8 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import com.kiselev.enemy.network.vk.api.model.Group;
 import com.kiselev.enemy.network.vk.api.model.Profile;
-import com.kiselev.enemy.network.vk.model.VKProfile;
-import com.kiselev.enemy.network.vk.utils.GsonHolder;
+import com.kiselev.enemy.network.vk.utils.MapperHolder;
 import lombok.Data;
 
 import java.util.List;
@@ -23,14 +22,14 @@ public class FollowingResponse {
     public List<Profile> profiles() {
         return items.stream()
                 .filter(this::isProfile)
-                .map(profile -> GsonHolder.GSON.fromJson(profile.toString(), Profile.class))
+                .map(profile -> MapperHolder.GSON.fromJson(profile.toString(), Profile.class))
                 .collect(Collectors.toList());
     }
 
     public List<Group> subscriptions() {
         return items.stream()
                 .filter(this::isGroup)
-                .map(group -> GsonHolder.GSON.fromJson(group.toString(), Group.class))
+                .map(group -> MapperHolder.GSON.fromJson(group.toString(), Group.class))
                 .collect(Collectors.toList());
     }
 

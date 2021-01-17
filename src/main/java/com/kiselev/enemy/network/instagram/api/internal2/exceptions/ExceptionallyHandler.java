@@ -4,14 +4,12 @@ import com.kiselev.enemy.network.instagram.api.internal2.exceptions.IGResponseEx
 
 public interface ExceptionallyHandler {
 
-    public static final ExceptionallyHandler WRAPPED_TO_IGRESPONSE = new ExceptionallyHandler() {
-
+    ExceptionallyHandler WRAPPED_TO_IGRESPONSE = new ExceptionallyHandler() {
         @Override
         public <T> T handle(Throwable throwable, Class<T> type) {
             return IGFailedResponse.of(throwable.getCause(), type);
         }
-
     };
 
-    public <T> T handle(Throwable throwable, Class<T> type);
+    <T> T handle(Throwable throwable, Class<T> type);
 }

@@ -1,6 +1,6 @@
 package com.kiselev.enemy.network.instagram.service;
 
-import com.google.common.collect.Lists;
+import com.kiselev.enemy.network.instagram.api.internal2.models.direct.item.ThreadItem;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.UserTags;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.Comment;
@@ -11,17 +11,25 @@ import com.kiselev.enemy.network.instagram.model.InstagramCommentary;
 import com.kiselev.enemy.network.instagram.model.InstagramPost;
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
 import com.kiselev.enemy.network.instagram.service.cache.InstagramCachedAPI;
+import com.kiselev.enemy.utils.progress.ProgressableAPI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class InstagramService {
+public class InstagramService extends ProgressableAPI {
 
     private final InstagramCachedAPI api;
+
+    public InstagramProfile me() {
+        User me = api.me();
+        return new InstagramInternalProfile(me);
+    }
 
     public InstagramProfile profile(String username) {
         User instagramUser = api.profile(username);
@@ -29,55 +37,72 @@ public class InstagramService {
     }
 
     public List<InstagramProfile> friends(String id) {
-        List<User> friends = api.friends(Long.valueOf(id));
+        List<User> friends = api.friends(id);
         return friends.stream()
                 .map(InstagramInternalProfile::new)
                 .collect(Collectors.toList());
     }
 
-    private List<InstagramProfile> followers(String id) {
-        List<User> followers = api.followers(Long.valueOf(id));
+    public List<InstagramProfile> followers(String id) {
+        List<User> followers = api.followers(id);
         return followers.stream()
                 .map(InstagramInternalProfile::new)
                 .collect(Collectors.toList());
     }
 
-    private List<InstagramProfile> following(String id) {
-        List<User> following = api.following(Long.valueOf(id));
+    public List<InstagramProfile> following(String id) {
+        List<User> following = api.following(id);
         return following.stream()
                 .map(InstagramInternalProfile::new)
                 .collect(Collectors.toList());
     }
 
-    private List<InstagramPost> posts(String id) {
-        List<TimelineMedia> posts = api.posts(Long.valueOf(id));
+    public List<InstagramPost> posts(String id) {
+        List<TimelineMedia> posts = api.posts(id);
         return posts.stream()
                 .map(InstagramInternalPost::new)
                 .collect(Collectors.toList());
     }
 
-    private List<InstagramProfile> likes(String id) {
+    public List<InstagramProfile> likes(String id) {
         List<User> likes = api.likes(id);
         return likes.stream()
                 .map(InstagramInternalProfile::new)
                 .collect(Collectors.toList());
     }
 
-    private List<InstagramCommentary> commentaries(String id) {
+    public List<InstagramCommentary> commentaries(String id) {
         List<Comment> commentaries = api.commentaries(id);
         return commentaries.stream()
                 .map(InstagramCommentary::new)
                 .collect(Collectors.toList());
     }
 
-    private List<ReelMedia> stories(String id) {
+    public List<ReelMedia> stories(String id) {
         return api.stories(Long.valueOf(id));
     }
 
+    public Map<InstagramProfile, Set<ThreadItem>> history() {
+        Map<Profile, Set<ThreadItem>> history = api.history();
+        return history.entrySet().stream()
+//                .peek(thread -> progress.bar(SocialNetwork.IG, "History messages:", history, thread))
+                .collect(Collectors.toMap(
+                        entry -> profile(entry.getKey().username()),
+                        Map.Entry::getValue,
+                        (first, second) -> {
+                            // TODO: Try to merge
+                            return second;
+                        }
+                ));
+    }
+
+    public Set<ThreadItem> messages(String threadId) {
+        return api.messages(threadId);
+    }
 
 //
 //
-//    private List<InstagramProfile> readStoryViewers(InstagramStoryItem instagramStoryItem) {
+//    public List<InstagramProfile> readStoryViewers(InstagramStoryItem instagramStoryItem) {
 //        if (api.isThatMe(instagramStoryItem.getUser().getUsername())) {
 //            List<InstagramUser> rawStoryViewers = api.storyViewers(
 //                    instagramStoryItem.getId()
@@ -171,7 +196,7 @@ public class InstagramService {
                 if (usertags != null) {
                     super.tags(usertags.getIn().stream()
                             .map(UserTags.UserTag::getUser)
-                            .map(Profile::getUsername)
+                            .map(Profile::username)
                             .map(InstagramService.this::profile)
                             .collect(Collectors.toList()));
                 }

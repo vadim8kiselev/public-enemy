@@ -1,18 +1,17 @@
 package com.kiselev.enemy.network.instagram.api.internal2.requests.media;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGPayload;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPostRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
-
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class MediaSeenRequest extends IGPostRequest<IGResponse> {
@@ -54,7 +53,7 @@ public class MediaSeenRequest extends IGPostRequest<IGResponse> {
         }
 
         public void map_to_reels(ReelMedia media) {
-            String key = String.format("%s_%s", media.getId(), media.getUser().getPk());
+            String key = String.format("%s_%s", media.getId(), media.getUser().id());
             String[] value = {
                     String.format("%s_%s", media.getTaken_at(), System.currentTimeMillis() / 1000)};
 

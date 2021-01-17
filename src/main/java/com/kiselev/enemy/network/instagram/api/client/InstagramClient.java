@@ -2,7 +2,6 @@ package com.kiselev.enemy.network.instagram.api.client;
 
 import com.google.common.collect.Lists;
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
-import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
 import com.kiselev.enemy.network.instagram.utils.InstagramUtils;
@@ -27,7 +26,7 @@ public class InstagramClient {
         authenticate();
 //        reanimate();
         IGClient client = client(clients);
-        InstagramUtils.randomSleep();
+        InstagramUtils.timeout();
 
         try {
             return client.sendRequest(request).join();
@@ -66,7 +65,7 @@ public class InstagramClient {
         for (IGClient client : clients) {
             if (client.isNotAvailable()) {
                 try {
-                    InstagramUtils.randomSleep();
+                    InstagramUtils.timeout();
                     client.actions().account().currentUser().join();
                     client.markAvailable();
                 } catch (Exception exception) {

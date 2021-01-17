@@ -1,5 +1,18 @@
 package com.kiselev.enemy.network.instagram.api.internal2.utils;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.kiselev.enemy.network.instagram.api.internal2.IGConstants;
+import lombok.SneakyThrows;
+import okhttp3.*;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.net.CookieManager;
 import java.net.URLEncoder;
@@ -16,22 +29,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
-import javax.crypto.Cipher;
-import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.kiselev.enemy.network.instagram.api.internal2.IGConstants;
-import lombok.SneakyThrows;
-import okhttp3.Cookie;
-import okhttp3.CookieJar;
-import okhttp3.HttpUrl;
-import okhttp3.JavaNetCookieJar;
-import okhttp3.OkHttpClient;
 
 public class IGUtils {
     private static final String BASE64URL_CHARMAP =

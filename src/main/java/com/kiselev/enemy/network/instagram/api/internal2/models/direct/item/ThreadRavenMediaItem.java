@@ -1,10 +1,10 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.direct.item;
 
-import java.util.List;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.kiselev.enemy.network.instagram.api.internal2.models.direct.item.ThreadItem;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.thread.ThreadMedia;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @JsonTypeName("raven_media")

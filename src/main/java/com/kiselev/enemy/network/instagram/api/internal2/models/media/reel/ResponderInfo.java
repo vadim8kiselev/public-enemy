@@ -1,11 +1,10 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.media.reel;
 
-import java.util.List;
-
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGBaseModel;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
-
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class ResponderInfo extends IGBaseModel {

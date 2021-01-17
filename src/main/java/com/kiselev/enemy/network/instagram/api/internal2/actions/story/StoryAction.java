@@ -1,12 +1,5 @@
 package com.kiselev.enemy.network.instagram.api.internal2.actions.story;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.UploadParameters;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.item.ReelMetadataItem;
@@ -18,6 +11,14 @@ import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUser
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaResponse.MediaConfigureToStoryResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 public class StoryAction {

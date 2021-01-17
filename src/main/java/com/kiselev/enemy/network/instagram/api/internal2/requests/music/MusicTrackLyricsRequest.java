@@ -2,7 +2,6 @@ package com.kiselev.enemy.network.instagram.api.internal2.requests.music;
 
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGGetRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.music.MusicTrackLyricsResponse;
-
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 

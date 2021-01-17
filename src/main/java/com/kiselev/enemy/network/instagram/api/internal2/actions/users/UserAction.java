@@ -1,7 +1,5 @@
 package com.kiselev.enemy.network.instagram.api.internal2.actions.users;
 
-import java.util.concurrent.CompletableFuture;
-
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.actions.feed.FeedIterable;
 import com.kiselev.enemy.network.instagram.api.internal2.models.friendships.Friendship;
@@ -14,10 +12,11 @@ import com.kiselev.enemy.network.instagram.api.internal2.requests.friendships.Fr
 import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUsersResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.friendships.FriendshipStatusResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.friendships.FriendshipsShowResponse;
-
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 public class UserAction {
@@ -29,20 +28,20 @@ public class UserAction {
 
     public FeedIterable<FriendshipsFeedsRequest, FeedUsersResponse> followersFeed() {
         return new FeedIterable<>(client, () ->
-                new FriendshipsFeedsRequest(user.getPk(), FriendshipsFeeds.FOLLOWERS));
+                new FriendshipsFeedsRequest(user.id(), FriendshipsFeeds.FOLLOWERS));
     }
 
     public FeedIterable<FriendshipsFeedsRequest, FeedUsersResponse> followingFeed() {
         return new FeedIterable<>(client, () ->
-                new FriendshipsFeedsRequest(user.getPk(), FriendshipsFeeds.FOLLOWING));
+                new FriendshipsFeedsRequest(user.id(), FriendshipsFeeds.FOLLOWING));
     }
 
     public CompletableFuture<Friendship> getFriendship() {
-        return new FriendshipsShowRequest(user.getPk()).execute(client)
+        return new FriendshipsShowRequest(user.id()).execute(client)
                 .thenApply(FriendshipsShowResponse::getFriendship);
     }
 
     public CompletableFuture<FriendshipStatusResponse> action(FriendshipsAction action) {
-        return new FriendshipsActionRequest(user.getPk(), action).execute(client);
+        return new FriendshipsActionRequest(user.id(), action).execute(client);
     }
 }

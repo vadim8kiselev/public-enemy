@@ -3,7 +3,6 @@ package com.kiselev.enemy.network.instagram.api.internal.request;
 import com.kiselev.enemy.network.instagram.api.internal.constants.InstagramConstants;
 import com.kiselev.enemy.network.instagram.api.internal.payload.InstagramGetUserFollowersResult;
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 

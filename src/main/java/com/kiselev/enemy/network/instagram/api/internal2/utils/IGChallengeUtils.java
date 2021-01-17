@@ -1,7 +1,5 @@
 package com.kiselev.enemy.network.instagram.api.internal2.utils;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.exceptions.IGResponseException.IGFailedResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.challenge.ChallengeResetRequest;
@@ -11,9 +9,11 @@ import com.kiselev.enemy.network.instagram.api.internal2.requests.challenge.Chal
 import com.kiselev.enemy.network.instagram.api.internal2.responses.accounts.LoginResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.challenge.Challenge;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.challenge.ChallengeStateResponse;
-import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public class IGChallengeUtils {

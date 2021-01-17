@@ -1,20 +1,19 @@
 package com.kiselev.enemy.network.instagram.api.internal2.requests.upload;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGPayload;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.UploadParameters;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPostRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.RuploadPhotoResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
-
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 @RequiredArgsConstructor
 @AllArgsConstructor

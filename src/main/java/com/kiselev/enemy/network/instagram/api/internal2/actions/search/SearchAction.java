@@ -1,6 +1,5 @@
 package com.kiselev.enemy.network.instagram.api.internal2.actions.search;
 
-import java.util.concurrent.CompletableFuture;
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.fbsearch.FbsearchPlacesRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.tags.TagsSearchRequest;
@@ -10,6 +9,8 @@ import com.kiselev.enemy.network.instagram.api.internal2.responses.tags.TagsSear
 import com.kiselev.enemy.network.instagram.api.internal2.responses.users.UsersSearchResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 public class SearchAction {

@@ -4,7 +4,6 @@ import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGGetRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPaginatedRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUserResponse;
-
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,7 @@ import lombok.Setter;
 public class FeedUserRequest extends IGGetRequest<FeedUserResponse>
         implements IGPaginatedRequest<FeedUserResponse> {
     @NonNull
-    private Long pk;
+    private String pk;
     @Setter
     private String max_id;
 

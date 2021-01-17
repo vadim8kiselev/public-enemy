@@ -1,12 +1,14 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.net.URL;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
-import lombok.Data;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class User extends Profile {
 
     private List<ProfilePic> hd_profile_pic_versions;
@@ -81,4 +83,13 @@ public class User extends Profile {
 //            "should_show_public_contacts": true,
 
 //            "account_badges": []
+
+
+    public static User deleted(String username) {
+        User deletedUser = new User();
+        deletedUser.id(String.valueOf(username.hashCode()));
+        deletedUser.username(username);
+        deletedUser.isDeleted(true);
+        return deletedUser;
+    }
 }

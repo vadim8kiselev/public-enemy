@@ -4,18 +4,16 @@ import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGGetRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPaginatedRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUsersResponse;
-
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class FriendshipsFeedsRequest extends IGGetRequest<FeedUsersResponse> implements IGPaginatedRequest<FeedUsersResponse> {
     @NonNull
-    private Long _id;
+    private String _id;
     @NonNull
     private FriendshipsFeeds action;
     @Setter

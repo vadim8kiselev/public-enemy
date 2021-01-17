@@ -2,9 +2,7 @@ package com.kiselev.enemy.network.vk.api.model.full;
 
 import com.google.gson.annotations.SerializedName;
 import com.kiselev.enemy.network.vk.api.model.Group;
-import com.vk.api.sdk.objects.base.BaseObject;
 import com.vk.api.sdk.objects.base.BoolInt;
-import com.vk.api.sdk.objects.base.Country;
 import com.vk.api.sdk.objects.groups.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

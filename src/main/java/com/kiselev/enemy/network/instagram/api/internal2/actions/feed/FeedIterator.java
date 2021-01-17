@@ -1,7 +1,6 @@
 package com.kiselev.enemy.network.instagram.api.internal2.actions.feed;
 
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
-import com.kiselev.enemy.network.instagram.api.internal2.actions.feed.CursorIterator;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPaginatedRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGPaginatedResponse;

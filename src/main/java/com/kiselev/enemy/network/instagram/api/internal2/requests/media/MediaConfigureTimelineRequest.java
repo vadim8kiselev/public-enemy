@@ -1,7 +1,5 @@
 package com.kiselev.enemy.network.instagram.api.internal2.requests.media;
 
-import java.util.Collections;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -13,12 +11,13 @@ import com.kiselev.enemy.network.instagram.api.internal2.models.media.UserTags.U
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPostRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaResponse.MediaConfigureTimelineResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
-
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+
+import java.util.Collections;
 
 @RequiredArgsConstructor
 public class MediaConfigureTimelineRequest extends IGPostRequest<MediaConfigureTimelineResponse> {

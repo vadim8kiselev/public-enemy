@@ -1,8 +1,6 @@
 package com.kiselev.enemy.network.instagram.api.internal2.actions.users;
 
-import java.util.concurrent.CompletableFuture;
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
-import com.kiselev.enemy.network.instagram.api.internal2.actions.users.UserAction;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.users.UsersInfoRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.users.UsersSearchRequest;
@@ -11,6 +9,8 @@ import com.kiselev.enemy.network.instagram.api.internal2.responses.users.UserRes
 import com.kiselev.enemy.network.instagram.api.internal2.responses.users.UsersSearchResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 public class UsersAction {

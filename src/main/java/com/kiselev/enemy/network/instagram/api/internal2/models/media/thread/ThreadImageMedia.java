@@ -2,8 +2,6 @@ package com.kiselev.enemy.network.instagram.api.internal2.models.media.thread;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.ImageVersions;
-
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.thread.ThreadMedia;
 import lombok.Data;
 
 @Data

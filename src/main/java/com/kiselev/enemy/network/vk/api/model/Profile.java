@@ -1,10 +1,8 @@
 package com.kiselev.enemy.network.vk.api.model;
 
-import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.kiselev.enemy.utils.flow.model.Info;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
-import com.kiselev.enemy.network.vk.utils.BaseObjectDeserializer;
 import com.vk.api.sdk.objects.audio.Audio;
 import com.vk.api.sdk.objects.base.BaseObject;
 import com.vk.api.sdk.objects.base.BoolInt;

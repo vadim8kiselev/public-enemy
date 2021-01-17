@@ -1,17 +1,21 @@
 package com.kiselev.enemy.network.instagram.api.internal2.actions.account;
 
+import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
+import com.kiselev.enemy.network.instagram.api.internal2.requests.accounts.AccountsActionRequest;
+import com.kiselev.enemy.network.instagram.api.internal2.requests.accounts.AccountsActionRequest.AccountsAction;
+import com.kiselev.enemy.network.instagram.api.internal2.requests.accounts.AccountsChangeProfilePictureRequest;
+import com.kiselev.enemy.network.instagram.api.internal2.requests.accounts.AccountsCurrentUserRequest;
+import com.kiselev.enemy.network.instagram.api.internal2.requests.accounts.AccountsSetBiographyRequest;
+import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
+import com.kiselev.enemy.network.instagram.api.internal2.responses.accounts.AccountsUserResponse;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
-import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.accounts.*;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.accounts.AccountsActionRequest.AccountsAction;
-import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
-import com.kiselev.enemy.network.instagram.api.internal2.responses.accounts.AccountsUserResponse;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class AccountAction {

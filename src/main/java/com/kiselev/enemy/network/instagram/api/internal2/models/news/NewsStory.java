@@ -1,7 +1,6 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.news;
 
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGBaseModel;
-
 import lombok.Data;
 
 @Data

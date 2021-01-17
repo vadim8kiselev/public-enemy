@@ -3,7 +3,7 @@ package com.kiselev.enemy.network.vk.api.request;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.kiselev.enemy.network.vk.api.utils.HttpTransportClient;
-import com.kiselev.enemy.network.vk.utils.GsonHolder;
+import com.kiselev.enemy.network.vk.utils.MapperHolder;
 import com.kiselev.enemy.network.vk.utils.VKUtils;
 import com.vk.api.sdk.client.ClientResponse;
 import com.vk.api.sdk.client.Lang;
@@ -57,7 +57,7 @@ public abstract class ApiRequest<R, T> {
     public ApiRequest(String token, String method, Type type) {
         this.transportClient = HttpTransportClient.getInstance();
         this.url = API_ADDRESS + method;
-        this.gson = GsonHolder.GSON;
+        this.gson = MapperHolder.GSON;
         this.retryAttempts = DEFAULT_RETRY_ATTEMPTS_INTERNAL_SERVER_ERROR_COUNT;
         this.params = new HashMap<>();
         this.method = method;

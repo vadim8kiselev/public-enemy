@@ -1,16 +1,16 @@
 package com.kiselev.enemy.network.instagram.model;
 
+import com.kiselev.enemy.network.instagram.api.internal.payload.InstagramProfilePic;
+import com.kiselev.enemy.network.instagram.api.internal.payload.InstagramUser;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
+import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
 import com.kiselev.enemy.utils.flow.model.Info;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import com.kiselev.enemy.network.instagram.api.internal.payload.InstagramProfilePic;
-import com.kiselev.enemy.network.instagram.api.internal.payload.InstagramUser;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -35,6 +35,9 @@ public class InstagramProfile implements Info {
     private String category;
     private String biography;
 
+    private String vk;
+    private String telegram;
+
     private String external_url;
 
     private boolean has_anonymous_profile_picture;
@@ -43,6 +46,7 @@ public class InstagramProfile implements Info {
     private boolean is_verified;
     private boolean is_business;
     private boolean is_favorite;
+    private boolean is_deleted;
 
     private URL photo;
 
@@ -84,6 +88,8 @@ public class InstagramProfile implements Info {
         this.biography = profile.getBiography();
 
         this.external_url = profile.getExternal_url();
+        this.vk = ProfilingUtils.identifier(SocialNetwork.VK, profile.getExternal_url());
+        this.telegram = ProfilingUtils.identifier(SocialNetwork.TG, profile.getExternal_url());
 
         this.has_anonymous_profile_picture = profile.isHas_anonymous_profile_picture();
 
@@ -107,17 +113,20 @@ public class InstagramProfile implements Info {
     public InstagramProfile(User profile) {
         this.timestamp = LocalDateTime.now();
 
-        this.id = String.valueOf(profile.getPk());
-        this.username = profile.getUsername();
-        this.fullName = profile.getName();
+        this.id = String.valueOf(profile.id());
+        this.username = profile.username();
+        this.fullName = profile.fullName();
         this.category = profile.getCategory();
         this.biography = profile.getBiography();
 
         this.external_url = profile.getExternal_url();
+        this.vk = ProfilingUtils.identifier(SocialNetwork.VK, profile.getExternal_url());
+        this.telegram = ProfilingUtils.identifier(SocialNetwork.TG, profile.getExternal_url());
 
-        this.has_anonymous_profile_picture = profile.isHasAnonymousPhoto();
+        this.has_anonymous_profile_picture = profile.hasAnonymousPhoto();
 
         this.is_private = profile.isPrivate();
+        this.is_deleted = profile.isDeleted();
 
         this.is_verified = profile.isVerified();
         this.is_business = profile.isBusiness();

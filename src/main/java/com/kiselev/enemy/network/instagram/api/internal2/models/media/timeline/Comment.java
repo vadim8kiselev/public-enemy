@@ -2,7 +2,6 @@ package com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline;
 
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGBaseModel;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
-
 import lombok.Data;
 
 @Data

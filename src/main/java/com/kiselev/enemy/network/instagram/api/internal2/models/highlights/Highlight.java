@@ -2,7 +2,6 @@ package com.kiselev.enemy.network.instagram.api.internal2.models.highlights;
 
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGBaseModel;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
-
 import lombok.Data;
 
 @Data

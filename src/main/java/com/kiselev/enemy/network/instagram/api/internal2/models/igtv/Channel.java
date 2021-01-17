@@ -1,12 +1,11 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.igtv;
 
-import java.util.List;
-
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGBaseModel;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.TimelineVideoMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
-
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class Channel extends IGBaseModel {

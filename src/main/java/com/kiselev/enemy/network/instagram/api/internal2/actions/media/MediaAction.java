@@ -1,18 +1,10 @@
 package com.kiselev.enemy.network.instagram.api.internal2.actions.media;
 
-import java.util.concurrent.CompletableFuture;
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.actions.feed.FeedIterable;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaActionRequest;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaCommentRequest;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaConfigureSidecarRequest;
+import com.kiselev.enemy.network.instagram.api.internal2.requests.media.*;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaConfigureSidecarRequest.MediaConfigureSidecarPayload;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaConfigureTimelineRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaConfigureTimelineRequest.MediaConfigurePayload;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaConfigureToIgtvRequest;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaEditRequest;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaGetCommentsRequest;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaInfoRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaGetCommentsResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaInfoResponse;
@@ -22,6 +14,8 @@ import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaRe
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaResponse.MediaConfigureToIgtvResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 public class MediaAction {

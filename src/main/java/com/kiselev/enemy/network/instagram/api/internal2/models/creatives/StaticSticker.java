@@ -1,8 +1,8 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.creatives;
 
-import java.util.List;
-
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class StaticSticker {

@@ -1,14 +1,11 @@
 package com.kiselev.enemy.network.instagram.api.internal2;
 
 import com.kiselev.enemy.network.instagram.api.internal2.actions.IGClientActions;
-import com.kiselev.enemy.network.instagram.api.internal2.exceptions.ExceptionallyHandler;
-import com.kiselev.enemy.network.instagram.api.internal2.exceptions.IGChallengeRequiredException;
 import com.kiselev.enemy.network.instagram.api.internal2.exceptions.IGLoginException;
 import com.kiselev.enemy.network.instagram.api.internal2.exceptions.IGResponseException.IGFailedResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGPayload;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGRequest;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.accounts.AccountsCurrentUserRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.accounts.AccountsLoginRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.accounts.AccountsTwoFactorLoginRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.qe.QeSyncRequest;
@@ -16,17 +13,17 @@ import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.accounts.LoginResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGChallengeUtils;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
-import com.kiselev.enemy.network.instagram.utils.InstagramUtils;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import org.apache.commons.io.FileUtils;
 
+import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
+import java.nio.charset.Charset;
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,8 +31,6 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @Data
 @Slf4j
@@ -189,6 +184,8 @@ public class IGClient {
 //                        log.info("Response for {} : {}", call.request().url().toString(), res.code());
                         try (ResponseBody body = res.body()) {
                             future.complete(new Pair<>(res, body.string()));
+                        } catch (Exception exception) {
+                            future.complete(new Pair<>(res, null));
                         }
                     }
 
@@ -200,11 +197,24 @@ public class IGClient {
 
         return future
                 .thenApply(res -> {
-                    setFromResponseHeaders(res.getFirst());
+                    Response response = res.getFirst();
+                    HttpUrl url = response.request().url();
+                    String body = res.getSecond();
+
+                    setFromResponseHeaders(response);
                     log.info("[{}]: {}, Body: {}",
                             username,
-                            res.getFirst().request().url(),
-                            IGUtils.truncate(res.getSecond()));
+                            url,
+                            IGUtils.truncate(body));
+
+                    try {
+                        FileUtils.writeStringToFile(
+                                new File("response/" + url.toString() + ".json"),
+                                body,
+                                Charset.defaultCharset());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
                     return request.parseResponse(res);
                 })
@@ -219,9 +229,13 @@ public class IGClient {
                             if ("Sorry, there was a problem with your request.".equals(cause.getMessage())) {
                                 throw new CompletionException("Sorry, there was a problem with your request.", cause);
                             }
+//                            if ("User not found".equals(cause.getMessage())) {
+////                                throw new SkipException(cause.getMessage(), cause);
+//                                return null;
+//                            }
 
                             log.error(throwable.getMessage());
-                            return null;
+                            throw new CompletionException(cause.getMessage(), cause);
                         });
     }
 
@@ -231,7 +245,7 @@ public class IGClient {
         if (Objects.equals(response.getStatus(), OK)) {
             this.loggedIn = true;
             this.selfProfile = response.getLogged_in_user();
-            log.info("Logged into {} ({})", selfProfile.getUsername(), selfProfile.getPk());
+            log.info("Logged into {} ({})", selfProfile.username(), selfProfile.id());
         } else {
             boolean debug = true;
         }
@@ -247,15 +261,17 @@ public class IGClient {
                 .ifPresent(s -> this.encryptionId = s);
         Optional.ofNullable(res.header("ig-set-password-encryption-pub-key"))
                 .ifPresent(s -> this.encryptionKey = s);
-        Optional.ofNullable(res.header("ig-set-authorization"))
+        String authorisation = res.header("ig-set-authorization");
+        Optional.ofNullable(authorisation)
                 .ifPresent(s -> this.authorization = s);
+        // Bearer IGT:2:eyJkc191c2VyX2lkIjoiMTQxNzgzMjc0NCIsInNlc3Npb25pZCI6IjE0MTc4MzI3NDQlM0F0U0JFb01McHEwdnR3NSUzQTUiLCJzaG91bGRfdXNlX2hlYWRlcl9vdmVyX2Nvb2tpZXMiOmZhbHNlfQ==
     }
 
     public IGPayload setIGPayloadDefaults(IGPayload load) {
         load.set_csrftoken(this.getCsrfToken());
         load.setDevice_id(this.deviceId);
         if (selfProfile != null) {
-            load.set_uid(selfProfile.getPk().toString());
+            load.set_uid(selfProfile.id());
             load.set_uuid(this.guid);
         } else {
             load.setId(this.guid);

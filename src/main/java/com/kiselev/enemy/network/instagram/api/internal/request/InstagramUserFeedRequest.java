@@ -2,7 +2,6 @@ package com.kiselev.enemy.network.instagram.api.internal.request;
 
 import com.kiselev.enemy.network.instagram.api.internal.payload.InstagramFeedResult;
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 

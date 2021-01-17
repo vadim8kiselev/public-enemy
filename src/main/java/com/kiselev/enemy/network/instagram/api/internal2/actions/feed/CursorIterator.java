@@ -1,13 +1,14 @@
 package com.kiselev.enemy.network.instagram.api.internal2.actions.feed;
 
-import java.util.Iterator;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Iterator;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 @RequiredArgsConstructor
 public class CursorIterator<T extends IGRequest<R>, R extends IGResponse> implements Iterator<R> {

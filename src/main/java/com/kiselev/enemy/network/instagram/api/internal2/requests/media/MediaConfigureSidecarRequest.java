@@ -1,9 +1,5 @@
 package com.kiselev.enemy.network.instagram.api.internal2.requests.media;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -16,11 +12,14 @@ import com.kiselev.enemy.network.instagram.api.internal2.models.media.UserTags.U
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPostRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaResponse.MediaConfigureSidecarResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
-
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class MediaConfigureSidecarRequest extends IGPostRequest<MediaConfigureSidecarResponse> {

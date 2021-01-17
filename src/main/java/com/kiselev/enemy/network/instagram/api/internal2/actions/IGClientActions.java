@@ -1,6 +1,5 @@
 package com.kiselev.enemy.network.instagram.api.internal2.actions;
 
-import java.lang.reflect.Field;
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.actions.account.AccountAction;
 import com.kiselev.enemy.network.instagram.api.internal2.actions.igtv.IgtvAction;
@@ -14,6 +13,8 @@ import com.kiselev.enemy.network.instagram.api.internal2.actions.users.UsersActi
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
+
+import java.lang.reflect.Field;
 
 @Accessors(fluent = true, prefix = "_")
 @Getter

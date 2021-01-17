@@ -1,12 +1,9 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonTypeName;
-
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.CaraouselItem;
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.TimelineMedia;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @JsonTypeName("8")

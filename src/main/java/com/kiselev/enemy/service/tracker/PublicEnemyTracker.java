@@ -1,11 +1,12 @@
 package com.kiselev.enemy.service.tracker;
 
-import com.kiselev.enemy.data.telegram.Telegram;
-import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.kiselev.enemy.network.instagram.Instagram;
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
+import com.kiselev.enemy.network.telegram.Telegram;
+import com.kiselev.enemy.network.telegram.model.TelegramMessage;
 import com.kiselev.enemy.network.vk.VK;
 import com.kiselev.enemy.network.vk.model.VKProfile;
+import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,12 +37,15 @@ public class PublicEnemyTracker {
     @Value("${com.kiselev.enemy.instagram.identifier:}")
     private String igIdentifier;
 
+    @Value("${com.kiselev.enemy.telegram.id}")
+    private Long telegramIdentifier;
+
     @SneakyThrows
     @Scheduled(cron = "0 0/1 * * * *")
     public void vk() {
         if (vkIsEnabled) {
             List<EnemyMessage<VKProfile>> profile = vk.track(vkIdentifier);
-            telegram.send(profile);
+            telegram.send(telegramIdentifier, TelegramMessage.messages(profile));
         }
     }
 
@@ -50,7 +54,7 @@ public class PublicEnemyTracker {
     public void ig() {
         if (igIsEnabled) {
             List<EnemyMessage<InstagramProfile>> profile = instagram.track(igIdentifier);
-            telegram.send(profile);
+            telegram.send(telegramIdentifier, TelegramMessage.messages(profile));
         }
     }
 }

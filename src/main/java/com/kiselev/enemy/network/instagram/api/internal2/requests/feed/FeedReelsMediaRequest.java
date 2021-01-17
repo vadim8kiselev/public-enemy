@@ -1,13 +1,12 @@
 package com.kiselev.enemy.network.instagram.api.internal2.requests.feed;
 
-import java.util.stream.Stream;
-
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGPayload;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPostRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
-
 import lombok.Getter;
+
+import java.util.stream.Stream;
 
 public class FeedReelsMediaRequest extends IGPostRequest<IGResponse> {
     private String[] _ids;

@@ -2,18 +2,20 @@ package com.kiselev.enemy.network.vk.service;
 
 import com.google.common.collect.Lists;
 import com.kiselev.enemy.network.vk.api.internal.VKInternalAPI;
-import com.kiselev.enemy.network.vk.api.model.Group;
-import com.kiselev.enemy.network.vk.api.model.Photo;
-import com.kiselev.enemy.network.vk.api.model.Post;
-import com.kiselev.enemy.network.vk.api.model.Profile;
+import com.kiselev.enemy.network.vk.api.model.*;
 import com.kiselev.enemy.network.vk.api.request.SearchRequest;
 import com.kiselev.enemy.network.vk.model.VKProfile;
+import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
+import com.kiselev.enemy.utils.analytics.model.Prediction;
 import com.vk.api.sdk.objects.likes.Type;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,87 +28,48 @@ public class VKService {
         return api;
     }
 
+    public VKProfile me() {
+        Profile me = api.me();
+
+        return new VKInternalProfile(me);
+    }
+
     public VKProfile profile(String profileId) {
         Profile profile = api.profile(profileId);
 
-        return new VKProfile(profile) {
-            @Override
-            public List<Photo> photos() {
-                if (super.photos() == null) {
-                    super.photos(VKService.this.photos(id()));
-                }
-                return super.photos();
+        return new VKInternalProfile(profile);
+    }
+
+    public Integer age(VKProfile profile) {
+        Integer age = searchAge(profile, 1, 100);
+
+        if (age == null) {
+            List<VKProfile> friends = profile.friends();
+            Prediction<Integer> prediction = AnalyticsUtils.predict(VKProfile::age, friends);
+            if (prediction != null) {
+                age = prediction.value();
             }
+        }
 
-            @Override
-            public List<VKProfile> friends() {
-                if (super.friends() == null) {
-                    super.friends(VKService.this.friends(id()));
-                }
-                return super.friends();
-            }
+        return age;
+    }
 
-            @Override
-            public List<VKProfile> followers() {
-                if (super.followers() == null) {
-                    super.followers(VKService.this.followers(id()));
-                }
-                return super.followers();
-            }
+    public String country(VKProfile profile) {
+        List<VKProfile> friends = profile.friends();
+        Prediction<String> prediction = AnalyticsUtils.predict(VKProfile::country, friends);
+        if (prediction != null) {
+            return prediction.value();
+        }
+        return null;
+    }
 
-            @Override
-            public List<VKProfile> following() {
-                if (super.following() == null) {
-                    super.following(VKService.this.following(id()));
-                }
-                return super.following();
-            }
-
-            @Override
-            public List<Group> communities() {
-                if (super.communities() == null) {
-                    super.communities(VKService.this.communities(id()));
-                }
-                return super.communities();
-            }
-
-            @Override
-            public List<Post> posts() {
-                if (super.posts() == null) {
-                    super.posts(VKService.this.posts(id()));
-                }
-                return super.posts();
-            }
-
-//            @Override
-//            public List<VKProfile> relatives() {
-//                if (relatives == null && isActive()) {
-//                    List<Relative> relatives = profile.relatives();
-//
-//                    if (relatives != null) {
-//                        List<String> relativesIds = relatives.stream()
-//                                .map(Relative::getId)
-//                                .map(String::valueOf)
-//                                .collect(Collectors.toList());
-//
-//                        this.relatives = wrap(api, api.profiles(relativesIds), force);
-//                    }
-//                }
-//                if (relatives == null) {
-//                    this.relatives = Lists.newArrayList();
-//                }
-//                return relatives;
-//            }
-
-
-            @Override
-            public List<VKProfile> likes() {
-                if (super.likes() == null) {
-                    super.likes(VKService.this.likes(id()));
-                }
-                return super.likes();
-            }
-        };
+    public String city(VKProfile profile) {
+        List<VKProfile> friends = profile.friends();
+        Prediction<String> prediction = AnalyticsUtils.predict(VKProfile::city, friends);
+        if (prediction != null) {
+            return prediction.value();
+        }
+        return null;
     }
 
     public List<Photo> photos(String id) {
@@ -187,9 +150,166 @@ public class VKService {
         return likes;
     }
 
+    public Map<VKProfile, Set<Message>> history() {
+        Map<Profile, Set<Message>> history = api.history();
+        return history.entrySet().stream()
+                .collect(Collectors.toMap(
+                        entry -> new VKInternalProfile(entry.getKey()),
+                        Map.Entry::getValue,
+                        (first, second) -> second
+                ));
+    }
+
+    public Set<Message> messages(String profileId) {
+        return api.messages(profileId);
+    }
+
     public List<VKProfile> search(SearchRequest.Query query) {
         return api.search(query).stream()
                 .map(VKProfile::new)
                 .collect(Collectors.toList());
+    }
+
+    public Integer searchAge(VKProfile profile, int from, int to) {
+        if (from != to) {
+            int middle = from + (to - from) / 2;
+
+            boolean left = isProfileFound(profile, from, middle);
+            if (left) {
+                return searchAge(profile, from, middle);
+            }
+
+            boolean right = isProfileFound(profile, middle + 1, to);
+            if (right) {
+                return searchAge(profile, middle + 1, to);
+            }
+
+            return null;
+        }
+        return from;
+    }
+
+    @SneakyThrows
+    private boolean isProfileFound(VKProfile profile, int a, int b) {
+        List<VKProfile> profiles = search(request -> request
+                .q(profile.fullName())
+                .city(profile.cityCode())
+                .country(profile.countryCode())
+                .hometown(profile.homeTown())
+                .ageFrom(a)
+                .ageTo(b));
+
+        List<String> ids = profiles.stream()
+                .map(VKProfile::id)
+                .collect(Collectors.toList());
+
+        return ids.contains(profile.id());
+    }
+
+    private class VKInternalProfile extends VKProfile {
+
+        public VKInternalProfile(Profile profile) {
+            super(profile);
+        }
+
+        @Override
+        public Integer age() {
+            if (super.age() == null) {
+                super.age(VKService.this.age(this));
+            }
+            return super.age();
+        }
+
+        @Override
+        public String country() {
+            if (super.country() == null) {
+                super.country(VKService.this.country(this));
+            }
+            return super.country();
+        }
+
+        @Override
+        public String city() {
+            if (super.city() == null) {
+                super.city(VKService.this.city(this));
+            }
+            return super.city();
+        }
+
+        @Override
+        public List<Photo> photos() {
+            if (super.photos() == null) {
+                super.photos(VKService.this.photos(id()));
+            }
+            return super.photos();
+        }
+
+        @Override
+        public List<VKProfile> friends() {
+            if (super.friends() == null) {
+                super.friends(VKService.this.friends(id()));
+            }
+            return super.friends();
+        }
+
+        @Override
+        public List<VKProfile> followers() {
+            if (super.followers() == null) {
+                super.followers(VKService.this.followers(id()));
+            }
+            return super.followers();
+        }
+
+        @Override
+        public List<VKProfile> following() {
+            if (super.following() == null) {
+                super.following(VKService.this.following(id()));
+            }
+            return super.following();
+        }
+
+        @Override
+        public List<Group> communities() {
+            if (super.communities() == null) {
+                super.communities(VKService.this.communities(id()));
+            }
+            return super.communities();
+        }
+
+        @Override
+        public List<Post> posts() {
+            if (super.posts() == null) {
+                super.posts(VKService.this.posts(id()));
+            }
+            return super.posts();
+        }
+
+//            @Override
+//            public List<VKProfile> relatives() {
+//                if (relatives == null && isActive()) {
+//                    List<Relative> relatives = profile.relatives();
+//
+//                    if (relatives != null) {
+//                        List<String> relativesIds = relatives.stream()
+//                                .map(Relative::getId)
+//                                .map(String::valueOf)
+//                                .collect(Collectors.toList());
+//
+//                        this.relatives = wrap(api, api.profiles(relativesIds), force);
+//                    }
+//                }
+//                if (relatives == null) {
+//                    this.relatives = Lists.newArrayList();
+//                }
+//                return relatives;
+//            }
+
+        @Override
+        public List<VKProfile> likes() {
+            if (super.likes() == null) {
+                super.likes(VKService.this.likes(id()));
+            }
+            return super.likes();
+        }
     }
 }

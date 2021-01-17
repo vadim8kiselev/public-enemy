@@ -1,12 +1,12 @@
 package com.kiselev.enemy.network.vk.service.tracker.flow.processor;
 
 import com.google.common.collect.Lists;
-import com.kiselev.enemy.utils.flow.message.EnemyMessage;
-import com.kiselev.enemy.utils.flow.utils.FlowUtils;
+import com.kiselev.enemy.network.vk.model.VKProfile;
+import com.kiselev.enemy.network.vk.service.tracker.flow.VKFlowProcessor;
 import com.kiselev.enemy.utils.flow.annotation.EnemyValue;
 import com.kiselev.enemy.utils.flow.annotation.EnemyValues;
-import com.kiselev.enemy.network.vk.service.tracker.flow.VKFlowProcessor;
-import com.kiselev.enemy.network.vk.model.VKProfile;
+import com.kiselev.enemy.utils.flow.message.EnemyMessage;
+import com.kiselev.enemy.utils.flow.utils.FlowUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;

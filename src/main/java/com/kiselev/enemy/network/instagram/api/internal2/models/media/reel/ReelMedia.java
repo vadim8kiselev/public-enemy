@@ -1,15 +1,12 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.media.reel;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.Media;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.Viewer;
-
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelImageMedia;
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelVideoMedia;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @JsonTypeInfo(defaultImpl = ReelMedia.class, use = JsonTypeInfo.Id.NAME,

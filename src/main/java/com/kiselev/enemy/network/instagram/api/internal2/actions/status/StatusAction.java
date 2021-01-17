@@ -3,11 +3,10 @@ package com.kiselev.enemy.network.instagram.api.internal2.actions.status;
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.status.StatusSetStatusRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
-
-import java.util.concurrent.CompletableFuture;
-
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 public class StatusAction {

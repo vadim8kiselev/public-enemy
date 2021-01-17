@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface SocialNetwork<Profile extends Info> {
 
+    Profile me();
+
     Profile profile(String identifier);
 
     List<EnemyMessage<Profile>> track(String identifier);

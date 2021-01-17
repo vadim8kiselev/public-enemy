@@ -2,23 +2,30 @@ package com.kiselev.enemy.network.instagram.api.internal2.models.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGBaseModel;
+import com.kiselev.enemy.utils.flow.model.Id;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
 @Data
+@Accessors(fluent = true)
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
-public class Profile extends IGBaseModel {
+public class Profile extends IGBaseModel implements Id {
 
+    @JsonProperty("pk")
     @EqualsAndHashCode.Include
-    private Long pk;
+    private String id;
 
+    @JsonProperty("username")
     private String username;
 
     @JsonProperty("full_name")
-    private String name;
+    private String fullName;
 
     @JsonProperty("is_private")
     private boolean isPrivate;
+
+    private boolean isDeleted;
 
     @JsonProperty("is_verified")
     private boolean isVerified;
@@ -35,4 +42,9 @@ public class Profile extends IGBaseModel {
 //          "account_badges": [],
 //          "latest_reel_media": 1608831754,
 //          "story_reel_media_ids": []
+
+    @Override
+    public String name() {
+        return username;
+    }
 }

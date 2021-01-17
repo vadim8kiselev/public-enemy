@@ -1,9 +1,8 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.direct;
 
-import java.util.List;
-
-import com.kiselev.enemy.network.instagram.api.internal2.models.direct.IGThread;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class Inbox {

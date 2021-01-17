@@ -2,7 +2,6 @@ package com.kiselev.enemy.network.instagram.api.internal2.requests.live;
 
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGGetRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.live.LiveBroadcastGetViewerListResponse;
-
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 

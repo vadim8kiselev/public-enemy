@@ -1,16 +1,17 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.direct;
 
-import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGBaseModel;
-import com.kiselev.enemy.network.instagram.api.internal2.models.direct.DirectStory;
 import com.kiselev.enemy.network.instagram.api.internal2.models.direct.item.ThreadItem;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
-
+import com.kiselev.enemy.utils.flow.model.Id;
 import lombok.Data;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Data
-public class IGThread extends IGBaseModel {
+public class IGThread extends IGBaseModel implements Id {
     private String thread_id;
     private String thread_v2_id;
     private List<Profile> users;
@@ -44,4 +45,20 @@ public class IGThread extends IGBaseModel {
     @JsonProperty("is_spam")
     private boolean is_spam;
     private ThreadItem last_permanent_item;
+
+    @Override
+    public String id() {
+        return thread_id;
+    }
+
+    @Override
+    public String name() {
+        if (users != null) {
+            return users.stream()
+                    .map(Profile::username)
+                    .filter(username -> !"vadim8kiselev".equals(username))
+                    .collect(Collectors.joining(", "));
+        }
+        return "unknown";
+    }
 }

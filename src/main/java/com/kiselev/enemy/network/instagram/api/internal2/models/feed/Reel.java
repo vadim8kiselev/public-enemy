@@ -1,12 +1,12 @@
 package com.kiselev.enemy.network.instagram.api.internal2.models.feed;
 
-import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGBaseModel;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
-
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class Reel extends IGBaseModel {

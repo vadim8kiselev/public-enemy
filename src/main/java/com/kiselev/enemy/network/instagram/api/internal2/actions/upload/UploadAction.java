@@ -1,20 +1,17 @@
 package com.kiselev.enemy.network.instagram.api.internal2.actions.upload;
 
-import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.UploadParameters;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.upload.MediaUploadFinishRequest;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.upload.RuploadPhotoRequest;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.upload.RuploadSegmentVideoGetRequest;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.upload.RuploadSegmentVideoPhaseRequest;
+import com.kiselev.enemy.network.instagram.api.internal2.requests.upload.*;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.upload.RuploadSegmentVideoPhaseRequest.Phase;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.upload.RuploadVideoRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.RuploadPhotoResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 @Slf4j
