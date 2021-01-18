@@ -1,13 +1,12 @@
 package com.kiselev.enemy.network.telegram.api.bot.command.info;
 
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
-import com.kiselev.enemy.network.telegram.model.TelegramMessage;
 import com.kiselev.enemy.network.telegram.api.bot.command.TelegramCommand;
-import com.kiselev.enemy.network.telegram.utils.TelegramUtils;
+import com.kiselev.enemy.network.telegram.model.TelegramMessage;
 import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.service.PublicEnemyService;
 import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
-import com.kiselev.enemy.utils.flow.message.Analysis;
+import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
@@ -44,15 +43,15 @@ public class InfoCommand implements TelegramCommand {
 
         String vkId = ProfilingUtils.identifier(SocialNetwork.VK, request);
         if (vkId != null) {
-            VKProfile vkResponse = publicEnemy.vk().profile(vkId);
-            publicEnemy.tg().send(requestId, TelegramMessage.message(vkResponse.toString()));
+            List<EnemyMessage<VKProfile>> info = publicEnemy.vk().info(vkId);
+            publicEnemy.tg().send(requestId, TelegramMessage.messages(info));
             return;
         }
 
         String igId = ProfilingUtils.identifier(SocialNetwork.IG, request);
         if (igId != null) {
-            InstagramProfile igResponse = publicEnemy.ig().profile(igId);
-            publicEnemy.tg().send(requestId, TelegramMessage.message(igResponse.toString()));
+            List<EnemyMessage<InstagramProfile>> info = publicEnemy.ig().info(igId);
+            publicEnemy.tg().send(requestId, TelegramMessage.messages(info));
             return;
         }
 
