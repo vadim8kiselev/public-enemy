@@ -8,9 +8,13 @@ import com.kiselev.enemy.service.PublicEnemyService;
 import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
 import com.kiselev.enemy.utils.flow.message.Analysis;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
+import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +29,16 @@ public class AnalyzeCommand implements TelegramCommand {
 
     @Override
     public void execute(Update update, String... args) {
-        Integer requestId = update.message().from().id();
-        String request = update.message().text();
+        Integer requestId = Optional.ofNullable(update)
+                .map(Update::message)
+                .map(Message::from)
+                .map(User::id)
+                .orElse(null);
+
+        String request = Optional.ofNullable(update)
+                .map(Update::message)
+                .map(Message::text)
+                .orElse(null);
 
         String vkId = ProfilingUtils.identifier(SocialNetwork.VK, request);
         if (vkId != null) {
