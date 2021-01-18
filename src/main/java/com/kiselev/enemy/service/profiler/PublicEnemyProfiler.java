@@ -6,6 +6,7 @@ import com.kiselev.enemy.network.vk.api.model.Profile;
 import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.service.PublicEnemyService;
 import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
+import com.kiselev.enemy.utils.flow.model.Id;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class PublicEnemyProfiler {
 
     private final PublicEnemyService publicEnemyService;
 
-    public Object profile(String url) {
+    public Id profile(String url) {
         String vkId = ProfilingUtils.identifier(SocialNetwork.VK, url);
         if (vkId != null) {
             return vkProfile(vkId);
