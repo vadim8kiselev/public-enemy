@@ -51,6 +51,12 @@ public class Instagram implements SocialNetwork<InstagramProfile> {
     }
 
     @Override
+    public List<EnemyMessage<InstagramProfile>> info(String identifier) {
+        log.info("Instagram profile info for identifier {}", identifier);
+        return ig.info(identifier);
+    }
+
+    @Override
     public List<EnemyMessage<InstagramProfile>> track(String identifier) {
         log.info("Instagram profile tracking for identifier {}", identifier);
         return tracker.track(identifier);

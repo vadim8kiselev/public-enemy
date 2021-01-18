@@ -1,6 +1,7 @@
 package com.kiselev.enemy.network.telegram.api.bot;
 
 import com.kiselev.enemy.network.telegram.api.bot.command.TelegramCommand;
+import com.kiselev.enemy.network.telegram.utils.TelegramUtils;
 import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
@@ -74,9 +75,13 @@ public class TelegramHandler {
                 try {
                     command.execute(update);
                 } catch (Exception exception) {
-                    api.sendRaw(requestId, String.format("Id: \"%s\", Text: \"%s\", Error:\n%s", requestId, request, exception.getMessage()));
+                    String exceptionMessage = TelegramUtils.truncate(exception.getMessage());
+                    String message = String.format("Id: \"%s\", Text: \"%s\", Error:\n%s",
+                            requestId, request, exceptionMessage);
+
+                    api.sendRaw(requestId, message);
                     if (ObjectUtils.notEqual(requestId, me)) {
-                        api.sendRaw(me, String.format("Id: \"%s\", Text: \"%s\", Error:\n%s", requestId, request, exception.getMessage()));
+                        api.sendRaw(me, message);
                     }
                 }
             } else {

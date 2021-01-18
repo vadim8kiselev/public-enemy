@@ -21,4 +21,8 @@ public class TelegramUtils {
     public static void timeout() {
         Thread.sleep(1000 + (long) (new Random().nextDouble() * (double) (2000 - 1000)));
     }
+
+    public static String truncate(String message) {
+        return message != null ? message.substring(0, Math.min(100, message.length())) : message;
+    }
 }

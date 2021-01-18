@@ -7,16 +7,19 @@ import com.kiselev.enemy.network.vk.api.request.SearchRequest;
 import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
 import com.kiselev.enemy.utils.analytics.model.Prediction;
+import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.vk.api.sdk.objects.likes.Type;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -204,6 +207,22 @@ public class VKService {
                 .collect(Collectors.toList());
 
         return ids.contains(profile.id());
+    }
+
+    @SneakyThrows
+    public List<EnemyMessage<VKProfile>> info(String identifier) {
+        VKProfile profile = profile(identifier);
+
+        return Stream.of(VKProfile.class.getDeclaredFields())
+                .peek(field -> field.setAccessible(true))
+                .filter(field -> field.getType().equals(String.class))
+                .map(field -> {
+                    String name = field.getName();
+                    String value = (String) field.get(profile);
+                    return String.format("%s \\- %s", name, value);
+                })
+                .map(message -> EnemyMessage.of(profile, message))
+                .collect(Collectors.toList());
     }
 
     private class VKInternalProfile extends VKProfile {
