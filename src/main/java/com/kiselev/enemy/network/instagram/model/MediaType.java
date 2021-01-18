@@ -1,4 +1,4 @@
-package com.kiselev.enemy.network.instagram.api.internal.payload;
+package com.kiselev.enemy.network.instagram.model;
 
 public enum MediaType {
 

@@ -1,7 +1,5 @@
 package com.kiselev.enemy.network.instagram.model;
 
-import com.kiselev.enemy.network.instagram.api.internal.payload.InstagramProfilePic;
-import com.kiselev.enemy.network.instagram.api.internal.payload.InstagramUser;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
 import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
@@ -16,7 +14,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -78,38 +75,6 @@ public class InstagramProfile implements Info {
 
     private LocalDateTime timestamp;
 
-    public InstagramProfile(InstagramUser profile) {
-        this.timestamp = LocalDateTime.now();
-
-        this.id = String.valueOf(profile.getPk());
-        this.username = profile.getUsername();
-        this.fullName = profile.getFull_name();
-        this.category = profile.getCategory();
-        this.biography = profile.getBiography();
-
-        this.external_url = profile.getExternal_url();
-        this.vk = ProfilingUtils.identifier(SocialNetwork.VK, profile.getExternal_url());
-        this.telegram = ProfilingUtils.identifier(SocialNetwork.TG, profile.getExternal_url());
-
-        this.has_anonymous_profile_picture = profile.isHas_anonymous_profile_picture();
-
-        this.is_private = profile.is_private();
-
-        this.is_verified = profile.is_verified();
-        this.is_business = profile.is_business();
-        this.is_favorite = profile.is_favorite();
-
-        InstagramProfilePic info = profile.getHd_profile_pic_url_info();
-        if (info != null) {
-            this.photo = info.getUrl();
-        }
-
-        this.public_phone_number = profile.getPublic_phone_number();
-        this.public_email = profile.getPublic_email();
-
-        this.location = location(profile);
-    }
-
     public InstagramProfile(User profile) {
         this.timestamp = LocalDateTime.now();
 
@@ -141,15 +106,6 @@ public class InstagramProfile implements Info {
         this.public_email = profile.getEmail();
 
 //        this.location = location(profile);
-    }
-
-    private String location(InstagramUser profile) {
-        return String.join(" ", Arrays.asList(
-                profile.getPublic_phone_country_code(),
-                profile.getCity_name(),
-                profile.getAddress_street(),
-                profile.getZip()
-        ));
     }
 
     @Override

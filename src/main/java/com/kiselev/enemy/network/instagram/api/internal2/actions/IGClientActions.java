@@ -2,9 +2,6 @@ package com.kiselev.enemy.network.instagram.api.internal2.actions;
 
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.actions.account.AccountAction;
-import com.kiselev.enemy.network.instagram.api.internal2.actions.igtv.IgtvAction;
-import com.kiselev.enemy.network.instagram.api.internal2.actions.search.SearchAction;
-import com.kiselev.enemy.network.instagram.api.internal2.actions.simulate.SimulateAction;
 import com.kiselev.enemy.network.instagram.api.internal2.actions.status.StatusAction;
 import com.kiselev.enemy.network.instagram.api.internal2.actions.story.StoryAction;
 import com.kiselev.enemy.network.instagram.api.internal2.actions.timeline.TimelineAction;
@@ -23,10 +20,7 @@ public class IGClientActions {
     private TimelineAction _timeline;
     private StoryAction _story;
     private UsersAction _users;
-    private SimulateAction _simulate;
-    private IgtvAction _igtv;
     private AccountAction _account;
-    private SearchAction _search;
     private StatusAction _status;
 
     @SneakyThrows
