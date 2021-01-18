@@ -56,14 +56,17 @@ public class InstagramAnalyst {
         unmutuals.addAll(following);
         unmutuals.removeAll(followers);
 
-        return EnemyMessage.of(
-                profile,
-                String.format(
-                        "Has %s not following back people:\n%s",
-                        unmutuals.size(),
-                        unmutuals.stream()
-                                .map(InstagramProfile::name)
-                                .collect(Collectors.joining("\n"))));
+        if (CollectionUtils.isNotEmpty(unmutuals)) {
+            return EnemyMessage.of(
+                    profile,
+                    String.format(
+                            "Has %s not following back people:\n%s",
+                            unmutuals.size(),
+                            unmutuals.stream()
+                                    .map(InstagramProfile::name)
+                                    .collect(Collectors.joining("\n"))));
+        }
+        return null;
     }
 
     private EnemyMessage<InstagramProfile> likes(InstagramProfile profile) {
