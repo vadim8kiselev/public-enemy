@@ -1,38 +1,13 @@
 package com.kiselev.enemy;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.kiselev.enemy.network.instagram.Instagram;
-import com.kiselev.enemy.network.instagram.model.InstagramPost;
-import com.kiselev.enemy.network.instagram.model.InstagramProfile;
-import com.kiselev.enemy.network.telegram.Telegram;
-import com.kiselev.enemy.network.telegram.model.TelegramMessage;
-import com.kiselev.enemy.network.vk.VK;
 import com.kiselev.enemy.service.PublicEnemyService;
-import com.kiselev.enemy.service.profiler.PublicEnemyProfiler;
-import com.kiselev.enemy.service.profiler.model.Conversation;
-import com.kiselev.enemy.service.profiler.model.Person;
-import com.kiselev.enemy.service.profiler.model.Text;
-import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
-import com.kiselev.enemy.utils.image.Color;
-import com.kiselev.enemy.utils.image.Media;
-import com.kiselev.enemy.utils.merger.Merger;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
-
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @EnableScheduling
 @SpringBootApplication

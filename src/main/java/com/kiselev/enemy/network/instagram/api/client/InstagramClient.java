@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -40,13 +41,18 @@ public class InstagramClient {
         if (clients == null) {
             clients = credentials.stream()
                     .map(credential -> {
-                        String[] usernameAndPassword = credential.split(":");
+                        try {
+                            String[] usernameAndPassword = credential.split(":");
 
-                        String username = usernameAndPassword[0];
-                        String password = usernameAndPassword[1];
+                            String username = usernameAndPassword[0];
+                            String password = usernameAndPassword[1];
 
-                        return IGClient.authenticate(username, password);
+                            return IGClient.authenticate(username, password);
+                        } catch (Exception exception) {
+                            return null;
+                        }
                     })
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         }
     }
