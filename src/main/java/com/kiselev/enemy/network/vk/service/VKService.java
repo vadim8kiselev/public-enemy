@@ -40,6 +40,10 @@ public class VKService {
     }
 
     public VKProfile profile(String profileId) {
+        if (profileId == null) {
+            return null;
+        }
+
         Profile profile = api.profile(profileId);
 
         return new VKInternalProfile(profile);

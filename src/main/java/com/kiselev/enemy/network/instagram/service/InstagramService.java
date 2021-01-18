@@ -40,6 +40,10 @@ public class InstagramService extends ProgressableAPI {
     }
 
     public InstagramProfile profile(String username) {
+        if (username == null) {
+            return null;
+        }
+
         User instagramUser = api.profile(username);
         return new InstagramInternalProfile(instagramUser);
     }

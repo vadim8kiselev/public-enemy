@@ -4,6 +4,7 @@ import com.kiselev.enemy.network.telegram.api.bot.command.TelegramCommand;
 import com.kiselev.enemy.network.telegram.model.TelegramMessage;
 import com.kiselev.enemy.service.PublicEnemyService;
 import com.kiselev.enemy.service.profiler.PublicEnemyProfiler;
+import com.kiselev.enemy.service.profiler.model.Person;
 import com.kiselev.enemy.utils.flow.model.Id;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
@@ -39,8 +40,14 @@ public class ProfileCommand implements TelegramCommand {
                 .map(Message::text)
                 .orElse(null);
 
-        Id profile = publicEnemyProfiler.profile(request);
+        Person person = publicEnemyProfiler.profile(request);
 
-        publicEnemy.tg().send(requestId, TelegramMessage.message(String.format("Profiled: %s - %s", profile.id(), profile.name())));
+        publicEnemy.tg().send(requestId, TelegramMessage.message(
+                String.format("Name: %s, Instagram: %s, Telegram: %s, VK: %s",
+                        person.getFullName(),
+                        person.getInstagram(),
+                        person.getTelegram(),
+                        person.getVk())
+        ));
     }
 }

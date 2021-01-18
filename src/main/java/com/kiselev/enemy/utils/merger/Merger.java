@@ -39,12 +39,9 @@ public class Merger {
 
         return history.values().stream()
                 .map(Lists::newArrayList)
-                .filter(list -> list.size() > 1)
-                .map(group -> {
-                    return group.stream()
-                            .reduce(Merger::merge)
-                            .orElse(null);
-                })
+                .map(group -> group.stream()
+                        .reduce(Merger::merge)
+                        .orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
@@ -112,6 +109,13 @@ public class Merger {
                         .sorted(Comparator.comparing(Text::getDate))
                         .collect(Collectors.toList()))
                 .build();
+    }
+
+    public static Person merge(Person... persons) {
+        return Arrays.stream(persons)
+                .filter(Objects::nonNull)
+                .reduce(Merger::merge)
+                .orElse(null);
     }
 
     public static Person merge(Person a, Person b) {

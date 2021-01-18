@@ -15,7 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class PublicEnemyApplication implements CommandLineRunner {
 
     @Autowired
-    private PublicEnemyService service;
+    private PublicEnemyService publicEnemy;
 
     public static void main(String[] args) {
         SpringApplication.run(PublicEnemyApplication.class, args);
@@ -24,7 +24,6 @@ public class PublicEnemyApplication implements CommandLineRunner {
     @Override
     @SneakyThrows
     public void run(String... args) {
-
     }
 
 //    @SneakyThrows

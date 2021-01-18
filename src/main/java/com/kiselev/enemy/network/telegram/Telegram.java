@@ -27,6 +27,10 @@ public class Telegram {
         return telegram.me();
     }
 
+    public TelegramProfile profile(String id) {
+        return telegram.profile(id);
+    }
+
     public <Profile extends Info> void send(TelegramMessage<Profile> message) {
         telegram.send(me, message);
     }

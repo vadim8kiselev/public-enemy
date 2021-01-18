@@ -31,6 +31,16 @@ public class TelegramService {
         return new TelegramProfile(me);
     }
 
+    public TelegramProfile profile(String id) {
+        if (id == null) {
+            return null;
+        }
+
+        TLUserFull profile = api.client().profile(id);
+
+        return new TelegramProfile(profile);
+    }
+
     public Map<TelegramProfile, Set<TLMessage>> history() {
         Map<TLUser, Set<TLMessage>> history = api.client().history();
 
