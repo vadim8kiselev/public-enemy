@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.kiselev.enemy.network.instagram.api.internal2.models.igtv.Channel;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGPaginatedResponse;
-
 import lombok.Data;
 
 @Data

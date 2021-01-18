@@ -1,10 +1,8 @@
 package com.kiselev.enemy.network.instagram.api.internal2;
 
-import java.io.Serializable;
-
-import com.kiselev.enemy.network.instagram.api.internal2.IGConstants;
-import com.kiselev.enemy.network.instagram.api.internal2.IGDevice;
 import lombok.Data;
+
+import java.io.Serializable;
 
 @Data
 public class IGAndroidDevice extends IGDevice implements Serializable {

@@ -1,7 +1,7 @@
 package com.kiselev.enemy.network.telegram.api.bot.command.system;
 
-import com.kiselev.enemy.network.telegram.model.TelegramMessage;
 import com.kiselev.enemy.network.telegram.api.bot.command.TelegramCommand;
+import com.kiselev.enemy.network.telegram.model.TelegramMessage;
 import com.kiselev.enemy.service.PublicEnemyService;
 import com.pengrad.telegrambot.model.Update;
 import lombok.RequiredArgsConstructor;

@@ -1,11 +1,12 @@
 package com.kiselev.enemy.network.instagram.api.internal2.responses.live;
 
-import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.Comment;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.Comment.Caption;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class LiveBroadcastGetCommentResponse extends IGResponse {

@@ -1,13 +1,12 @@
 package com.kiselev.enemy.network.instagram.api.internal2.exceptions;
 
-import java.io.IOException;
-
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
-
 import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
+
+import java.io.IOException;
 
 @Getter
 public class IGResponseException extends IOException {

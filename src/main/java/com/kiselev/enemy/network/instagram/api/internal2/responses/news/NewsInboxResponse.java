@@ -1,11 +1,10 @@
 package com.kiselev.enemy.network.instagram.api.internal2.responses.news;
 
-import java.util.List;
-
 import com.kiselev.enemy.network.instagram.api.internal2.models.news.NewsStory;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
-
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class NewsInboxResponse extends IGResponse {

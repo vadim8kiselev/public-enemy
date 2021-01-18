@@ -1,9 +1,10 @@
 package com.kiselev.enemy.network.instagram.api.internal2.responses.direct;
 
-import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
 import lombok.Data;
+
+import java.util.Map;
 
 @Data
 public class DirectGetPresenceResponse extends IGResponse {

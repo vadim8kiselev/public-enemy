@@ -1,9 +1,7 @@
 package com.kiselev.enemy.network.instagram.api.internal2.exceptions;
 
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
-import com.kiselev.enemy.network.instagram.api.internal2.exceptions.IGResponseException;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.accounts.LoginResponse;
-
 import lombok.Getter;
 
 @Getter

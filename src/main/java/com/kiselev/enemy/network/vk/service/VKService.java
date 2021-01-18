@@ -7,13 +7,15 @@ import com.kiselev.enemy.network.vk.api.request.SearchRequest;
 import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
 import com.kiselev.enemy.utils.analytics.model.Prediction;
+import com.kiselev.enemy.utils.flow.annotation.EnemyValue;
 import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.vk.api.sdk.objects.likes.Type;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -210,19 +212,27 @@ public class VKService {
     }
 
     @SneakyThrows
-    public List<EnemyMessage<VKProfile>> info(String identifier) {
+    public EnemyMessage<VKProfile>  info(String identifier) {
         VKProfile profile = profile(identifier);
 
-        return Stream.of(VKProfile.class.getDeclaredFields())
+        String message = Stream.of(VKProfile.class.getDeclaredFields())
                 .peek(field -> field.setAccessible(true))
-                .filter(field -> field.getType().equals(String.class))
+                .filter(field -> field.getAnnotation(EnemyValue.class) != null)
                 .map(field -> {
                     String name = field.getName();
-                    String value = (String) field.get(profile);
-                    return String.format("%s \\- %s", name, value);
+                    Object object = ReflectionUtils.getField(field, profile);
+                    if (object != null) {
+                        String value = object.toString();
+                        if (StringUtils.isNotEmpty(value)) {
+                            return String.format("%s - %s", name, value);
+                        }
+                    }
+                    return null;
                 })
-                .map(message -> EnemyMessage.of(profile, message))
-                .collect(Collectors.toList());
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining("\n"));
+
+        return EnemyMessage.of(profile, message);
     }
 
     private class VKInternalProfile extends VKProfile {

@@ -41,8 +41,10 @@ public class VKProfile implements Info {
     @EnemyValue(message = LAST_NAME_MESSAGE)
     private String lastName;
 
+    @EnemyValue
     private String fullName;
 
+    @EnemyValue
     private String status;
 
     @EnemyValue(message = SEX_MESSAGE)
@@ -69,17 +71,20 @@ public class VKProfile implements Info {
     @EnemyValue(message = HOME_TOWN_MESSAGE)
     private String homeTown;
 
+    @EnemyValue
     private String phone;
 
+    @EnemyValue
     private String site;
 
+    @EnemyValue
     private String instagram;
 
+    @EnemyValue
     private String telegram;
 
     private boolean isFriend;
 
-    @EnemyValue(message = PRIVATE_MESSAGE)
     private String isPrivate;
 
     @EnemyValue(message = DEACTIVATED_MESSAGE)

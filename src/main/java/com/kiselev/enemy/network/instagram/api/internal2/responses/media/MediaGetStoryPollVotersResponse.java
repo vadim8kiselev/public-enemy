@@ -2,7 +2,6 @@ package com.kiselev.enemy.network.instagram.api.internal2.responses.media;
 
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.VoterInfo;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGPaginatedResponse;
-
 import lombok.Data;
 
 @Data

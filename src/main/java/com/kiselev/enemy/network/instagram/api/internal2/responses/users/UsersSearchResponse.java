@@ -3,10 +3,9 @@ package com.kiselev.enemy.network.instagram.api.internal2.responses.users;
 import com.kiselev.enemy.network.instagram.api.internal2.models.friendships.Friendship;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
+import lombok.Data;
 
 import java.util.List;
-
-import lombok.Data;
 
 @Data
 public class UsersSearchResponse extends IGResponse {

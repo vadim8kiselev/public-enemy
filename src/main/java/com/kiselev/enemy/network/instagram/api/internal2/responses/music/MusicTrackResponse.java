@@ -1,13 +1,12 @@
 package com.kiselev.enemy.network.instagram.api.internal2.responses.music;
 
-import java.util.List;
-
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.kiselev.enemy.network.instagram.api.internal2.models.music.MusicTrack;
 import com.kiselev.enemy.network.instagram.api.internal2.models.music.MusicPlaylist.BeanToTrackConverter;
+import com.kiselev.enemy.network.instagram.api.internal2.models.music.MusicTrack;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGPaginatedResponse;
-
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class MusicTrackResponse extends IGPaginatedResponse {

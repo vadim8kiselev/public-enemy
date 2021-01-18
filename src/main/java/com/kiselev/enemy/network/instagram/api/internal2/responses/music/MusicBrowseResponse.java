@@ -1,16 +1,15 @@
 package com.kiselev.enemy.network.instagram.api.internal2.responses.music;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.util.StdConverter;
 import com.kiselev.enemy.network.instagram.api.internal2.models.music.MusicPlaylist;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.utils.IGUtils;
-
 import lombok.Data;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 public class MusicBrowseResponse extends IGResponse {

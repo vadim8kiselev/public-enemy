@@ -1,15 +1,14 @@
 package com.kiselev.enemy.network.instagram.api.internal2.requests.friendships;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGPayload;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGPostRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.friendships.FriendshipsShowManyResponse;
-
 import lombok.Getter;
 import lombok.NonNull;
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FriendshipsShowManyRequest extends IGPostRequest<FriendshipsShowManyResponse> {
     @NonNull

@@ -1,12 +1,11 @@
 package com.kiselev.enemy.network.instagram.api.internal2.responses.media;
 
-import java.util.List;
-
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGPaginatedResponse;
-
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class MediaListReelMediaViewerResponse extends IGPaginatedResponse {

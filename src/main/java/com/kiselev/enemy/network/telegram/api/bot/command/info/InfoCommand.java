@@ -14,7 +14,7 @@ import com.pengrad.telegrambot.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Collections;
 import java.util.Optional;
 
 @Service
@@ -43,15 +43,15 @@ public class InfoCommand implements TelegramCommand {
 
         String vkId = ProfilingUtils.identifier(SocialNetwork.VK, request);
         if (vkId != null) {
-            List<EnemyMessage<VKProfile>> info = publicEnemy.vk().info(vkId);
-            publicEnemy.tg().send(requestId, TelegramMessage.messages(info));
+            EnemyMessage<VKProfile> info = publicEnemy.vk().info(vkId);
+            publicEnemy.tg().send(requestId, TelegramMessage.messages(Collections.singletonList(info)));
             return;
         }
 
         String igId = ProfilingUtils.identifier(SocialNetwork.IG, request);
         if (igId != null) {
-            List<EnemyMessage<InstagramProfile>> info = publicEnemy.ig().info(igId);
-            publicEnemy.tg().send(requestId, TelegramMessage.messages(info));
+            EnemyMessage<InstagramProfile> info = publicEnemy.ig().info(igId);
+            publicEnemy.tg().send(requestId, TelegramMessage.messages(Collections.singletonList(info)));
             return;
         }
 

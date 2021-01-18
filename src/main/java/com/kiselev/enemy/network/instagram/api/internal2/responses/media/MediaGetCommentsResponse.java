@@ -1,12 +1,11 @@
 package com.kiselev.enemy.network.instagram.api.internal2.responses.media;
 
-import java.util.List;
-
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.Comment;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.Comment.Caption;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGPaginatedResponse;
-
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class MediaGetCommentsResponse extends IGPaginatedResponse {

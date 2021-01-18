@@ -11,6 +11,7 @@ import com.pengrad.telegrambot.request.GetUpdates;
 import com.pengrad.telegrambot.response.GetUpdatesResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import java.util.logging.Logger;
 import static com.pengrad.telegrambot.UpdatesListener.CONFIRMED_UPDATES_ALL;
 import static com.pengrad.telegrambot.UpdatesListener.CONFIRMED_UPDATES_NONE;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TelegramHandler {
@@ -75,10 +77,12 @@ public class TelegramHandler {
                 try {
                     command.execute(update);
                 } catch (Exception exception) {
-                    String exceptionMessage = TelegramUtils.truncate(exception.getMessage());
+                    String exceptionMessage = exception.getMessage();
+                    String truncatedExceptionMessage = TelegramUtils.truncate(exceptionMessage);
                     String message = String.format("Id: \"%s\", Text: \"%s\", Error:\n%s",
-                            requestId, request, exceptionMessage);
+                            requestId, request, truncatedExceptionMessage);
 
+                    log.warn(exceptionMessage, exception);
                     api.sendRaw(requestId, message);
                     if (ObjectUtils.notEqual(requestId, me)) {
                         api.sendRaw(me, message);

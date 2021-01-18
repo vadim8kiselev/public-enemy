@@ -1,8 +1,9 @@
 package com.kiselev.enemy.network.instagram.api.internal2;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.Map;
-import lombok.Data;
 
 @Data
 public class IGDevice implements Serializable {

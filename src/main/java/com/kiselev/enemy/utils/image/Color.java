@@ -3,7 +3,6 @@ package com.kiselev.enemy.utils.image;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Comparator;
 import java.util.List;

@@ -1,9 +1,7 @@
 package com.kiselev.enemy.network.instagram.api.internal2.requests;
 
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
-import com.kiselev.enemy.network.instagram.api.internal2.requests.IGRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
-
 import okhttp3.Request;
 
 public abstract class IGGetRequest<T extends IGResponse> extends IGRequest<T> {

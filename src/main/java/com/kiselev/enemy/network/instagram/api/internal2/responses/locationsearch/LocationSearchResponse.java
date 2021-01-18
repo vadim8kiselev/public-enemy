@@ -1,11 +1,10 @@
 package com.kiselev.enemy.network.instagram.api.internal2.responses.locationsearch;
 
-import java.util.List;
-
 import com.kiselev.enemy.network.instagram.api.internal2.models.location.Location.Venue;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
-
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class LocationSearchResponse extends IGResponse {

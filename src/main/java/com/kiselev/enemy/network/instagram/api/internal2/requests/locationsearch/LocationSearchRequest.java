@@ -3,7 +3,6 @@ package com.kiselev.enemy.network.instagram.api.internal2.requests.locationsearc
 import com.kiselev.enemy.network.instagram.api.internal2.IGClient;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.IGGetRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.locationsearch.LocationSearchResponse;
-
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 

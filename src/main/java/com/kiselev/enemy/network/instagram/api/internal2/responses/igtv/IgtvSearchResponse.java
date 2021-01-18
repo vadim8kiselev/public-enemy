@@ -1,12 +1,11 @@
 package com.kiselev.enemy.network.instagram.api.internal2.responses.igtv;
 
-import java.util.List;
-
 import com.kiselev.enemy.network.instagram.api.internal2.models.igtv.Channel;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
-
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class IgtvSearchResponse extends IGResponse {

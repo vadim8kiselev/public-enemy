@@ -1,7 +1,6 @@
 package com.kiselev.enemy.network.instagram.api.internal2.responses.challenge;
 
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
-
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;

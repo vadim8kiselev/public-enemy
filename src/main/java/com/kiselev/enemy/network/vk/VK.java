@@ -51,7 +51,7 @@ public class VK implements SocialNetwork<VKProfile> {
     }
 
     @Override
-    public List<EnemyMessage<VKProfile>> info(String identifier) {
+    public EnemyMessage<VKProfile>  info(String identifier) {
         log.info("VK profile info for identifier {}", identifier);
         return vk.info(identifier);
     }

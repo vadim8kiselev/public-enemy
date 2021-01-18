@@ -1,6 +1,5 @@
 package com.kiselev.enemy.network.instagram.service;
 
-import com.google.common.collect.Lists;
 import com.kiselev.enemy.network.instagram.api.internal2.models.direct.item.ThreadItem;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.UserTags;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
@@ -13,14 +12,18 @@ import com.kiselev.enemy.network.instagram.model.InstagramPost;
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
 import com.kiselev.enemy.network.instagram.service.cache.InstagramCachedAPI;
 import com.kiselev.enemy.network.vk.model.VKProfile;
+import com.kiselev.enemy.utils.flow.annotation.EnemyValue;
 import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.kiselev.enemy.utils.progress.ProgressableAPI;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -106,19 +109,27 @@ public class InstagramService extends ProgressableAPI {
     }
 
     @SneakyThrows
-    public List<EnemyMessage<InstagramProfile>> info(String identifier) {
+    public EnemyMessage<InstagramProfile> info(String identifier) {
         InstagramProfile profile = profile(identifier);
 
-        return Stream.of(VKProfile.class.getDeclaredFields())
+        String message = Stream.of(VKProfile.class.getDeclaredFields())
                 .peek(field -> field.setAccessible(true))
-                .filter(field -> field.getType().equals(String.class))
+                .filter(field -> field.getAnnotation(EnemyValue.class) != null)
                 .map(field -> {
                     String name = field.getName();
-                    String value = (String) field.get(profile);
-                    return String.format("%s \\- %s", name, value);
+                    Object object = ReflectionUtils.getField(field, profile);
+                    if (object != null) {
+                        String value = object.toString();
+                        if (StringUtils.isNotEmpty(value)) {
+                            return String.format("%s - %s", name, value);
+                        }
+                    }
+                    return null;
                 })
-                .map(message -> EnemyMessage.of(profile, message))
-                .collect(Collectors.toList());
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining("\n"));
+
+        return EnemyMessage.of(profile, message);
     }
 
 //

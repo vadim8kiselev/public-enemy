@@ -23,6 +23,6 @@ public class TelegramUtils {
     }
 
     public static String truncate(String message) {
-        return message != null ? message.substring(0, Math.min(100, message.length())) : message;
+        return message != null ? message.substring(0, Math.min(500, message.length())) : message;
     }
 }

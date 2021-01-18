@@ -1,12 +1,11 @@
 package com.kiselev.enemy.network.instagram.api.internal2.responses.discover;
 
-import java.util.List;
-
 import com.kiselev.enemy.network.instagram.api.internal2.models.discover.Cluster;
 import com.kiselev.enemy.network.instagram.api.internal2.models.discover.SectionalItem;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGPaginatedResponse;
-
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class DiscoverTopicalExploreResponse extends IGPaginatedResponse {

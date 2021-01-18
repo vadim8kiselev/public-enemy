@@ -1,11 +1,8 @@
 package com.kiselev.enemy.network.instagram.service.analyst;
 
 import com.google.common.collect.Lists;
-import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
-import com.kiselev.enemy.network.instagram.model.InstagramPost;
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
 import com.kiselev.enemy.network.instagram.service.InstagramService;
-import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
 import com.kiselev.enemy.utils.analytics.model.Prediction;
 import com.kiselev.enemy.utils.flow.message.Analysis;
@@ -14,14 +11,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
