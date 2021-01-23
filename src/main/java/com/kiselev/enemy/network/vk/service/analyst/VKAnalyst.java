@@ -56,10 +56,10 @@ public class VKAnalyst {
     }
 
     public EnemyMessage<VKProfile> age(VKProfile profile) {
-        Integer age = profile.age();
+        String age = profile.age();
 
         List<VKProfile> friends = profile.friends();
-        Prediction<Integer> predictedAge = AnalyticsUtils.predict(VKProfile::age, friends);
+        Prediction<String> predictedAge = AnalyticsUtils.predict(VKProfile::age, friends);
 
         if (age != null && predictedAge != null) {
             if (!Objects.equals(age, predictedAge.value()) && predictedAge.statistics() > 20) {
@@ -71,7 +71,8 @@ public class VKAnalyst {
         }
 
         if (age == null) {
-            Integer hiddenAge = vk.searchAge(profile, 1, 100);
+            Integer intAge = vk.searchAge(profile, 1, 100);
+            String hiddenAge = intAge != null ? intAge.toString() : null;
 
             if (hiddenAge != null && predictedAge == null) {
                 return EnemyMessage.of(

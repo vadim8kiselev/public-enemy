@@ -17,7 +17,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class InstagramTracker {
 
-    private static final String DEFAULT_MESSAGE = "New profile has been added to list";
+    private static final String NEW_PROFILE = "New profile has been added to list";
+
+    private static final String NO_CHANGES = "No changes since last snapshot";
 
     private final InstagramService ig;
 
@@ -26,12 +28,17 @@ public class InstagramTracker {
     private final List<InstagramFlowProcessor> processors;
 
     public List<EnemyMessage<InstagramProfile>> track(String identifier) {
-        InstagramProfile actualProfile = ig.profile(identifier);
+        InstagramProfile actualProfile = new InstagramProfile(ig.api().profile(identifier));
         InstagramProfile latestProfile = mongo.ig().read(identifier);
 
         List<EnemyMessage<InstagramProfile>> messages = flow(actualProfile, latestProfile);
+
         if (CollectionUtils.isNotEmpty(messages)) {
             mongo.ig().save(actualProfile);
+        } else {
+            return Collections.singletonList(
+                    EnemyMessage.of(actualProfile, NO_CHANGES)
+            );
         }
 
         return messages;
@@ -40,10 +47,9 @@ public class InstagramTracker {
     public List<EnemyMessage<InstagramProfile>> flow(InstagramProfile actual, InstagramProfile latest) {
         if (latest == null) {
             return Collections.singletonList(
-                    EnemyMessage.of(actual, DEFAULT_MESSAGE)
+                    EnemyMessage.of(actual, NEW_PROFILE)
             );
         }
-
         return processors.stream()
                 .map(processor -> processor.process(actual, latest))
                 .flatMap(List::stream)

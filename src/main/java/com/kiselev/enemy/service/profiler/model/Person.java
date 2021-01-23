@@ -26,7 +26,7 @@ public class Person {
 
     private String birthday;
 
-    private Integer age;
+    private String age;
 
     private String country;
 
@@ -86,7 +86,7 @@ public class Person {
         this.firstName = profile.firstName();
         this.lastName = profile.lastName();
         this.fullName = profile.fullName();
-        this.sex = profile.sex().name();
+        this.sex = profile.sex();
         this.age = profile.age();
         this.birthday = profile.birthday();
         this.country = profile.country();

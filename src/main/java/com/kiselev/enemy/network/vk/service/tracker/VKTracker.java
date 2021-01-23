@@ -11,13 +11,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class VKTracker {
 
-    private static final String DEFAULT_MESSAGE = "New profile has been added to list";
+    private static final String NEW_PROFILE = "New profile has been added to list";
+
+    private static final String NO_CHANGES = "No changes since last snapshot";
 
     private final VKService vk;
 
@@ -26,12 +29,17 @@ public class VKTracker {
     private final List<VKFlowProcessor> processors;
 
     public List<EnemyMessage<VKProfile>> track(String identifier) {
-        VKProfile actualProfile = vk.profile(identifier);
+        VKProfile actualProfile = new VKProfile(vk.api().profile(identifier));
         VKProfile latestProfile = mongo.vk().read(identifier);
 
         List<EnemyMessage<VKProfile>> messages = flow(actualProfile, latestProfile);
+
         if (CollectionUtils.isNotEmpty(messages)) {
             mongo.vk().save(actualProfile);
+        } else {
+            return Collections.singletonList(
+                    EnemyMessage.of(actualProfile, NO_CHANGES)
+            );
         }
 
         return messages;
@@ -40,13 +48,13 @@ public class VKTracker {
     public List<EnemyMessage<VKProfile>> flow(VKProfile actual, VKProfile latest) {
         if (latest == null) {
             return Collections.singletonList(
-                    EnemyMessage.of(actual, DEFAULT_MESSAGE)
+                    EnemyMessage.of(actual, NEW_PROFILE)
             );
         }
-
         return processors.stream()
                 .map(processor -> processor.process(actual, latest))
                 .flatMap(List::stream)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 }

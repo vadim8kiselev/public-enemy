@@ -5,14 +5,11 @@ import com.kiselev.enemy.network.vk.api.internal.VKAPI;
 import com.kiselev.enemy.network.vk.api.model.*;
 import com.kiselev.enemy.network.vk.api.request.SearchRequest;
 import com.kiselev.enemy.network.vk.model.VKProfile;
-import com.kiselev.enemy.network.vk.utils.VKUtils;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
 import com.kiselev.enemy.utils.analytics.model.Prediction;
-import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.vk.api.sdk.objects.likes.Type;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -47,12 +44,13 @@ public class VKService {
         return new VKInternalProfile(profile);
     }
 
-    public Integer age(VKProfile profile) {
-        Integer age = searchAge(profile, 1, 100);
+    public String age(VKProfile profile) {
+        Integer intAge = searchAge(profile, 1, 100);
+        String age = intAge != null ? intAge.toString() : null;
 
         if (age == null) {
             List<VKProfile> friends = profile.friends();
-            Prediction<Integer> prediction = AnalyticsUtils.predict(VKProfile::age, friends);
+            Prediction<String> prediction = AnalyticsUtils.predict(VKProfile::age, friends);
             if (prediction != null) {
                 age = prediction.value();
             }
@@ -263,7 +261,7 @@ public class VKService {
         }
 
         @Override
-        public Integer age() {
+        public String age() {
             if (super.age() == null) {
                 super.age(VKService.this.age(this));
             }

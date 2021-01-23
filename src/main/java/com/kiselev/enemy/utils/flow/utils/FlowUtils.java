@@ -47,14 +47,14 @@ public class FlowUtils {
         Map<String, Type> actualMap = actualValues.stream()
                 .collect(Collectors.toMap(
                         Type::id,
-                        post -> post,
+                        value -> value,
                         (first, second) -> second
                 ));
 
         Map<String, Type> latestMap = latestValues.stream()
                 .collect(Collectors.toMap(
                         Type::id,
-                        post -> post,
+                        value -> value,
                         (first, second) -> second
                 ));
 

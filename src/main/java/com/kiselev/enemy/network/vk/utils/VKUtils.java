@@ -31,11 +31,13 @@ public class VKUtils {
         return null;
     }
 
-    public static Integer age(String rawDate) {
+    public static String age(String rawDate) {
         if (rawDate != null && rawDate.split("\\.").length == 3) {
             DateTimeFormatter pattern = DateTimeFormatter.ofPattern("d.M.yyyy");
             LocalDate birthDate = LocalDate.parse(rawDate, pattern);
-            return Period.between(birthDate, LocalDate.now()).getYears();
+            return String.valueOf(
+                    Period.between(birthDate, LocalDate.now()).getYears()
+            );
         }
         return null;
     }

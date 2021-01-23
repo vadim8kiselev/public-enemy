@@ -16,7 +16,7 @@ public class VKMongoService {
     private final MongoCacheVKRepository mongoCacheVKRepository;
 
     public VKProfile read(String id) {
-        return mongoVKRepository.findTopByIdOrderByTimestamp(id);
+        return mongoVKRepository.findTopByIdOrUsernameOrderByTimestamp(id);
     }
 
     public void save(VKProfile vkProfile) {

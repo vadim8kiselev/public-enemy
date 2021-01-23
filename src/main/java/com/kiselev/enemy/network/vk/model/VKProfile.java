@@ -11,12 +11,14 @@ import com.kiselev.enemy.utils.flow.annotation.EnemyValues;
 import com.kiselev.enemy.utils.flow.model.Info;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import com.vk.api.sdk.objects.base.BoolInt;
-import com.vk.api.sdk.objects.base.Sex;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -25,10 +27,13 @@ import java.util.List;
 import static com.kiselev.enemy.network.vk.model.constants.VKMessages.*;
 
 @Data
+@Document
+@NoArgsConstructor
 @Accessors(fluent = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class VKProfile implements Info {
 
+    @Id
     @EqualsAndHashCode.Include
     private String id;
 
@@ -48,10 +53,10 @@ public class VKProfile implements Info {
     private String status;
 
     @EnemyValue(message = SEX_MESSAGE)
-    private Sex sex;
+    private String sex;
 
     @EnemyValue(message = AGE_MESSAGE)
-    private Integer age;
+    private String age;
 
     @EnemyValue(message = BIRTHDAY_MESSAGE)
     private String birthday;
@@ -123,7 +128,7 @@ public class VKProfile implements Info {
         this.lastName = profile.lastName();
         this.fullName = profile.firstName() + " " + profile.lastName();
         this.status = profile.status();
-        this.sex = profile.sex();
+        this.sex = profile.sex().name();
         this.age = VKUtils.age(profile.birthday());
         this.birthday = profile.birthday();
         this.photo = profile.photo();
