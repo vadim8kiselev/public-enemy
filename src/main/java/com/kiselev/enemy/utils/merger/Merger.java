@@ -120,20 +120,27 @@ public class Merger {
 
     public static Person merge(Person a, Person b) {
         return Person.builder()
-                .firstName(ObjectUtils.firstNonNull(a.getFirstName(), b.getFirstName()))
-                .lastName(ObjectUtils.firstNonNull(a.getLastName(), b.getLastName()))
-                .fullName(ObjectUtils.firstNonNull(a.getFullName(), b.getFullName()))
-                .sex(ObjectUtils.firstNonNull(a.getSex(), b.getSex()))
-                .age(ObjectUtils.firstNonNull(a.getAge(), b.getAge()))
-                .birthday(ObjectUtils.firstNonNull(a.getBirthday(), b.getBirthday()))
-                .phone(ObjectUtils.firstNonNull(a.getPhone(), b.getPhone()))
-                .email(ObjectUtils.firstNonNull(a.getEmail(), b.getEmail()))
-                .country(ObjectUtils.firstNonNull(a.getCountry(), b.getCountry()))
-                .city(ObjectUtils.firstNonNull(a.getCity(), b.getCity()))
-                .address(ObjectUtils.firstNonNull(a.getAddress(), b.getAddress()))
-                .telegram(ObjectUtils.firstNonNull(a.getTelegram(), b.getTelegram()))
-                .instagram(ObjectUtils.firstNonNull(a.getInstagram(), b.getInstagram()))
-                .vk(ObjectUtils.firstNonNull(a.getVk(), b.getVk()))
+                .firstName(merge(a.getFirstName(), b.getFirstName()))
+                .lastName(merge(a.getLastName(), b.getLastName()))
+                .fullName(merge(a.getFullName(), b.getFullName()))
+                .sex(merge(a.getSex(), b.getSex()))
+                .age(merge(a.getAge(), b.getAge()))
+                .birthday(merge(a.getBirthday(), b.getBirthday()))
+                .phone(merge(a.getPhone(), b.getPhone()))
+                .email(merge(a.getEmail(), b.getEmail()))
+                .country(merge(a.getCountry(), b.getCountry()))
+                .city(merge(a.getCity(), b.getCity()))
+                .address(merge(a.getAddress(), b.getAddress()))
+                .telegram(merge(a.getTelegram(), b.getTelegram()))
+                .instagram(merge(a.getInstagram(), b.getInstagram()))
+                .vk(merge(a.getVk(), b.getVk()))
                 .build();
+    }
+
+    public static <Type> Type merge(Type a, Type b) {
+        if (Objects.equals(a, b)) {
+            boolean debug = true;
+        }
+        return ObjectUtils.firstNonNull(a, b);
     }
 }

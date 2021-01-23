@@ -12,4 +12,8 @@ public class Prediction<Type> {
     private Type value;
 
     private Long statistics;
+
+    public boolean sufficient(long statistics) {
+        return this.statistics >= statistics;
+    }
 }

@@ -19,24 +19,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Instagram implements SocialNetwork<InstagramProfile> {
 
-    private final InstagramCachedAPI api;
-
     private final InstagramService ig;
 
     private final InstagramTracker tracker;
 
     private final InstagramAnalyst analyst;
 
-    public InstagramCachedAPI api() {
-        return api;
-    }
-
     public InstagramService service() {
         return ig;
-    }
-
-    public InstagramAnalyst analyst() {
-        return analyst;
     }
 
     @Override
@@ -48,12 +38,6 @@ public class Instagram implements SocialNetwork<InstagramProfile> {
     public InstagramProfile profile(String identifier) {
         log.info("Instagram profile profiling for identifier {}", identifier);
         return ig.profile(identifier);
-    }
-
-    @Override
-    public EnemyMessage<InstagramProfile>  info(String identifier) {
-        log.info("Instagram profile info for identifier {}", identifier);
-        return ig.info(identifier);
     }
 
     @Override

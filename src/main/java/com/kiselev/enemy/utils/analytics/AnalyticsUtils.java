@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 
 public class AnalyticsUtils {
 
-    public static <Profile extends Info, Type> Prediction<Type> predict(Function<Profile, Type> function,
-                                                                        List<Profile> predictionGroup) {
+    public static <Object, Type> Prediction<Type> predict(Function<Object, Type> function,
+                                                          List<Object> predictionGroup) {
         List<Type> predictionCandidates = predictionGroup.stream()
                 .map(function)
                 .filter(Objects::nonNull)

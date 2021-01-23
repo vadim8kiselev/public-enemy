@@ -5,12 +5,15 @@ import com.kiselev.enemy.network.vk.utils.MapperHolder;
 import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.response.BaseResponse;
+import lombok.SneakyThrows;
 import okhttp3.*;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -18,6 +21,10 @@ import java.util.concurrent.TimeUnit;
 public class TelegramBotClient {
 
     private static final String API_URL = "https://api.telegram.org/bot";
+
+    private static final String API_FILE_URL = "https://api.telegram.org/file/bot";
+
+    private static final Integer TIMEOUT = 0;
 
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(75, TimeUnit.SECONDS)
@@ -33,8 +40,8 @@ public class TelegramBotClient {
     private String token;
 
     public <T extends BaseRequest<T, R>, R extends BaseResponse> void send(final T request, final Callback<T, R> callback) {
-        OkHttpClient client = getOkHttpClient(request);
-        client.newCall(createRequest(request)).enqueue(new okhttp3.Callback() {
+        OkHttpClient client = client(request.getTimeoutSeconds());
+        client.newCall(post(request)).enqueue(new okhttp3.Callback() {
             @Override
             public void onResponse(Call call, Response response) {
                 R result = null;
@@ -61,18 +68,25 @@ public class TelegramBotClient {
         });
     }
 
+    @SneakyThrows
+    public byte[] download(final String file) {
+        return IOUtils.toByteArray(
+                new URL(API_FILE_URL + token + "/" + file)
+        );
+    }
+
     public <T extends BaseRequest<T, R>, R extends BaseResponse> R send(final BaseRequest<T, R> request) {
         try {
-            OkHttpClient client = getOkHttpClient(request);
-            Response response = client.newCall(createRequest(request)).execute();
+            OkHttpClient client = client(request.getTimeoutSeconds());
+            Response response = client.newCall(post(request)).execute();
             return gson.fromJson(response.body().string(), request.getResponseType());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private OkHttpClient getOkHttpClient(BaseRequest<?, ?> request) {
-        int timeoutMillis = request.getTimeoutSeconds() * 1000;
+    public OkHttpClient client(Integer timeout) {
+        int timeoutMillis = timeout * 1000;
 
         if (client.readTimeoutMillis() == 0 || client.readTimeoutMillis() > timeoutMillis) return client;
         if (clientWithTimeout.readTimeoutMillis() > timeoutMillis) return clientWithTimeout;
@@ -81,7 +95,7 @@ public class TelegramBotClient {
         return clientWithTimeout;
     }
 
-    private Request createRequest(BaseRequest<?, ?> request) {
+    private Request post(BaseRequest<?, ?> request) {
         return new Request.Builder()
                 .url(API_URL + token + "/" + request.getMethod())
                 .post(createRequestBody(request))

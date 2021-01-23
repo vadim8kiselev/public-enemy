@@ -12,8 +12,6 @@ public interface SocialNetwork<Profile extends Info> {
 
     Profile profile(String identifier);
 
-    EnemyMessage<Profile>  info(String identifier);
-
     List<EnemyMessage<Profile>> track(String identifier);
 
     Analysis<Profile> analyze(String identifier);

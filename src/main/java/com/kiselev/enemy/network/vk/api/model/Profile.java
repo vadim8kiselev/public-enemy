@@ -34,13 +34,13 @@ public class Profile implements Info {
     private Sex sex;
 
     @SerializedName("screen_name")
-    private String screenName;
+    private String username;
 
     @SerializedName("domain")
     private String domain;
 
     @SerializedName("bdate")
-    private String birthDate;
+    private String birthday;
 
     @SerializedName("country")
     private BaseObject country;
@@ -144,7 +144,7 @@ public class Profile implements Info {
         return String.format(
                 type().template(),
                 firstName + " " + lastName,
-                screenName != null ? screenName : ("id" + id)
+                username != null ? username : ("id" + id)
         );
     }
 

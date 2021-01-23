@@ -60,8 +60,19 @@ public class Person {
         this.instagram = profile.username();
 
         this.fullName = profile.fullName();
+
+        if (StringUtils.isNotEmpty(this.fullName)) {
+            if(this.fullName.contains(" ")) {
+                int space = this.fullName.indexOf(" ");
+                this.firstName = this.fullName.substring(0, space);
+                this.lastName = this.fullName.substring(space + 1);
+            }
+        }
+
         this.phone = profile.public_phone_number();
         this.email = profile.public_email();
+
+        this.address = profile.address();
 
         this.vk = profile.vk();
         this.telegram = profile.telegram();
@@ -70,7 +81,7 @@ public class Person {
     public Person(VKProfile profile) {
         String phone = StringUtils.isNotEmpty(profile.phone()) ? profile.phone() : null;
 
-        this.vk = profile.screenName();
+        this.vk = profile.username();
 
         this.firstName = profile.firstName();
         this.lastName = profile.lastName();

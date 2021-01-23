@@ -26,7 +26,13 @@ public class User extends Profile {
     private String email;
 
     @JsonProperty("public_phone_number")
-    private String phoneNumber;
+    private String publicPhoneNumber;
+
+    @JsonProperty("contact_phone_number")
+    private String contactPhoneNumber;
+
+    @JsonProperty("city_name")
+    private String address;
 
     @JsonProperty("is_business")
     private boolean isBusiness;

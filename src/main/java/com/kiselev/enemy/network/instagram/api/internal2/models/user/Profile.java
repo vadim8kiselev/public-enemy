@@ -33,8 +33,8 @@ public class Profile extends IGBaseModel implements Id {
     @JsonProperty("has_anonymous_profile_picture")
     private boolean hasAnonymousPhoto;
 
-//    @JsonProperty("profile_pic_url")
-//    private String photoUrl;
+    @JsonProperty("profile_pic_url")
+    private String photoUrl;
 //
 //    @JsonProperty("profile_pic_id")
 //    private String photoId;

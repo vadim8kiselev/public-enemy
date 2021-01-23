@@ -23,6 +23,10 @@ public class Telegram {
     @Value("${com.kiselev.enemy.telegram.id:}")
     private Integer me;
 
+    public TelegramService service() {
+        return telegram;
+    }
+
     public TelegramProfile me() {
         return telegram.me();
     }

@@ -1,13 +1,27 @@
 package com.kiselev.enemy;
 
+import com.google.common.collect.Lists;
+import com.kiselev.enemy.network.instagram.api.InstagramAPI;
+import com.kiselev.enemy.network.telegram.api.bot.TelegramBotAPI;
+import com.kiselev.enemy.network.telegram.api.client.TelegramClientAPI;
+import com.kiselev.enemy.network.vk.api.internal.VKAPI;
 import com.kiselev.enemy.service.PublicEnemyService;
+import com.kiselev.enemy.service.profiler.model.Conversation;
+import com.kiselev.enemy.service.profiler.model.Person;
+import com.kiselev.enemy.service.profiler.model.Text;
+import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @EnableScheduling
 @SpringBootApplication
@@ -24,9 +38,18 @@ public class PublicEnemyApplication implements CommandLineRunner {
     @Override
     @SneakyThrows
     public void run(String... args) {
+
+        TelegramBotAPI telegramBotAPI = publicEnemy.tg().service().api().bot();
+        TelegramClientAPI telegramClientAPI = publicEnemy.tg().service().api().client();
+
+        InstagramAPI instagramAPI = publicEnemy.ig().service().api().raw();
+
+        VKAPI api = publicEnemy.vk().service().api();
+
+//        messages();
     }
 
-//    @SneakyThrows
+    //    @SneakyThrows
 //    public void colors() {
 //        InstagramProfile vadim8kiselev = service.ig().profile("vadim8kiselev");
 //        List<InstagramPost> posts = vadim8kiselev.posts();
@@ -67,136 +90,224 @@ public class PublicEnemyApplication implements CommandLineRunner {
 //        service.tg().send(TelegramMessage.message(colorsResult));
 //    }
 //
-//    @SneakyThrows
-//    public void messages() {
+    @SneakyThrows
+    public void messages() {
+
+//        InstagramProfile ig_me = instagram.me();
+//        TelegramProfile tg_me = telegram.me();
+//        VKProfile vk_me = vk.me();
+
+//        Map<InstagramProfile, List<ThreadItem>> instagramRawHistory = instagram.service().history();
+//        List<Conversation> instagramHistory = instagramRawHistory.entrySet().stream()
+//                .map(entry -> Conversation.builder()
+//                        .id(entry.getKey().id())
+//                        .person(new Person(entry.getKey()))
+//                        .texts(entry.getValue().stream()
+//                                .map(Text::new)
+//                                .collect(Collectors.toList()))
+//                        .build())
+//                .collect(Collectors.toList());
+//        ProfilingUtils.cache("ig", instagramHistory);
+        List<Conversation> instagramConversations = ProfilingUtils.cache("ig_mine");
+
+//        List<Conversation> igUpdatedConversations = instagramConversations.stream()
+//                .peek(conversation -> {
+//                    List<Text> texts = conversation.getTexts();
+//                    texts.forEach(text -> text.setMine(Objects.equals(ig_me.id(), text.getFrom())));
+//                })
+//                .collect(Collectors.toList());
+//        ProfilingUtils.cache("ig_mine", igUpdatedConversations);
+
+//        Map<TelegramUser, List<TLMessage>> telegramRawHistory = telegram.history();
+//        List<Conversation> telegramHistory = telegramRawHistory.entrySet().stream()
+//                .map(entry -> Conversation.builder()
+//                        .id(String.valueOf(entry.getKey().id()))
+//                        .person(new Person(entry.getKey()))
+//                        .texts(entry.getValue().stream()
+//                                .map(Text::new)
+//                                .collect(Collectors.toList()))
+//                        .build())
+//                .collect(Collectors.toList());
+//        ProfilingUtils.cache("tg", telegramHistory);
+        List<Conversation> telegramConversations = ProfilingUtils.cache("tg_mine");
+
+//        List<Conversation> tgUpdatedConversations = telegramConversations.stream()
+//                .peek(conversation -> {
+//                    List<Text> texts = conversation.getTexts();
+//                    texts.forEach(text -> text.setMine(Objects.equals(tg_me.id(), text.getFrom())));
+//                })
+//                .collect(Collectors.toList());
+//        ProfilingUtils.cache("tg_mine", tgUpdatedConversations);
+
+//        List<Conversation> updatedTg = telegramConversations.stream()
+//                .map(conversation -> {
+//                    Person person = conversation.getPerson();
+//                    String username = StringUtils.isNotEmpty(person.getTelegram()) ? person.getTelegram() : null;
+//                    String phone = StringUtils.isNotEmpty(person.getPhone()) ? person.getPhone() : null;
 //
-////        InstagramProfile ig_me = instagram.me();
-////        TelegramProfile tg_me = telegram.me();
-////        VKProfile vk_me = vk.me();
+//                    person.setTelegram(ObjectUtils.firstNonNull(username, phone));
+//                    person.setPhone(phone);
 //
-////        Map<InstagramProfile, List<ThreadItem>> instagramRawHistory = instagram.service().history();
-////        List<Conversation> instagramHistory = instagramRawHistory.entrySet().stream()
-////                .map(entry -> Conversation.builder()
-////                        .id(entry.getKey().id())
-////                        .person(new Person(entry.getKey()))
-////                        .texts(entry.getValue().stream()
-////                                .map(Text::new)
-////                                .collect(Collectors.toList()))
-////                        .build())
-////                .collect(Collectors.toList());
-////        ProfilingUtils.cache("ig", instagramHistory);
-//        List<Conversation> instagramConversations = ProfilingUtils.cache("ig_mine");
+//                    return conversation;
+//                }).collect(Collectors.toList());
 //
-////        List<Conversation> igUpdatedConversations = instagramConversations.stream()
-////                .peek(conversation -> {
-////                    List<Text> texts = conversation.getTexts();
-////                    texts.forEach(text -> text.setMine(Objects.equals(ig_me.id(), text.getFrom())));
-////                })
-////                .collect(Collectors.toList());
-////        ProfilingUtils.cache("ig_mine", igUpdatedConversations);
+//        ProfilingUtils.cache("tg_xx", updatedTg);
+
+//        Map<VKProfile, List<Message>> vkRawHistory = vk.service().history();
+//        List<Conversation> vkHistory = vkRawHistory.entrySet().stream()
+//                .map(entry -> Conversation.builder()
+//                        .id(entry.getKey().id())
+//                        .person(new Person(entry.getKey()))
+//                        .texts(entry.getValue().stream()
+//                                .map(Text::new)
+//                                .collect(Collectors.toList()))
+//                        .build())
+//                .collect(Collectors.toList());
+//        ProfilingUtils.cache("vk", vkHistory);
+        List<Conversation> vkConversations = ProfilingUtils.cache("vk_mine");
+
+//        List<Conversation> vkUpdatedConversations = vkConversations.stream()
+//                .peek(conversation -> {
+//                    List<Text> texts = conversation.getTexts();
+//                    texts.forEach(text -> text.setMine(Objects.equals(vk_me.id(), text.getFrom())));
+//                })
+//                .collect(Collectors.toList());
+//        ProfilingUtils.cache("vk_mine", vkUpdatedConversations);
+
+        List<Conversation> conversations = Lists.newArrayList();
+        conversations.addAll(instagramConversations);
+        conversations.addAll(telegramConversations);
+        conversations.addAll(vkConversations);
+
+        conversations
+                .forEach(conversation -> conversation.setTexts(
+                        conversation.getTexts().stream().distinct().collect(Collectors.toList())
+                ));
+
+//        Map<Person, List<Text>> history = conversations.stream()
+//                .collect(Collectors.toMap(
+//                        Conversation::getPerson,
+//                        Conversation::getTexts
+//                ));
 //
-////        Map<TelegramUser, List<TLMessage>> telegramRawHistory = telegram.history();
-////        List<Conversation> telegramHistory = telegramRawHistory.entrySet().stream()
-////                .map(entry -> Conversation.builder()
-////                        .id(String.valueOf(entry.getKey().id()))
-////                        .person(new Person(entry.getKey()))
-////                        .texts(entry.getValue().stream()
-////                                .map(Text::new)
-////                                .collect(Collectors.toList()))
-////                        .build())
-////                .collect(Collectors.toList());
-////        ProfilingUtils.cache("tg", telegramHistory);
-//        List<Conversation> telegramConversations = ProfilingUtils.cache("tg_mine");
+//        List<String> instagrams = instagramConversations.stream()
+//                .map(Conversation::getPerson)
+//                .map(Person::getInstagram)
+//                .collect(Collectors.toList());
 //
-////        List<Conversation> tgUpdatedConversations = telegramConversations.stream()
-////                .peek(conversation -> {
-////                    List<Text> texts = conversation.getTexts();
-////                    texts.forEach(text -> text.setMine(Objects.equals(tg_me.id(), text.getFrom())));
-////                })
-////                .collect(Collectors.toList());
-////        ProfilingUtils.cache("tg_mine", tgUpdatedConversations);
+//        List<String> telegrams = telegramConversations.stream()
+//                .map(Conversation::getPerson)
+//                .map(Person::getTelegram)
+//                .collect(Collectors.toList());
 //
-////        List<Conversation> updatedTg = telegramConversations.stream()
-////                .map(conversation -> {
-////                    Person person = conversation.getPerson();
-////                    String username = StringUtils.isNotEmpty(person.getTelegram()) ? person.getTelegram() : null;
-////                    String phone = StringUtils.isNotEmpty(person.getPhone()) ? person.getPhone() : null;
-////
-////                    person.setTelegram(ObjectUtils.firstNonNull(username, phone));
-////                    person.setPhone(phone);
-////
-////                    return conversation;
-////                }).collect(Collectors.toList());
-////
-////        ProfilingUtils.cache("tg_xx", updatedTg);
+//        List<String> vks = vkConversations.stream()
+//                .map(Conversation::getPerson)
+//                .map(Person::getVk)
+//                .collect(Collectors.toList());
 //
-////        Map<VKProfile, List<Message>> vkRawHistory = vk.service().history();
-////        List<Conversation> vkHistory = vkRawHistory.entrySet().stream()
-////                .map(entry -> Conversation.builder()
-////                        .id(entry.getKey().id())
-////                        .person(new Person(entry.getKey()))
-////                        .texts(entry.getValue().stream()
-////                                .map(Text::new)
-////                                .collect(Collectors.toList()))
-////                        .build())
-////                .collect(Collectors.toList());
-////        ProfilingUtils.cache("vk", vkHistory);
-//        List<Conversation> vkConversations = ProfilingUtils.cache("vk_mine");
+//        Sets.SetView<String> ig_tg = Sets.intersection(
+//                Sets.newHashSet(instagrams),
+//                Sets.newHashSet(telegrams)
+//        );
 //
-////        List<Conversation> vkUpdatedConversations = vkConversations.stream()
-////                .peek(conversation -> {
-////                    List<Text> texts = conversation.getTexts();
-////                    texts.forEach(text -> text.setMine(Objects.equals(vk_me.id(), text.getFrom())));
-////                })
-////                .collect(Collectors.toList());
-////        ProfilingUtils.cache("vk_mine", vkUpdatedConversations);
+//        Sets.SetView<String> ig_vk = Sets.intersection(
+//                Sets.newHashSet(instagrams),
+//                Sets.newHashSet(vks)
+//        );
 //
-//        List<Conversation> conversations = Lists.newArrayList();
-//        conversations.addAll(instagramConversations);
-//        conversations.addAll(telegramConversations);
-//        conversations.addAll(vkConversations);
+//        Sets.SetView<String> tg_vk = Sets.intersection(
+//                Sets.newHashSet(telegrams),
+//                Sets.newHashSet(vks)
+//        );
 //
-////        Map<Person, List<Text>> history = conversations.stream()
-////                .collect(Collectors.toMap(
-////                        Conversation::getPerson,
-////                        Conversation::getTexts
-////                ));
-////
-////        List<String> instagrams = instagramConversations.stream()
-////                .map(Conversation::getPerson)
-////                .map(Person::getInstagram)
-////                .collect(Collectors.toList());
-////
-////        List<String> telegrams = telegramConversations.stream()
-////                .map(Conversation::getPerson)
-////                .map(Person::getTelegram)
-////                .collect(Collectors.toList());
-////
-////        List<String> vks = vkConversations.stream()
-////                .map(Conversation::getPerson)
-////                .map(Person::getVk)
-////                .collect(Collectors.toList());
-////
-////        Sets.SetView<String> ig_tg = Sets.intersection(
-////                Sets.newHashSet(instagrams),
-////                Sets.newHashSet(telegrams)
-////        );
-////
-////        Sets.SetView<String> ig_vk = Sets.intersection(
-////                Sets.newHashSet(instagrams),
-////                Sets.newHashSet(vks)
-////        );
-////
-////        Sets.SetView<String> tg_vk = Sets.intersection(
-////                Sets.newHashSet(telegrams),
-////                Sets.newHashSet(vks)
-////        );
-////
-////        Sets.SetView<String> ig_tg_vk = Sets.intersection(
-////                Sets.newHashSet(ig_tg),
-////                Sets.newHashSet(tg_vk)
-////        );
-//
+//        Sets.SetView<String> ig_tg_vk = Sets.intersection(
+//                Sets.newHashSet(ig_tg),
+//                Sets.newHashSet(tg_vk)
+//        );    й
+
+        Set<String> ids = conversations.stream()
+                .map(Conversation::getTexts)
+                .flatMap(List::stream)
+                .filter(Text::getMine)
+                .map(Text::getFrom)
+                .collect(Collectors.toSet());
+
+        Map<String, Long> texts = conversations.stream()
+                .map(Conversation::getTexts)
+                .flatMap(List::stream)
+                .filter(Text::getMine)
+                .map(Text::getText)
+                .filter(Objects::nonNull)
+                .map(String::toLowerCase)
+                .map(string -> string
+                        .replaceAll("[?!:;.,()\\d*<>]", ""))
+                .map(string -> string
+                        .replaceAll("\\s+", " "))
+                .map(String::trim)
+                .filter(StringUtils::isNotEmpty)
+                .collect(Collectors.groupingBy(
+                        Function.identity(),
+                        Collectors.counting()
+                ));
+
+        LinkedHashMap<String, Long> desc = texts.entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (u, v) -> v,
+                        LinkedHashMap::new));
+
+        LinkedHashMap<String, Long> asc = texts.entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue())
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (u, v) -> v,
+                        LinkedHashMap::new));
+
+        LinkedHashMap<String, Long> words1 = desc.entrySet().stream()
+                .filter(entry -> entry.getKey().split(" ").length == 1)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (u, v) -> v,
+                        LinkedHashMap::new));
+
+        LinkedHashMap<String, Long> words2 = desc.entrySet().stream()
+                .filter(entry -> entry.getKey().split(" ").length == 2)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (u, v) -> v,
+                        LinkedHashMap::new));
+
+        LinkedHashMap<String, Long> words3 = desc.entrySet().stream()
+                .filter(entry -> entry.getKey().split(" ").length == 3)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (u, v) -> v,
+                        LinkedHashMap::new));
+
+        LinkedHashMap<String, Long> words4 = desc.entrySet().stream()
+                .filter(entry -> entry.getKey().split(" ").length == 4)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (u, v) -> v,
+                        LinkedHashMap::new));
+
+        LinkedHashMap<String, Long> words5 = desc.entrySet().stream()
+                .filter(entry -> entry.getKey().split(" ").length == 5)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (u, v) -> v,
+                        LinkedHashMap::new));
+
+        boolean debug = true;
+
 //        List<Conversation> history = Merger.reduce(conversations);
 //
 //        Conversation conversation = history.stream()
@@ -228,7 +339,7 @@ public class PublicEnemyApplication implements CommandLineRunner {
 //            }
 //        }
 //
-//        service.tg().send(TelegramMessage.message(
+//        publicEnemy.tg().send(TelegramMessage.message(
 //                String.format(
 //                        "\\[%s\\] wrote me %s times. I wrote back %s times.",
 //                        ObjectUtils.firstNonNull(
@@ -243,49 +354,80 @@ public class PublicEnemyApplication implements CommandLineRunner {
 ////        }
 //
 //        boolean debug = true;
+
+
+//        long today = LocalDate.now().toEpochDay();
+//        LocalDate epoch = LocalDate.ofEpochDay(0);
+
+//        for (Map.Entry<Profile, List<Message>> entry : history.entrySet()) {
+//        Conversation conversation = history.iterator().next();
+
+//        Person profile = alina_borozdina.getPerson();
+//        List<Text> messages = alina_borozdina.getTexts();
 //
+//        Map<String, Long> map = messages.stream()
+//                .map(Text::getDate)
+////                    .map(date -> ChronoUnit.DAYS.between(epoch, date))
+//                .sorted(Comparator.naturalOrder())
+//                .map(date -> date.format(DateTimeFormatter.ofPattern("M.yyyy")))
+//                .collect(Collectors.groupingBy(Function.identity(), LinkedHashMap::new, Collectors.counting()));
 //
-////        long today = LocalDate.now().toEpochDay();
-////        LocalDate epoch = LocalDate.ofEpochDay(0);
+//        Long max = map.values().stream()
+//                .max(Comparator.naturalOrder())
+//                .orElseThrow(RuntimeException::new);
 //
-////        for (Map.Entry<Profile, List<Message>> entry : history.entrySet()) {
-////        Conversation conversation = history.iterator().next();
+//        System.out.println(profile.getFirstName() + " " + profile.getLastName());
+//        for (Map.Entry<String, Long> tap : map.entrySet()) {
+//            System.out.println(tap.getKey() + " - " + (tap.getValue() * 100 / max) + "%");
+//        }
+//        System.out.println(profile.getFirstName() + " " + profile.getLastName());
+
 //
-////        Person profile = alina_borozdina.getPerson();
-////        List<Text> messages = alina_borozdina.getTexts();
-////
-////        Map<String, Long> map = messages.stream()
-////                .map(Text::getDate)
-//////                    .map(date -> ChronoUnit.DAYS.between(epoch, date))
-////                .sorted(Comparator.naturalOrder())
-////                .map(date -> date.format(DateTimeFormatter.ofPattern("M.yyyy")))
-////                .collect(Collectors.groupingBy(Function.identity(), LinkedHashMap::new, Collectors.counting()));
-////
-////        Long max = map.values().stream()
-////                .max(Comparator.naturalOrder())
-////                .orElseThrow(RuntimeException::new);
-////
-////        System.out.println(profile.getFirstName() + " " + profile.getLastName());
-////        for (Map.Entry<String, Long> tap : map.entrySet()) {
-////            System.out.println(tap.getKey() + " - " + (tap.getValue() * 100 / max) + "%");
-////        }
-////        System.out.println(profile.getFirstName() + " " + profile.getLastName());
+//            List<Long> diffs = Lists.newArrayList();
+//            for (int index = 1; index < days.size(); index++) {
+//                Long a = days.get(index - 1);
+//                Long b = days.get(index);
 //
-////
-////            List<Long> diffs = Lists.newArrayList();
-////            for (int index = 1; index < days.size(); index++) {
-////                Long a = days.get(index - 1);
-////                Long b = days.get(index);
-////
-////                long c = a - b;
-////                diffs.add(c);
-////            }
-////
-////            Long max = diffs.stream()
-////                    .max(Comparator.naturalOrder())
-////                    .orElse(null);
-////
-////            System.out.println(profile.firstName() + " " + profile.lastName() + " - " + max + " days without talking at max");
-////        }
-//    }
+//                long c = a - b;
+//                diffs.add(c);
+//            }
+//
+//            Long max = diffs.stream()
+//                    .max(Comparator.naturalOrder())
+//                    .orElse(null);
+//
+//            System.out.println(profile.firstName() + " " + profile.lastName() + " - " + max + " days without talking at max");
+//        }
+    }
+
+    private List<Conversation> lookFor(List<Conversation> conversations, String message) {
+        List<Conversation> convs = Lists.newArrayList();
+
+        for (Conversation conversation : conversations) {
+            Person person = conversation.getPerson();
+            List<Text> texts = conversation.getTexts();
+
+            for (Text text : texts) {
+                if (text.getMine() && text.getText() != null) {
+                    String textMessage = String
+                            .valueOf(text.getText())
+                            .toLowerCase()
+                            .replaceAll("[?!:;.,()\\d*<>]", "")
+                            .replaceAll("\\s+", " ")
+                            .trim();
+
+                    if (textMessage.equals(message)) {
+                        convs.add(Conversation.builder()
+                                .person(person)
+                                .texts(Lists.newArrayList(
+                                        text
+                                ))
+                                .id(conversation.getId())
+                                .build());
+                    }
+                }
+            }
+        }
+        return convs;
+    }
 }

@@ -2,7 +2,6 @@ package com.kiselev.enemy.network.vk.api.internal;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.kiselev.enemy.network.vk.api.VKAPI;
 import com.kiselev.enemy.network.vk.api.constants.VKConstants;
 import com.kiselev.enemy.network.vk.api.model.*;
 import com.kiselev.enemy.network.vk.api.request.*;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @Primary
 @RequiredArgsConstructor
-public class VKInternalAPI extends ProgressableAPI implements VKAPI {
+public class VKAPI extends ProgressableAPI {
 
     @Value("${com.kiselev.enemy.vk.identifier:}")
     private String vkIdentifier;
@@ -42,12 +41,10 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
                 .orElseThrow(() -> new RuntimeException("No vk tokens found!"));
     }
 
-    @Override
     public Profile me() {
         return profile(vkIdentifier);
     }
 
-    @Override
     @SneakyThrows
     public Profile profile(String profileId) {
         List<Profile> profiles = profiles(
@@ -59,7 +56,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
                 .orElseThrow(() -> new IllegalArgumentException("Profile not found by id " + profileId));
     }
 
-    @Override
     @SneakyThrows
     public List<Profile> profiles(List<String> profileIds) {
         return new ProfileRequest(token())
@@ -68,7 +64,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
                 .execute();
     }
 
-    @Override
     @SneakyThrows
     public List<Photo> photos(String profileId) {
         List<Photo> photos = Lists.newArrayList();
@@ -81,7 +76,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
                 .collect(Collectors.toList());
     }
 
-    @Override
     @SneakyThrows
     public List<Photo> albumPhotos(String profileId, String albumId) {
         try {
@@ -110,7 +104,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
         }
     }
 
-    @Override
     @SneakyThrows
     public List<Profile> friends(String profileId) {
         int offset = 0;
@@ -133,7 +126,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
         return friends;
     }
 
-    @Override
     @SneakyThrows
     public List<Profile> followers(String profileId) {
         int offset = 0;
@@ -156,7 +148,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
         return followers;
     }
 
-    @Override
     @SneakyThrows
     public List<Profile> following(String profileId) {
         int offset = 0;
@@ -180,7 +171,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
         return following;
     }
 
-    @Override
     @SneakyThrows
     public List<Group> communities(String profileId) {
         List<Group> communities = Lists.newArrayList();
@@ -189,7 +179,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
         return communities;
     }
 
-    @Override
     @SneakyThrows
     public List<Group> subscriptions(String profileId) {
         int offset = 0;
@@ -213,7 +202,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
         return subscriptions;
     }
 
-    @Override
     @SneakyThrows
     public List<Group> groups(String profileId) {
         int offset = 0;
@@ -237,7 +225,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
         return groups;
     }
 
-    @Override
     @SneakyThrows
     public List<Post> posts(String profileId) {
         int offset = 0;
@@ -262,7 +249,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
                 .collect(Collectors.toList());
     }
 
-    @Override
     @SneakyThrows
     public List<Profile> likes(String profileId, String itemId, Type type) {
         int offset = 0;
@@ -288,7 +274,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
                 .collect(Collectors.toList());
     }
 
-    @Override
     @SneakyThrows
     public Map<Profile, Set<Message>> history(List<String> profileIds) {
         List<Profile> profiles = profiles(profileIds);
@@ -301,7 +286,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
                 ));
     }
 
-    @Override
     @SneakyThrows
     public Map<Profile, Set<Message>> history() {
         int offset = 0;
@@ -329,7 +313,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
                 ));
     }
 
-    @Override
     @SneakyThrows
     public Set<Message> messages(String profileId) {
         int offset = 0;
@@ -352,7 +335,6 @@ public class VKInternalAPI extends ProgressableAPI implements VKAPI {
         return messages;
     }
 
-    @Override
     @SneakyThrows
     public List<Profile> search(SearchRequest.Query query) {
         SearchRequest request = new SearchRequest(token());

@@ -1,7 +1,7 @@
 package com.kiselev.enemy.network.vk.service.cache;
 
 import com.kiselev.enemy.data.mongo.Mongo;
-import com.kiselev.enemy.network.vk.api.internal.VKInternalAPI;
+import com.kiselev.enemy.network.vk.api.internal.VKAPI;
 import com.kiselev.enemy.network.vk.api.model.Profile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class VKCachedAPI extends VKInternalAPI {
+public class VKCachedAPI extends VKAPI {
 
     private final Mongo mongo;
 

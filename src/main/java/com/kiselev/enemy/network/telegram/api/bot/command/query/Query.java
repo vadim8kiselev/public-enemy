@@ -1,11 +1,8 @@
-package com.kiselev.enemy.network.telegram.api.bot.command.profiling;
+package com.kiselev.enemy.network.telegram.api.bot.command.query;
 
 import com.kiselev.enemy.network.telegram.api.bot.command.TelegramCommand;
-import com.kiselev.enemy.network.telegram.model.TelegramMessage;
 import com.kiselev.enemy.service.PublicEnemyService;
-import com.kiselev.enemy.service.profiler.PublicEnemyProfiler;
-import com.kiselev.enemy.service.profiler.model.Person;
-import com.kiselev.enemy.utils.flow.model.Id;
+import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.User;
@@ -13,18 +10,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
-public class ProfileCommand implements TelegramCommand {
+public class Query implements TelegramCommand {
 
     private final PublicEnemyService publicEnemy;
 
-    private final PublicEnemyProfiler publicEnemyProfiler;
-
     @Override
     public String command() {
-        return "/profile";
+        return "/query";
     }
 
     @Override
@@ -40,14 +37,20 @@ public class ProfileCommand implements TelegramCommand {
                 .map(Message::text)
                 .orElse(null);
 
-        Person person = publicEnemyProfiler.profile(request);
+        // How much(many) ......... do(es) . have(s)?
+        // -------- followers ------ I -------?
 
-        publicEnemy.tg().send(requestId, TelegramMessage.message(
-                String.format("Name: %s, Instagram: %s, Telegram: %s, VK: %s",
-                        person.getFullName(),
-                        person.getInstagram(),
-                        person.getTelegram(),
-                        person.getVk())
-        ));
+        // Show/Give/List my followers
+
+        // What is the average age among my followers?
+
+        if (request != null) {
+            Pattern pattern = Pattern.compile("[Hh]ow (much|many) (\\w+) (do|does) (\\w+) (have|has)\\?");
+            Matcher matcher = pattern.matcher(request);
+            if (matcher.find()) {
+                String a = matcher.group(2);
+                String b = matcher.group(4);
+            }
+        }
     }
 }

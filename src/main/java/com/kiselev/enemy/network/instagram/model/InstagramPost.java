@@ -11,9 +11,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @Data
 @Accessors(fluent = true)
@@ -90,7 +94,13 @@ public class InstagramPost {
 
     private String location(Location location) {
         if (location != null) {
-            return location.getCity();
+            return Stream.of(location.getCity(),
+                    location.getAddress(),
+                    location.getShort_name(),
+                    location.getName())
+                    .filter(StringUtils::isNotEmpty)
+                    .findFirst()
+                    .orElse(null);
         }
         return null;
     }

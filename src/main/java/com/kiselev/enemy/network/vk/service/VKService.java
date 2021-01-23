@@ -1,35 +1,33 @@
 package com.kiselev.enemy.network.vk.service;
 
 import com.google.common.collect.Lists;
-import com.kiselev.enemy.network.vk.api.internal.VKInternalAPI;
+import com.kiselev.enemy.network.vk.api.internal.VKAPI;
 import com.kiselev.enemy.network.vk.api.model.*;
 import com.kiselev.enemy.network.vk.api.request.SearchRequest;
 import com.kiselev.enemy.network.vk.model.VKProfile;
+import com.kiselev.enemy.network.vk.utils.VKUtils;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
 import com.kiselev.enemy.utils.analytics.model.Prediction;
-import com.kiselev.enemy.utils.flow.annotation.EnemyValue;
 import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.vk.api.sdk.objects.likes.Type;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ReflectionUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class VKService {
 
-    private final VKInternalAPI api;
+    private final VKAPI api;
 
-    public VKInternalAPI api() {
+    public VKAPI api() {
         return api;
     }
 
@@ -215,29 +213,48 @@ public class VKService {
         return ids.contains(profile.id());
     }
 
-    @SneakyThrows
-    public EnemyMessage<VKProfile>  info(String identifier) {
-        VKProfile profile = profile(identifier);
+//    @SneakyThrows
+//    public EnemyMessage<Profile> info(String identifier) {
+//        List<String> messages = Lists.newArrayList();
+//
+//        Profile profile = api.profile(identifier);
+//        messages.add(message("Username", profile.username()));
+//        messages.add(message("Full name", profile.fullName()));
+//        messages.add(message("Status", profile.status()));
+//        messages.add(message("Sex", profile.sex().name()));
+//
+//        Integer age = VKUtils.age(profile.birthday());
+//        if (age != null) {
+//            messages.add(message("Age", age));
+//        } else {
+//            messages.add(message("Age", "Hidden"));
+//            messages.add(message(">>>", "Hidden"));
+//        }
+//
+//        messages.add(message("Birthday", profile.birthday()));
+//        messages.add(message("Country", profile.country()));
+//        messages.add(message("City", profile.city()));
+//        messages.add(message("Phone", profile.phone()));
+//
+//        String message = messages.stream()
+//                .filter(Objects::nonNull)
+//                .collect(Collectors.joining("\n"));
+//        if (StringUtils.isNotEmpty(message)) {
+//            return EnemyMessage.of(profile, message);
+//        } else {
+//            return null;
+//        }
+//    }
 
-        String message = Stream.of(VKProfile.class.getDeclaredFields())
-                .peek(field -> field.setAccessible(true))
-                .filter(field -> field.getAnnotation(EnemyValue.class) != null)
-                .map(field -> {
-                    String name = field.getName();
-                    Object object = ReflectionUtils.getField(field, profile);
-                    if (object != null) {
-                        String value = object.toString();
-                        if (StringUtils.isNotEmpty(value)) {
-                            return String.format("%s - %s", name, value);
-                        }
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.joining("\n"));
-
-        return EnemyMessage.of(profile, message);
-    }
+//    private String message(String title, Object field) {
+//        if (field != null) {
+//            String string = field.toString();
+//            if (StringUtils.isNotEmpty(string)) {
+//                return title + ": " + field.toString();
+//            }
+//        }
+//        return null;
+//    }
 
     private class VKInternalProfile extends VKProfile {
 

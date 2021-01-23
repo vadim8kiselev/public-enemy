@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -50,7 +52,7 @@ public class InstagramProfile implements Info {
     private String public_phone_number;
     private String public_email;
 
-    private String location;
+    private String address;
 
     @ToString.Exclude
     private List<ReelMedia> stories;
@@ -102,10 +104,16 @@ public class InstagramProfile implements Info {
             this.photo = info.getUrl();
         }
 
-        this.public_phone_number = profile.getPhoneNumber();
+        this.public_phone_number = ObjectUtils.firstNonNull(
+                profile.getContactPhoneNumber(),
+                profile.getPublicPhoneNumber()
+        );
+
         this.public_email = profile.getEmail();
 
-//        this.location = location(profile);
+        this.address = StringUtils.isNotEmpty(profile.getAddress())
+                ? profile.getAddress()
+                : null;
     }
 
     @Override

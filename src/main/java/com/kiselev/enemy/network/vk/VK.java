@@ -1,6 +1,5 @@
 package com.kiselev.enemy.network.vk;
 
-import com.kiselev.enemy.network.vk.api.internal.VKInternalAPI;
 import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.network.vk.service.VKService;
 import com.kiselev.enemy.network.vk.service.analyst.VKAnalyst;
@@ -19,24 +18,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VK implements SocialNetwork<VKProfile> {
 
-    private final VKInternalAPI api;
-
     private final VKService vk;
 
     private final VKTracker tracker;
 
     private final VKAnalyst analyst;
 
-    public VKInternalAPI api() {
-        return api;
-    }
-
     public VKService service() {
         return vk;
-    }
-
-    public VKAnalyst analyst() {
-        return analyst;
     }
 
     @Override
@@ -48,12 +37,6 @@ public class VK implements SocialNetwork<VKProfile> {
     public VKProfile profile(String identifier) {
         log.info("VK profile profiling for identifier {}", identifier);
         return vk.profile(identifier);
-    }
-
-    @Override
-    public EnemyMessage<VKProfile>  info(String identifier) {
-        log.info("VK profile info for identifier {}", identifier);
-        return vk.info(identifier);
     }
 
     @Override

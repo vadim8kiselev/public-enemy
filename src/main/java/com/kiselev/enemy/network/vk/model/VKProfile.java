@@ -33,7 +33,7 @@ public class VKProfile implements Info {
     private String id;
 
     @EnemyValue(message = SCREEN_NAME_MESSAGE)
-    private String screenName;
+    private String username;
 
     @EnemyValue(message = FIRST_NAME_MESSAGE)
     private String firstName;
@@ -118,14 +118,14 @@ public class VKProfile implements Info {
         this.timestamp = LocalDateTime.now();
 
         this.id = profile.id();
-        this.screenName = profile.screenName();
+        this.username = profile.username();
         this.firstName = profile.firstName();
         this.lastName = profile.lastName();
         this.fullName = profile.firstName() + " " + profile.lastName();
         this.status = profile.status();
         this.sex = profile.sex();
-        this.age = VKUtils.age(profile.birthDate());
-        this.birthday = profile.birthDate();
+        this.age = VKUtils.age(profile.birthday());
+        this.birthday = profile.birthday();
         this.photo = profile.photo();
         this.country = VKUtils.title(profile.country());
         this.city = VKUtils.title(profile.city());
@@ -166,7 +166,7 @@ public class VKProfile implements Info {
         return String.format(
                 type().template(),
                 fullName,
-                screenName != null ? screenName : ("id" + id)
+                username != null ? username : ("id" + id)
         );
     }
 

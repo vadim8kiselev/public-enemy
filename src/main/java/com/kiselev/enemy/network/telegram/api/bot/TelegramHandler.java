@@ -7,6 +7,7 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.User;
+import com.pengrad.telegrambot.model.VideoNote;
 import com.pengrad.telegrambot.request.GetUpdates;
 import com.pengrad.telegrambot.response.GetUpdatesResponse;
 import lombok.RequiredArgsConstructor;
@@ -89,10 +90,10 @@ public class TelegramHandler {
                     }
                 }
             } else {
-                api.sendRaw(requestId, String.format("Unknown type of command: \"%s\"", request));
+                api.sendRaw(requestId, String.format("Unknown command: \"%s\"", request));
             }
         } else {
-            api.sendRaw(me, String.format("Illegal arguments\\: id\\=\"%s\", text\\=\"%s\"", requestId, request));
+            api.sendRaw(requestId, String.format("Unknown command: \"%s\"", request));
         }
     }
 

@@ -1,5 +1,6 @@
 package com.kiselev.enemy.network.instagram.service;
 
+import com.google.common.collect.Lists;
 import com.kiselev.enemy.network.instagram.api.internal2.models.direct.item.ThreadItem;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.UserTags;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
@@ -12,6 +13,8 @@ import com.kiselev.enemy.network.instagram.model.InstagramPost;
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
 import com.kiselev.enemy.network.instagram.service.cache.InstagramCachedAPI;
 import com.kiselev.enemy.network.vk.model.VKProfile;
+import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
+import com.kiselev.enemy.utils.analytics.model.Prediction;
 import com.kiselev.enemy.utils.flow.annotation.EnemyValue;
 import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.kiselev.enemy.utils.progress.ProgressableAPI;
@@ -34,6 +37,10 @@ public class InstagramService extends ProgressableAPI {
 
     private final InstagramCachedAPI api;
 
+    public InstagramCachedAPI api() {
+        return api;
+    }
+
     public InstagramProfile me() {
         User me = api.me();
         return new InstagramInternalProfile(me);
@@ -46,6 +53,15 @@ public class InstagramService extends ProgressableAPI {
 
         User instagramUser = api.profile(username);
         return new InstagramInternalProfile(instagramUser);
+    }
+
+    public String address(InstagramProfile profile) {
+        List<InstagramPost> posts = profile.posts();
+        Prediction<String> prediction = AnalyticsUtils.predict(InstagramPost::location, posts);
+        if (prediction != null && prediction.sufficient(20)) {
+            return prediction.value();
+        }
+        return null;
     }
 
     public List<InstagramProfile> friends(String id) {
@@ -112,29 +128,38 @@ public class InstagramService extends ProgressableAPI {
         return api.messages(threadId);
     }
 
-    @SneakyThrows
-    public EnemyMessage<InstagramProfile> info(String identifier) {
-        InstagramProfile profile = profile(identifier);
+//    @SneakyThrows
+//    public EnemyMessage<InstagramProfile> info(String identifier) {
+//        List<String> messages = Lists.newArrayList();
+//
+//        InstagramProfile profile = profile(identifier);
+//        messages.add(message("Username", profile.username()));
+//        messages.add(message("Full name", profile.fullName()));
+//        messages.add(message("Category", profile.category()));
+//        messages.add(message("Biography", profile.biography()));
+//        messages.add(message("Phone number", profile.public_phone_number()));
+//        messages.add(message("Email", profile.public_email()));
+//        messages.add(message("Address", profile.address()));
+//
+//        String message = messages.stream()
+//                .filter(Objects::nonNull)
+//                .collect(Collectors.joining("\n"));
+//        if (StringUtils.isNotEmpty(message)) {
+//            return EnemyMessage.of(profile, message);
+//        } else {
+//            return null;
+//        }
+//    }
 
-        String message = Stream.of(VKProfile.class.getDeclaredFields())
-                .peek(field -> field.setAccessible(true))
-                .filter(field -> field.getAnnotation(EnemyValue.class) != null)
-                .map(field -> {
-                    String name = field.getName();
-                    Object object = ReflectionUtils.getField(field, profile);
-                    if (object != null) {
-                        String value = object.toString();
-                        if (StringUtils.isNotEmpty(value)) {
-                            return String.format("%s - %s", name, value);
-                        }
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.joining("\n"));
-
-        return EnemyMessage.of(profile, message);
-    }
+//    private String message(String title, Object field) {
+//        if (field != null) {
+//            String string = field.toString();
+//            if (StringUtils.isNotEmpty(string)) {
+//                return title + ": " + field.toString();
+//            }
+//        }
+//        return null;
+//    }
 
 //
 //
@@ -160,6 +185,14 @@ public class InstagramService extends ProgressableAPI {
     private class InstagramInternalProfile extends InstagramProfile {
         public InstagramInternalProfile(User profile) {
             super(profile);
+        }
+
+        @Override
+        public String address() {
+            if (super.address() == null) {
+                super.address(InstagramService.this.address(this));
+            }
+            return super.address();
         }
 
         @Override
