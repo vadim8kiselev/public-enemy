@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MongoCacheVKRepository extends MongoRepository<Profile, String> {
 
-    Profile findOneByIdOrUserName(String id);
+    Profile findOneByIdOrUsername(String id);
 }

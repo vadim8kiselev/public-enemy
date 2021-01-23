@@ -24,7 +24,7 @@ public class VKMongoService {
     }
 
     public Profile readCache(String profileId) {
-        return mongoCacheVKRepository.findOneByIdOrUserName(profileId);
+        return mongoCacheVKRepository.findOneByIdOrUsername(profileId);
     }
 
     public void saveCache(Profile profile) {
