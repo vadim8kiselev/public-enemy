@@ -135,6 +135,13 @@ public class Profile implements Info {
     @SerializedName("photo_max")
     private URL photo;
 
+    public Sex sex() {
+        if (this.sex == null) {
+            this.sex = Sex.UNKNOWN;
+        }
+        return this.sex;
+    }
+
     public String fullName() {
         return this.firstName + " " + this.lastName;
     }
