@@ -43,7 +43,11 @@ public class PublicEnemyApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+//        birthdates();
+//        stats();
+    }
 
+    public void birthdates() {
         VKProfile me = publicEnemy.vk().me();
         List<VKProfile> friends = publicEnemy.vk().service().api().friends(me.id()).stream()
                 .map(VKProfile::new)
@@ -66,8 +70,6 @@ public class PublicEnemyApplication implements CommandLineRunner {
             }
             publicEnemy.tg().send(TelegramMessage.raw(number++ + ": " + friend.fullName() + " - " + birthDate + "(" + age + ")"));
         }
-
-//        stats();
     }
 
     @SneakyThrows
