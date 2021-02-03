@@ -2,6 +2,7 @@ package com.kiselev.enemy.network.instagram.service.analyst;
 
 import com.google.common.collect.Lists;
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
+import com.kiselev.enemy.network.instagram.model.ProfileType;
 import com.kiselev.enemy.network.instagram.service.InstagramService;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
 import com.kiselev.enemy.utils.analytics.model.Prediction;
@@ -30,6 +31,7 @@ public class InstagramAnalyst {
         List<EnemyMessage<InstagramProfile>> messages = Lists.newArrayList();
 
         messages.add(unmutuals(profile));
+        messages.add(realFollowers(profile));
 //        messages.add(likes(profile));
 
         return Analysis.of(
@@ -60,6 +62,21 @@ public class InstagramAnalyst {
                                     .collect(Collectors.joining("\n"))));
         }
         return null;
+    }
+
+    private EnemyMessage<InstagramProfile> realFollowers(InstagramProfile profile) {
+        Long bots = profile.followers().stream()
+                .filter(InstagramProfile::isBot)
+                .count();
+
+        Integer followers= profile.followerCount();
+
+        return EnemyMessage.of(
+                profile,
+                String.format(
+                        "Has %s bots among of %s followers",
+                        bots,
+                        followers));
     }
 
     private EnemyMessage<InstagramProfile> likes(InstagramProfile profile) {

@@ -5,17 +5,22 @@ import com.kiselev.enemy.network.vk.api.internal.VKAPI;
 import com.kiselev.enemy.network.vk.api.model.*;
 import com.kiselev.enemy.network.vk.api.request.SearchRequest;
 import com.kiselev.enemy.network.vk.model.VKProfile;
+import com.kiselev.enemy.network.vk.utils.VKUtils;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
 import com.kiselev.enemy.utils.analytics.model.Prediction;
+import com.kiselev.enemy.utils.flow.message.EnemyMessage;
+import com.vk.api.sdk.exceptions.ApiException;
+import com.vk.api.sdk.exceptions.ApiPrivateProfileException;
 import com.vk.api.sdk.objects.likes.Type;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,8 +50,7 @@ public class VKService {
     }
 
     public String age(VKProfile profile) {
-        Integer intAge = searchAge(profile, 1, 100);
-        String age = intAge != null ? intAge.toString() : null;
+        String age = searchAge(profile, 1, 100);
 
         if (age == null) {
             List<VKProfile> friends = profile.friends();
@@ -83,7 +87,7 @@ public class VKService {
         for (Photo photo : photos) {
             photo.likes(
                     api.likes(id, photo.id(), Type.PHOTO).stream()
-                            .map(VKProfile::new)
+                            .map(VKInternalProfile::new)
                             .collect(Collectors.toList()));
         }
 
@@ -94,7 +98,7 @@ public class VKService {
         List<Profile> friends = api.friends(id);
 
         return friends.stream()
-                .map(VKProfile::new)
+                .map(VKInternalProfile::new)
                 .collect(Collectors.toList());
     }
 
@@ -102,7 +106,7 @@ public class VKService {
         List<Profile> followers = api.followers(id);
 
         return followers.stream()
-                .map(VKProfile::new)
+                .map(VKInternalProfile::new)
                 .collect(Collectors.toList());
     }
 
@@ -110,7 +114,7 @@ public class VKService {
         List<Profile> following = api.following(id);
 
         return following.stream()
-                .map(VKProfile::new)
+                .map(VKInternalProfile::new)
                 .collect(Collectors.toList());
     }
 
@@ -126,7 +130,7 @@ public class VKService {
         for (Post post : posts) {
             post.likes(
                     api.likes(id, post.id(), Type.POST).stream()
-                            .map(VKProfile::new)
+                            .map(VKInternalProfile::new)
                             .collect(Collectors.toList()));
         }
 
@@ -171,11 +175,15 @@ public class VKService {
 
     public List<VKProfile> search(SearchRequest.Query query) {
         return api.search(query).stream()
-                .map(VKProfile::new)
+                .map(VKInternalProfile::new)
                 .collect(Collectors.toList());
     }
 
-    public Integer searchAge(VKProfile profile, int from, int to) {
+    public String searchAge(VKProfile profile) {
+        return searchAge(profile, 1, 100);
+    }
+
+    public String searchAge(VKProfile profile, int from, int to) {
         if (from != to) {
             int middle = from + (to - from) / 2;
 
@@ -191,68 +199,140 @@ public class VKService {
 
             return null;
         }
-        return from;
+        return String.valueOf(from);
     }
 
     @SneakyThrows
     private boolean isProfileFound(VKProfile profile, int a, int b) {
-        List<VKProfile> profiles = search(request -> request
-                .q(profile.fullName())
-                .city(profile.cityCode())
-                .country(profile.countryCode())
-                .hometown(profile.homeTown())
-                .ageFrom(a)
-                .ageTo(b));
+        SearchRequest.Query query = request -> {
+            SearchRequest searchRequest = request
+                    .q(profile.fullName())
+                    .city(profile.cityCode())
+                    .country(profile.countryCode())
+                    .hometown(profile.homeTown())
+                    .ageFrom(a)
+                    .ageTo(b);
+            if (profile.birthDay() != null) {
+                searchRequest = searchRequest.birthDay(profile.birthDay());
+            }
+            if (profile.birthMonth() != null) {
+                searchRequest = searchRequest.birthMonth(profile.birthMonth());
+            }
+            if (profile.birthYear() != null) {
+                searchRequest = searchRequest.birthYear(profile.birthYear());
+            }
+            return searchRequest;
+        };
 
-        List<String> ids = profiles.stream()
-                .map(VKProfile::id)
+        List<VKProfile> profiles = api.search(query).stream()
+                .map(VKProfile::new)
                 .collect(Collectors.toList());
 
-        return ids.contains(profile.id());
+        return profiles.contains(profile);
     }
 
-//    @SneakyThrows
-//    public EnemyMessage<Profile> info(String identifier) {
-//        List<String> messages = Lists.newArrayList();
-//
-//        Profile profile = api.profile(identifier);
-//        messages.add(message("Username", profile.username()));
-//        messages.add(message("Full name", profile.fullName()));
-//        messages.add(message("Status", profile.status()));
-//        messages.add(message("Sex", profile.sex().name()));
-//
-//        Integer age = VKUtils.age(profile.birthday());
-//        if (age != null) {
-//            messages.add(message("Age", age));
-//        } else {
-//            messages.add(message("Age", "Hidden"));
-//            messages.add(message(">>>", "Hidden"));
-//        }
-//
-//        messages.add(message("Birthday", profile.birthday()));
-//        messages.add(message("Country", profile.country()));
-//        messages.add(message("City", profile.city()));
-//        messages.add(message("Phone", profile.phone()));
-//
-//        String message = messages.stream()
-//                .filter(Objects::nonNull)
-//                .collect(Collectors.joining("\n"));
-//        if (StringUtils.isNotEmpty(message)) {
-//            return EnemyMessage.of(profile, message);
-//        } else {
-//            return null;
-//        }
-//    }
+    public String searchBirthDate(VKProfile profile) {
+        String birthday = profile.birthDate();
+        if (birthday != null) {
+            String[] numbers = birthday.split("\\.");
+            if (numbers.length == 3) {
+                int day = Integer.parseInt(numbers[0]);
+                int month = Integer.parseInt(numbers[1]);
+                int year = Integer.parseInt(numbers[2]);
+                return searchBirthDate(profile, day, month, year);
+            } else if (numbers.length == 2) {
+                int day = Integer.parseInt(numbers[0]);
+                int month = Integer.parseInt(numbers[1]);
+                return searchBirthDate(profile, day, month, null);
+            }
+        }
 
-//    private String message(String title, Object field) {
-//        if (field != null) {
-//            String string = field.toString();
-//            if (StringUtils.isNotEmpty(string)) {
-//                return title + ": " + field.toString();
-//            }
-//        }
-//        return null;
-//    }
+        String age = searchAge(profile);
+        if (age != null) {
+            int year = LocalDate.now().minusYears(
+                    Integer.parseInt(age)
+            ).getYear();
+            for (int predictedYear = year - 1; predictedYear <= year + 1; predictedYear++) {
+                String predictedBirthDate = searchBirthDate(profile, null, null, predictedYear);
+                if (predictedBirthDate != null) {
+                    return predictedBirthDate;
+                }
+            }
+        }
+        return null;
+    }
+
+    public String searchBirthDate(VKProfile profile, Integer day, Integer month, Integer year) {
+        if (year != null) {
+            if (month != null) {
+                if (day != null) {
+                    if (isProfileFound(profile, day, month, year)) {
+                        return String.format("%s.%s.%s", day, month, year);
+                    }
+                } else {
+                    // Null day
+                    for (int dayIndex = 1; dayIndex <= 31; dayIndex++) {
+                        if (isProfileFound(profile, dayIndex, month, year)) {
+                            return searchBirthDate(profile, dayIndex, month, year);
+                        }
+                    }
+                }
+            } else {
+                // Null month
+                for (int monthIndex = 1; monthIndex <= 12; monthIndex++) {
+                    if (isProfileFound(profile, day, monthIndex, year)) {
+                        return searchBirthDate(profile, day, monthIndex, year);
+                    }
+                }
+            }
+        } else {
+            // Null year
+            int today = LocalDate.now().getYear();
+            for (int yearIndex = today; yearIndex >= today - 100; yearIndex--) {
+                if (isProfileFound(profile, day, month, yearIndex)) {
+                    return searchBirthDate(profile, day, month, yearIndex);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    @SneakyThrows
+    private boolean isProfileFound(VKProfile profile, Integer day, Integer month, Integer year) {
+        SearchRequest.Query query = request -> {
+            SearchRequest searchRequest = request
+                    .q(profile.fullName())
+                    .city(profile.cityCode())
+                    .country(profile.countryCode())
+                    .hometown(profile.homeTown());
+            if (day != null) {
+                searchRequest = searchRequest.birthDay(day);
+            }
+            if (month != null) {
+                searchRequest = searchRequest.birthMonth(month);
+            }
+            if (year != null) {
+                searchRequest = searchRequest.birthYear(year);
+            }
+            return searchRequest;
+        };
+
+        List<VKProfile> profiles = api.search(query).stream()
+                .map(VKProfile::new)
+                .collect(Collectors.toList());
+
+        return profiles.contains(profile);
+    }
+
+    @SneakyThrows
+    public EnemyMessage<VKProfile> info(String identifier) {
+        return null;
+    }
+
+    public EnemyMessage<VKProfile> version(String identifier) {
+        return null;
+    }
 
     private class VKInternalProfile extends VKProfile {
 

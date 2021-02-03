@@ -20,7 +20,9 @@ public class TelegramMessage<Profile extends Info> {
 
     private List<EnemyMessage<Profile>> messages;
 
-    private String message;
+    private EnemyMessage<Profile> message;
+
+    private String text;
 
     public static <Profile extends Info> TelegramMessage<Profile> analysis(Analysis<Profile> analysis) {
         TelegramMessage<Profile> message = new TelegramMessage<>();
@@ -36,10 +38,24 @@ public class TelegramMessage<Profile extends Info> {
         return message;
     }
 
-    public static TelegramMessage<?> message(String text) {
-        TelegramMessage<?> message = new TelegramMessage<>();
+    public static <Profile extends Info> TelegramMessage<Profile> message(EnemyMessage<Profile> rawMessage) {
+        TelegramMessage<Profile> message = new TelegramMessage<>();
         message.type = MessageType.SINGLE;
-        message.message = text;
+        message.message = rawMessage;
+        return message;
+    }
+
+    public static TelegramMessage<?> text(String text) {
+        TelegramMessage<?> message = new TelegramMessage<>();
+        message.type = MessageType.TEXT;
+        message.text = text;
+        return message;
+    }
+
+    public static TelegramMessage<?> raw(String text) {
+        TelegramMessage<?> message = new TelegramMessage<>();
+        message.type = MessageType.RAW;
+        message.text = text;
         return message;
     }
 
@@ -56,7 +72,11 @@ public class TelegramMessage<Profile extends Info> {
     }
 
     public String message() {
-        return message;
+        return answer(message);
+    }
+
+    public String text() {
+        return text;
     }
 
     private List<String> answers(List<EnemyMessage<Profile>> enemyMessages) {
@@ -73,7 +93,11 @@ public class TelegramMessage<Profile extends Info> {
                 .collect(Collectors.toList());
     }
 
+    private String answer(EnemyMessage<Profile> enemyMessage) {
+        return enemyMessage.getProfile().header() + enemyMessage.getMessage();
+    }
+
     public enum MessageType {
-        ANALYSIS, MULTI, SINGLE
+        ANALYSIS, MULTI, SINGLE, TEXT, RAW
     }
 }

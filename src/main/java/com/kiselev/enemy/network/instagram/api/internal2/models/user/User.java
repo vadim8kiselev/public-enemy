@@ -40,6 +40,15 @@ public class User extends Profile {
     @JsonProperty("is_favorite")
     private boolean isFavorite;
 
+    @JsonProperty("media_count")
+    private Integer mediaCount;
+
+    @JsonProperty("follower_count")
+    private Integer followerCount;
+
+    @JsonProperty("following_count")
+    private Integer followingCount;
+
     @Data
     public static class ProfilePic {
         public URL url;
@@ -52,9 +61,9 @@ public class User extends Profile {
 //            "public_phone_number": "",
 
 //            "media_count": 89,
-//            "geo_media_count": 0,
 //            "follower_count": 112,
 //            "following_count": 30,
+//            "geo_media_count": 0,
 //            "following_tag_count": 0,
 //            "total_igtv_videos": 0,
 //            "usertags_count": 4,

@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.utils.flow.model.Id;
 import lombok.Data;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import java.util.List;
@@ -42,6 +43,7 @@ public class Photo implements Id {
     @SerializedName("width")
     private Integer width;
 
+    @ToString.Exclude
     private transient List<VKProfile> likes;
 
     @Override

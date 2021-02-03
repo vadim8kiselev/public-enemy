@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static com.pengrad.telegrambot.UpdatesListener.CONFIRMED_UPDATES_ALL;
 import static com.pengrad.telegrambot.UpdatesListener.CONFIRMED_UPDATES_NONE;
@@ -72,7 +73,7 @@ public class TelegramHandler {
                 .orElse(null);
 
         if (requestId != null && request != null) {
-            TelegramCommand command = recognizeCommand(request);
+            TelegramCommand command = recognizeCommand(update);
 
             if (command != null) {
                 try {
@@ -97,9 +98,16 @@ public class TelegramHandler {
         }
     }
 
-    private TelegramCommand recognizeCommand(String text) {
+    private TelegramCommand recognizeCommand(Update update) {
+        List<TelegramCommand> commands = this.commands.stream()
+                .filter(command -> command.is(update))
+                .collect(Collectors.toList());
+
+        if (commands.size() != 1) {
+            throw new RuntimeException("Error happened while command recognizing process");
+        }
+
         return commands.stream()
-                .filter(command -> text.startsWith(command.command()))
                 .findFirst()
                 .orElse(null);
     }

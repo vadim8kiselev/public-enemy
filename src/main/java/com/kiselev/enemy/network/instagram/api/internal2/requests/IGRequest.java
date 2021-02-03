@@ -88,15 +88,18 @@ public abstract class IGRequest<T extends IGResponse> {
         return igResponse;
     }
 
-    public T parseResponse(String json) throws JsonProcessingException {
+    public T parseResponse(String json) {
         return parseResponse(json, getResponseType());
     }
 
-    public <U> U parseResponse(String json, Class<U> type) throws JsonProcessingException {
+    public <U> U parseResponse(String json, Class<U> type) {
         log.debug("{} parsing response : {}", apiPath() + path(), json);
-        U response = IGUtils.jsonToObject(json, type);
-
-        return response;
+        try {
+            U response = IGUtils.jsonToObject(json, type);
+            return response;
+        } catch (Exception exception) {
+            throw new RuntimeException(exception.getMessage(), exception);
+        }
     }
 
     protected Request.Builder applyHeaders(IGClient client, Request.Builder req) {

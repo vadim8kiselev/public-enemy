@@ -68,6 +68,12 @@ public class TelegramService {
             case SINGLE:
                 api.bot().send(id, message.message());
                 return;
+            case TEXT:
+                api.bot().send(id, message.text());
+                return;
+            case RAW:
+                api.bot().sendRaw(id, message.text());
+                return;
             default:
                 throw new RuntimeException("Unknown type of the message");
         }

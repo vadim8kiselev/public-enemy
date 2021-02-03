@@ -40,21 +40,21 @@ public class PublicEnemyTracker {
     @Value("${com.kiselev.enemy.telegram.id}")
     private Integer telegramIdentifier;
 
-    @SneakyThrows
-    @Scheduled(cron = "0 0/1 * * * *")
-    public void vk() {
-        if (vkIsEnabled) {
-            List<EnemyMessage<VKProfile>> profile = vk.track(vkIdentifier);
-            telegram.send(telegramIdentifier, TelegramMessage.messages(profile));
-        }
-    }
-
-    @SneakyThrows
-    @Scheduled(cron = "0 0/1 * * * *")
-    public void ig() {
-        if (igIsEnabled) {
-            List<EnemyMessage<InstagramProfile>> profile = instagram.track(igIdentifier);
-            telegram.send(telegramIdentifier, TelegramMessage.messages(profile));
-        }
-    }
+//    @SneakyThrows
+//    @Scheduled(cron = "0 0/1 * * * *")
+//    public void vk() {
+//        if (vkIsEnabled) {
+//            List<EnemyMessage<VKProfile>> profile = vk.track(vkIdentifier);
+//            telegram.send(telegramIdentifier, TelegramMessage.messages(profile));
+//        }
+//    }
+//
+//    @SneakyThrows
+//    @Scheduled(cron = "0 0/1 * * * *")
+//    public void ig() {
+//        if (igIsEnabled) {
+//            List<EnemyMessage<InstagramProfile>> profile = instagram.track(igIdentifier);
+//            telegram.send(telegramIdentifier, TelegramMessage.messages(profile));
+//        }
+//    }
 }

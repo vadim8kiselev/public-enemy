@@ -19,6 +19,7 @@ import com.kiselev.enemy.network.instagram.api.internal2.requests.feed.FeedUserR
 import com.kiselev.enemy.network.instagram.api.internal2.requests.friendships.FriendshipsFeedsRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaGetCommentsRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaGetLikersRequest;
+import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaListReelMediaViewerRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.users.UsersUsernameInfoRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.direct.DirectInboxResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.direct.DirectThreadsResponse;
@@ -26,6 +27,7 @@ import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUser
 import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUserResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUsersResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaGetCommentsResponse;
+import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaListReelMediaViewerResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.users.UserResponse;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import com.kiselev.enemy.utils.progress.ProgressableAPI;
@@ -150,12 +152,6 @@ public class InstagramAPI extends ProgressableAPI {
                     new FeedUserRequest(profilePk, next)
             );
 
-//            InstagramFeedResult feedPosts =
-//                    client.request(new InstagramUserFeedRequest2(
-//                            profilePk,
-//                            next
-//                    ));
-
             if (response != null) {
                 posts.addAll(
                         response.getItems()
@@ -171,15 +167,9 @@ public class InstagramAPI extends ProgressableAPI {
     }
 
     public List<Profile> likes(String mediaId) {
-
         FeedUsersResponse response = client.request(
                 new MediaGetLikersRequest(mediaId)
         );
-
-//        InstagramGetMediaLikersResult likesResult = client.request(
-//                new InstagramGetMediaLikersRequest(
-//                        mediaId
-//                ));
 
         if (response != null) {
             return response.getUsers();
@@ -198,12 +188,6 @@ public class InstagramAPI extends ProgressableAPI {
                     new MediaGetCommentsRequest(mediaId,
                             next)
             );
-
-//            InstagramGetMediaCommentsResult commentsResult = client.request(
-//                    new InstagramGetMediaCommentsRequest(
-//                            mediaId,
-//                            next
-//                    ));
 
             if (response != null) {
                 comments.addAll(
@@ -229,6 +213,31 @@ public class InstagramAPI extends ProgressableAPI {
             return reel.getItems();
         }
         return null;
+    }
+
+    public List<Profile> viewers(String storyId) {
+        List<Profile> viewers = Lists.newArrayList();
+
+        String next = null;
+        do {
+
+            MediaListReelMediaViewerResponse response = client.request(
+                    new MediaListReelMediaViewerRequest(storyId,
+                            next)
+            );
+
+            if (response != null) {
+                viewers.addAll(
+                        response.getUsers()
+                );
+            }
+
+            next = response != null
+                    ? response.getNext_max_id()
+                    : null;
+        } while (next != null);
+
+        return viewers;
     }
 
     public Map<Profile, Set<ThreadItem>> history() {
@@ -284,53 +293,4 @@ public class InstagramAPI extends ProgressableAPI {
 
         return messages;
     }
-
-
-//
-//    // Also check for InstagramGetReelsTrayFeedRequest
-//    public List<InstagramStoryItem> stories(Long profilePk) {
-//        InstagramUserReelMediaFeedResult feedResult = client.request(
-//                new InstagramGetUserReelMediaFeedRequest(
-//                        profilePk
-//                )
-//        );
-//        if (feedResult != null) {
-//            List<InstagramStoryItem> items = feedResult.getItems();
-//            if (items != null) {
-//                return items;
-//            }
-//        }
-//        return Collections.emptyList();
-//    }
-//
-//    public List<InstagramUser> storyViewers(String storyPk) {
-//        List<InstagramUser> viewers = Lists.newArrayList();
-//
-//        String next = null;
-//        do {
-//            InstagramGetStoryViewersResult viewersResult = client.request(
-//                    new InstagramGetStoryViewersRequest2(
-//                            storyPk,
-//                            next
-//                    )
-//            );
-//
-//            if (viewersResult != null) {
-//                viewers.addAll(
-//                        Optional.of(viewersResult)
-//                                .map(InstagramGetStoryViewersResult::getUsers)
-//                                .orElseGet(Lists::newArrayList)
-//                );
-//            }
-//
-//            next = viewersResult != null
-//                    ? viewersResult.getNext_max_id()
-//                    : null;
-//        } while (next != null);
-//
-//        return viewers.stream()
-//                .map(InstagramUser::getUsername)
-//                .map(this::profile)
-//                .collect(Collectors.toList());
-//    }
 }

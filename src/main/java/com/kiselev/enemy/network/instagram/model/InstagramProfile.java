@@ -1,12 +1,13 @@
 package com.kiselev.enemy.network.instagram.model;
 
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
+import com.google.common.collect.Maps;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
 import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
 import com.kiselev.enemy.utils.flow.model.Info;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.ObjectUtils;
@@ -17,9 +18,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Data
 @Document
+@NoArgsConstructor
 @Accessors(fluent = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class InstagramProfile implements Info {
@@ -55,7 +60,7 @@ public class InstagramProfile implements Info {
     private String address;
 
     @ToString.Exclude
-    private List<ReelMedia> stories;
+    private List<InstagramStory> stories;
 
     @ToString.Exclude
     private List<InstagramProfile> friends;
@@ -72,8 +77,13 @@ public class InstagramProfile implements Info {
     @ToString.Exclude
     private List<InstagramProfile> likes;
 
-//    @ToString.Exclude
-//    private List<InstagramPost> stories;
+    private ProfileType profileType;
+
+    private boolean isBot;
+
+    private Integer followerCount;
+
+    private Integer followingCount;
 
     private LocalDateTime timestamp;
 
@@ -114,6 +124,87 @@ public class InstagramProfile implements Info {
         this.address = StringUtils.isNotEmpty(profile.getAddress())
                 ? profile.getAddress()
                 : null;
+
+        this.profileType = profileType(profile);
+
+        this.isBot = ProfileType.BOT == profileType;
+
+        this.followerCount = profile.getFollowerCount();
+        this.followingCount = profile.getFollowingCount();
+    }
+
+    private ProfileType profileType(User profile) {
+        boolean isAnonymous = profile.hasAnonymousPhoto();
+        boolean isNotAnonymous = !profile.hasAnonymousPhoto();
+        boolean isEmptyBiography = StringUtils.isEmpty(profile.getBiography());
+        boolean isNotEmptyBiography = StringUtils.isNotEmpty(profile.getBiography());
+        int mediaCount = profile.getMediaCount();
+        int followers = profile.getFollowerCount();
+        int followings = profile.getFollowingCount();
+
+        Map<ProfileType, Integer> rating = Maps.newHashMap();
+
+        rating.put(ProfileType.BOT, sum(
+                rate(isAnonymous),
+                rate(isEmptyBiography),
+                rate(mediaCount < 10),
+                rate(xTimesMore(followings, followers, 5))
+        ));
+        rating.put(ProfileType.VIEWER, sum(
+                rate(isNotAnonymous),
+                rate(isNotEmptyBiography),
+                rate(mediaCount < 10),
+                rate(followings > followers)
+        ));
+        rating.put(ProfileType.NORMAL, sum(
+                rate(isNotAnonymous),
+                rate(isNotEmptyBiography)
+        ));
+        rating.put(ProfileType.SHOWER, sum(
+                rate(isNotAnonymous),
+                rate(isNotEmptyBiography),
+                rate(mediaCount >= 10),
+                rate(xTimesMore(followers, followings, 5))
+        ));
+        rating.put(ProfileType.BLOGGER, sum(
+                rate(isNotAnonymous),
+                rate(mediaCount >= 100),
+                rate(isNotEmptyBiography),
+                rate(xTimesMore(followers, followings, 10))
+        ));
+        rating.put(ProfileType.STAR, sum(
+                rate(isNotAnonymous),
+                rate(isNotEmptyBiography),
+                rate(mediaCount >= 1000),
+                rate(followers >= 1_000_000)
+        ));
+
+        return rating.entrySet().stream()
+                .sorted(Map.Entry.<ProfileType, Integer>comparingByValue().reversed())
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("A problem with the rating mechanism"));
+    }
+
+    private Integer sum(int... rates) {
+        return IntStream.of(rates)
+                .sum();
+    }
+
+    private boolean xTimesMore(int a, int b, int x) {
+        return a / b > x;
+    }
+
+    private boolean xTimesLess(int a, int b, int x) {
+        return a / b < x;
+    }
+
+    private int rate(boolean expression) {
+        return expression ? 1 : 0;
+    }
+
+    private int rate(boolean expression, int rate) {
+        return expression ? rate : 0;
     }
 
     @Override

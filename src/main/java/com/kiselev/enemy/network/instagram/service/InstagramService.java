@@ -10,6 +10,7 @@ import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
 import com.kiselev.enemy.network.instagram.model.InstagramCommentary;
 import com.kiselev.enemy.network.instagram.model.InstagramPost;
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
+import com.kiselev.enemy.network.instagram.model.InstagramStory;
 import com.kiselev.enemy.network.instagram.service.cache.InstagramCachedAPI;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
 import com.kiselev.enemy.utils.analytics.model.Prediction;
@@ -97,8 +98,18 @@ public class InstagramService extends ProgressableAPI {
                 .collect(Collectors.toList());
     }
 
-    public List<ReelMedia> stories(String id) {
-        return api.stories(Long.valueOf(id));
+    public List<InstagramStory> stories(String id) {
+        List<ReelMedia> stories = api.stories(Long.valueOf(id));
+        return stories.stream()
+                .map(InstagramInternalStory::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<InstagramProfile> viewers(String id) {
+        List<User> viewers = api.viewers(id);
+        return viewers.stream()
+                .map(InstagramInternalProfile::new)
+                .collect(Collectors.toList());
     }
 
     public Map<InstagramProfile, Set<ThreadItem>> history() {
@@ -188,7 +199,7 @@ public class InstagramService extends ProgressableAPI {
         }
 
         @Override
-        public List<ReelMedia> stories() {
+        public List<InstagramStory> stories() {
             if (super.stories() == null) {
                 super.stories(InstagramService.this.stories(id()));
             }
@@ -278,6 +289,21 @@ public class InstagramService extends ProgressableAPI {
                 super.commentaries(InstagramService.this.commentaries(id()));
             }
             return super.commentaries();
+        }
+    }
+
+    private class InstagramInternalStory extends InstagramStory {
+
+        public InstagramInternalStory(ReelMedia story) {
+            super(story);
+        }
+
+        @Override
+        public List<InstagramProfile> viewers() {
+            if (super.viewers() == null) {
+                super.viewers(InstagramService.this.viewers(id()));
+            }
+            return super.viewers();
         }
     }
 }

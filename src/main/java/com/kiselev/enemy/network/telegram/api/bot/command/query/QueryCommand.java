@@ -15,13 +15,13 @@ import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
-public class Query implements TelegramCommand {
+public class QueryCommand implements TelegramCommand {
 
     private final PublicEnemyService publicEnemy;
 
     @Override
-    public String command() {
-        return "/query";
+    public boolean is(Update update) {
+        return false;
     }
 
     @Override

@@ -38,7 +38,7 @@ public class VKAnalyst {
             messages.add(age(profile));
             messages.add(country(profile));
             messages.add(city(profile));
-            messages.add(likes(profile));
+//            messages.add(likes(profile));
         } catch (Exception exception) {
             log.error("Exception while analysis of vk profile {}:\n", profile.name(), exception);
         }
@@ -71,8 +71,7 @@ public class VKAnalyst {
         }
 
         if (age == null) {
-            Integer intAge = vk.searchAge(profile, 1, 100);
-            String hiddenAge = intAge != null ? intAge.toString() : null;
+            String hiddenAge = vk.searchAge(profile, 1, 100);
 
             if (hiddenAge != null && predictedAge == null) {
                 return EnemyMessage.of(

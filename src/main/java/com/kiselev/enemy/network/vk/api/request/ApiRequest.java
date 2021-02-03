@@ -8,10 +8,7 @@ import com.kiselev.enemy.network.vk.utils.VKUtils;
 import com.vk.api.sdk.client.ClientResponse;
 import com.vk.api.sdk.client.Lang;
 import com.vk.api.sdk.client.TransportClient;
-import com.vk.api.sdk.exceptions.ApiException;
-import com.vk.api.sdk.exceptions.ApiServerException;
-import com.vk.api.sdk.exceptions.ClientException;
-import com.vk.api.sdk.exceptions.ExceptionMapper;
+import com.vk.api.sdk.exceptions.*;
 import com.vk.api.sdk.objects.base.Error;
 import com.vk.api.sdk.queries.EnumParam;
 import org.apache.logging.log4j.LogManager;
@@ -67,10 +64,18 @@ public abstract class ApiRequest<R, T> {
     }
 
     public T execute() throws ApiException, ClientException {
-        ApiServerException exception = null;
+        ApiException exception = null;
         for (int i = 0; i < retryAttempts; i++) {
             try {
                 return executeWithoutRetry();
+            } catch (ApiPrivateProfileException e) {
+                LOG.warn("API Private profile error", e);
+                exception = e;
+//                return null
+            } catch (ApiUserDeletedException e) {
+                LOG.warn("API Banned or deleted profile error", e);
+                exception = e;
+//                return null
             } catch (ApiServerException e) {
                 LOG.warn("API Server error", e);
                 exception = e;

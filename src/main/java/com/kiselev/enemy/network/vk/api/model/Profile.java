@@ -40,7 +40,7 @@ public class Profile implements Info {
     private String domain;
 
     @SerializedName("bdate")
-    private String birthday;
+    private String birthDate;
 
     @SerializedName("country")
     private BaseObject country;
@@ -62,6 +62,18 @@ public class Profile implements Info {
 
     @SerializedName("instagram")
     private String instagram;
+
+    @SerializedName("facebook")
+    private String facebook;
+
+    @SerializedName("facebook_name")
+    private String facebookName;
+
+    @SerializedName("twitter")
+    private String twitter;
+
+    @SerializedName("skype")
+    private String skype;
 
     @SerializedName("status_audio")
     private Audio statusAudio;

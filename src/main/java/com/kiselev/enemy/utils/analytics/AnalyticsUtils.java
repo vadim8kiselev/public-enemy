@@ -19,6 +19,10 @@ public class AnalyticsUtils {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
+        return predict(predictionCandidates);
+    }
+
+    public static <Type> Prediction<Type> predict(List<Type> predictionCandidates) {
         Map<Type, Long> predictionCandidatesHeatMap = predictionCandidates.stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 

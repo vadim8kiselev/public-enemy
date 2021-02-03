@@ -27,7 +27,5 @@ public class VKConstants {
 
     public static final Integer MESSAGES = 200;
 
-    public static final Integer REPOSTS = 1000;
-
-    public static final Integer MEMBERS = 1000;
+    public static final Integer SEARCH = 1000;
 }

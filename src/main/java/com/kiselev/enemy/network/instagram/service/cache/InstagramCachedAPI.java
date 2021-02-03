@@ -109,6 +109,17 @@ public class InstagramCachedAPI extends ProgressableAPI {
         return api.stories(profilePk);
     }
 
+    public List<User> viewers(String storyId) {
+        List<Profile> viewers = api.viewers(storyId);
+
+        return viewers.stream()
+                .peek(like -> progress.bar(SocialNetwork.IG, "Viewers", viewers, like))
+                .map(Profile::username)
+                .map(this::profile)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
     public Map<Profile, Set<ThreadItem>> history() {
         return api.history();
     }

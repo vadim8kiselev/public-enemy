@@ -14,13 +14,13 @@ public class IdCommand implements TelegramCommand {
     private final PublicEnemyService publicEnemy;
 
     @Override
-    public String command() {
-        return "/id";
+    public boolean is(Update update) {
+        return false;
     }
 
     @Override
     public void execute(Update update, String... args) {
         Integer requestId = update.message().from().id();
-        publicEnemy.tg().send(requestId, TelegramMessage.message("Your id is " + requestId));
+        publicEnemy.tg().send(requestId, TelegramMessage.text("Your id is " + requestId));
     }
 }

@@ -4,7 +4,7 @@ import com.pengrad.telegrambot.model.Update;
 
 public interface TelegramCommand {
 
-    String command();
+    boolean is(Update update);
 
     void execute(Update update, String... args);
 }

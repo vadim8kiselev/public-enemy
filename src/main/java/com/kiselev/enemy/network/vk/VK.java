@@ -40,14 +40,14 @@ public class VK implements SocialNetwork<VKProfile> {
     }
 
     @Override
-    public List<EnemyMessage<VKProfile>> track(String identifier) {
-        log.info("VK profile tracking for identifier {}", identifier);
-        return tracker.track(identifier);
+    public EnemyMessage<VKProfile> info(String identifier) {
+        log.info("VK profile information for identifier {}", identifier);
+        return vk.info(identifier);
     }
 
     @Override
-    public Analysis<VKProfile> analyze(String identifier) {
-        log.info("VK profile analysis for identifier {}", identifier);
-        return analyst.analyze(identifier);
+    public EnemyMessage<VKProfile> version(String identifier) {
+        log.info("VK profile version for identifier {}", identifier);
+        return vk.version(identifier);
     }
 }

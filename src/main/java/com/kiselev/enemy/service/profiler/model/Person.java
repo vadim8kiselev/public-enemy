@@ -88,7 +88,7 @@ public class Person {
         this.fullName = profile.fullName();
         this.sex = profile.sex();
         this.age = profile.age();
-        this.birthday = profile.birthday();
+        this.birthday = profile.birthDate();
         this.country = profile.country();
         this.city = profile.city();
         this.address = profile.country() + ", " + profile.city();

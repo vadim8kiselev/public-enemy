@@ -11,9 +11,13 @@ import com.kiselev.enemy.utils.flow.annotation.EnemyValues;
 import com.kiselev.enemy.utils.flow.model.Info;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import com.vk.api.sdk.objects.base.BoolInt;
+import com.vk.api.sdk.objects.users.Career;
+import com.vk.api.sdk.objects.users.School;
+import com.vk.api.sdk.objects.users.University;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +26,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.kiselev.enemy.network.vk.model.constants.VKMessages.*;
 
@@ -59,7 +66,16 @@ public class VKProfile implements Info {
     private String age;
 
     @EnemyValue(message = BIRTHDAY_MESSAGE)
-    private String birthday;
+    private String birthDate;
+
+    @EnemyValue
+    private Integer birthDay;
+
+    @EnemyValue
+    private Integer birthMonth;
+
+    @EnemyValue
+    private Integer birthYear;
 
     private URL photo;
 
@@ -83,10 +99,28 @@ public class VKProfile implements Info {
     private String site;
 
     @EnemyValue
+    private String facebook;
+
+    @EnemyValue
+    private String twitter;
+
+    @EnemyValue
+    private String skype;
+
+    @EnemyValue
     private String instagram;
 
     @EnemyValue
     private String telegram;
+
+    @EnemyValue
+    private List<String> university;
+
+    @EnemyValue
+    private List<String> school;
+
+    @EnemyValue
+    private List<String> job;
 
     private boolean isFriend;
 
@@ -95,26 +129,34 @@ public class VKProfile implements Info {
     @EnemyValue(message = DEACTIVATED_MESSAGE)
     private String isDeactivated;
 
+    @ToString.Exclude
     @EnemyValues(newMessage = NEW_PHOTO_MESSAGE, deleteMessage = DELETED_PHOTO_MESSAGE)
     private List<Photo> photos;
 
+    @ToString.Exclude
     @EnemyValues(newMessage = NEW_FRIEND_MESSAGE, deleteMessage = DELETED_FRIEND_MESSAGE)
     private List<VKProfile> friends;
 
+    @ToString.Exclude
     @EnemyValues(newMessage = NEW_FOLLOWER_MESSAGE, deleteMessage = DELETED_FOLLOWER_MESSAGE)
     private List<VKProfile> followers;
 
+    @ToString.Exclude
     @EnemyValues(newMessage = NEW_FOLLOWING_MESSAGE, deleteMessage = DELETED_FOLLOWING_MESSAGE)
     private List<VKProfile> following;
 
+    @ToString.Exclude
     @EnemyValues(newMessage = NEW_GROUP_MESSAGE, deleteMessage = DELETED_GROUP_MESSAGE)
     private List<Group> communities;
 
+    @ToString.Exclude
     @EnemyValues(newMessage = NEW_POST_MESSAGE, deleteMessage = DELETED_POST_MESSAGE)
     private List<Post> posts;
 
+    @ToString.Exclude
     private List<VKProfile> relatives;
 
+    @ToString.Exclude
     private List<VKProfile> likes;
 
     private LocalDateTime timestamp;
@@ -129,16 +171,22 @@ public class VKProfile implements Info {
         this.fullName = profile.firstName() + " " + profile.lastName();
         this.status = profile.status();
         this.sex = profile.sex().name();
-        this.age = VKUtils.age(profile.birthday());
-        this.birthday = profile.birthday();
+        this.age = VKUtils.age(profile.birthDate());
+        this.birthDate = profile.birthDate();
+        this.birthDay = VKUtils.birthDay(profile.birthDate());
+        this.birthMonth = VKUtils.birthMonth(profile.birthDate());
+        this.birthYear = VKUtils.birthYear(profile.birthDate());
         this.photo = profile.photo();
         this.country = VKUtils.title(profile.country());
         this.city = VKUtils.title(profile.city());
         this.countryCode = VKUtils.code(profile.country());
         this.cityCode = VKUtils.code(profile.city());
-        this.homeTown = profile.homeTown();
+        this.homeTown = StringUtils.isNotEmpty(profile.homeTown()) ? profile.homeTown() : null;
         this.phone = ObjectUtils.firstNonNull(profile.mobilePhone(), profile.mobilePhone());
         this.site = profile.site();
+        this.facebook = profile.facebook();
+        this.twitter = profile.twitter();
+        this.skype = profile.skype();
         this.instagram = ObjectUtils.firstNonNull(
                 profile.instagram(),
                 ProfilingUtils.identifier(SocialNetwork.IG, profile.site()),
@@ -149,6 +197,23 @@ public class VKProfile implements Info {
         this.isFriend = BoolInt.YES == profile.isFriend();
         this.isPrivate = profile.isPrivate();
         this.isDeactivated = profile.deactivated();
+
+        this.university = VKUtils.safeStream(profile.universities())
+                .map(University::getName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        this.school = VKUtils.safeStream(profile.schools())
+                .map(School::getName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        // ocupation
+
+        this.job = VKUtils.safeStream(profile.career())
+                .map(Career::getCompany)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
 //        if (force) {
 //            vkProfile.photos();

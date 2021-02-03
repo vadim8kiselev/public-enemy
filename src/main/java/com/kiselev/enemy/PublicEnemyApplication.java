@@ -4,13 +4,17 @@ import com.google.common.collect.Lists;
 import com.kiselev.enemy.network.instagram.api.InstagramAPI;
 import com.kiselev.enemy.network.telegram.api.bot.TelegramBotAPI;
 import com.kiselev.enemy.network.telegram.api.client.TelegramClientAPI;
+import com.kiselev.enemy.network.telegram.model.TelegramMessage;
 import com.kiselev.enemy.network.vk.api.internal.VKAPI;
+import com.kiselev.enemy.network.vk.model.VKProfile;
+import com.kiselev.enemy.network.vk.service.analyst.VKAnalyst;
 import com.kiselev.enemy.service.PublicEnemyService;
 import com.kiselev.enemy.service.profiler.model.Conversation;
 import com.kiselev.enemy.service.profiler.model.Person;
 import com.kiselev.enemy.service.profiler.model.Text;
 import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -18,7 +22,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,17 +42,83 @@ public class PublicEnemyApplication implements CommandLineRunner {
     }
 
     @Override
-    @SneakyThrows
     public void run(String... args) {
 
-        TelegramBotAPI telegramBotAPI = publicEnemy.tg().service().api().bot();
-        TelegramClientAPI telegramClientAPI = publicEnemy.tg().service().api().client();
+        VKProfile me = publicEnemy.vk().me();
+        List<VKProfile> friends = publicEnemy.vk().service().api().friends(me.id()).stream()
+                .map(VKProfile::new)
+                .collect(Collectors.toList());
 
-        InstagramAPI instagramAPI = publicEnemy.ig().service().api().raw();
+        int number = 0;
+        for (VKProfile friend : friends) {
+            String birthDate = friend.birthDate();
+            if (birthDate == null) {
+                birthDate = publicEnemy.vk().service().searchBirthDate(friend);
+            }
 
-        VKAPI api = publicEnemy.vk().service().api();
+            String age = friend.age();
+            if (age == null) {
+                age = publicEnemy.vk().service().searchAge(friend);
+            }
 
-//        messages();
+            if (birthDate == null || age == null) {
+                boolean debug = true;
+            }
+            publicEnemy.tg().send(TelegramMessage.raw(number++ + ": " + friend.fullName() + " - " + birthDate + "(" + age + ")"));
+        }
+
+//        stats();
+    }
+
+    @SneakyThrows
+    public void stats() {
+        VKProfile vadim8kiselev = new VKProfile(publicEnemy.vk().service().api().profile("asya_ov"));
+
+        List<VKProfile> friends = publicEnemy.vk().service().api().friends(vadim8kiselev.id()).stream()
+                .map(VKProfile::new)
+                .collect(Collectors.toList());
+
+        List<VKProfile> a = friends.stream()
+                .filter(friend -> "25.9".equals(friend.birthDate()))
+                .collect(Collectors.toList());
+
+        List<VKProfile> b = friends.stream()
+                .filter(friend -> StringUtils.isNotEmpty(friend.telegram()))
+                .collect(Collectors.toList());
+
+        Field[] fields = vadim8kiselev.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            ReflectionUtils.makeAccessible(field);
+//            Object object = ReflectionUtils.getField(field, vadim8kiselev);
+
+            List<Object> predictionCandidates = friends.stream()
+                    .map(friend -> ReflectionUtils.getField(field, friend))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            Map<Object, Long> predictionCandidatesHeatMap = predictionCandidates.stream()
+                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+            Map<Object, Long> sortedPredictionCandidatesHeatMap = predictionCandidatesHeatMap.entrySet().stream()
+                    .sorted(Map.Entry.<Object, Long>comparingByValue().reversed())
+                    .limit(5)
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (u, v) -> v,
+                            LinkedHashMap::new));
+
+            String name = field.getName();
+            String message = sortedPredictionCandidatesHeatMap.entrySet().stream()
+                    .map(entry -> name + ": " + entry.getKey().toString() + ", number: " + entry.getValue())
+                    .collect(Collectors.joining("\n"));
+
+            try {
+                publicEnemy.tg().send(TelegramMessage.text(message));
+            } catch (Exception exception) {
+                // skip
+            }
+        }
     }
 
     //    @SneakyThrows
