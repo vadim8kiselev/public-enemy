@@ -1,18 +1,16 @@
 package com.kiselev.enemy;
 
 import com.google.common.collect.Lists;
-import com.kiselev.enemy.network.instagram.api.InstagramAPI;
-import com.kiselev.enemy.network.telegram.api.bot.TelegramBotAPI;
-import com.kiselev.enemy.network.telegram.api.client.TelegramClientAPI;
 import com.kiselev.enemy.network.telegram.model.TelegramMessage;
-import com.kiselev.enemy.network.vk.api.internal.VKAPI;
+import com.kiselev.enemy.network.vk.api.model.Message;
 import com.kiselev.enemy.network.vk.model.VKProfile;
-import com.kiselev.enemy.network.vk.service.analyst.VKAnalyst;
 import com.kiselev.enemy.service.PublicEnemyService;
 import com.kiselev.enemy.service.profiler.model.Conversation;
 import com.kiselev.enemy.service.profiler.model.Person;
 import com.kiselev.enemy.service.profiler.model.Text;
 import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
+import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
+import com.kiselev.enemy.utils.analytics.model.Prediction;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -43,14 +41,85 @@ public class PublicEnemyApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+//        InstagramProfile me = publicEnemy.ig().me();
+//        List<InstagramStory> stories = me.stories();
+//
+//        for (InstagramStory story : stories) {
+//            List<InstagramProfile> viewers = story.viewers();
+//        }
+//
+//        boolean debug = true;
+
+//        sortedMessages();
+//        cities();
 //        birthdates();
 //        stats();
+    }
+
+    private void sortedMessages() {
+        VKProfile vk_me = publicEnemy.vk().me();
+
+        Map<VKProfile, Set<Message>> vkRawHistory = publicEnemy.vk().service().history();
+        List<Conversation> vkHistory = vkRawHistory.entrySet().stream()
+                .map(entry -> Conversation.builder()
+                        .id(entry.getKey().id())
+                        .person(new Person(entry.getKey()))
+                        .texts(entry.getValue().stream()
+                                .map(Text::new)
+                                .collect(Collectors.toList()))
+                        .build())
+                .collect(Collectors.toList());
+
+        List<String> dialogues = vkHistory.stream()
+                .filter(conversation -> conversation.getTexts() != null)
+                .sorted((a, b) -> {
+                    int a_size = a.getTexts() != null ? a.getTexts().size() : 0;
+                    int b_size = b.getTexts() != null ? b.getTexts().size() : 0;
+                    return Integer.compare(b_size, a_size);
+                })
+                .map(conversation -> conversation.getPerson().getFullName() + " - " + conversation.getTexts().size() + " messages")
+                .limit(30)
+                .collect(Collectors.toList());
+
+        for (String dialogue : dialogues) {
+            publicEnemy.tg().send(TelegramMessage.text(dialogue));
+        }
+    }
+
+    private void cities() {
+        VKProfile kiselev = publicEnemy.vk().profile("kiselev");
+
+        Set<VKProfile> friends = publicEnemy.vk().service().api().friends(kiselev.id())
+                .stream()
+                .map(VKProfile::new)
+                .map(friend -> publicEnemy.vk().service().api().friends(friend.id()).stream()
+                        .map(VKProfile::new).collect(Collectors.toSet()))
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet());
+
+        for (VKProfile friend : friends) {
+            String city = friend.city();
+            if (city != null) {
+                List<VKProfile> ffriends = publicEnemy.vk().service().api().friends(friend.id()).stream()
+                        .map(VKProfile::new).collect(Collectors.toList());
+
+                Prediction<String> prediction = AnalyticsUtils.predict(VKProfile::city, ffriends);
+                if (prediction != null && prediction.sufficient(20)) {
+                    String predictedCity = prediction.value();
+
+                    if (ObjectUtils.notEqual(city, predictedCity)) {
+                        publicEnemy.tg().send(TelegramMessage.text(friend.name() + " - City:" + city + ", Predicted City: " + prediction.message()));
+                    }
+                }
+            }
+        }
     }
 
     public void birthdates() {
         VKProfile me = publicEnemy.vk().me();
         List<VKProfile> friends = publicEnemy.vk().service().api().friends(me.id()).stream()
                 .map(VKProfile::new)
+                .sorted(Comparator.comparing(VKProfile::lastName))
                 .collect(Collectors.toList());
 
         int number = 0;

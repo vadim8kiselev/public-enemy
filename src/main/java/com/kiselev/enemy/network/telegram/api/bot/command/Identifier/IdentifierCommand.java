@@ -10,9 +10,7 @@ import com.kiselev.enemy.service.PublicEnemyService;
 import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
 import com.kiselev.enemy.utils.analytics.model.Prediction;
-import com.kiselev.enemy.utils.flow.message.Analysis;
 import com.kiselev.enemy.utils.flow.message.EnemyMessage;
-import com.kiselev.enemy.utils.flow.model.Info;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import com.kiselev.enemy.utils.progress.ProgressableAPI;
 import com.pengrad.telegrambot.model.Message;
@@ -25,7 +23,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -171,79 +168,78 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
             messages.addAll(life);
         }
 
-
-        for (VKProfile friend : friends) {
-            List<VKProfile> ffriends = publicEnemy.vk().service().api().friends(friend.id()).stream()
-                    .map(VKProfile::new)
-                    .collect(Collectors.toList());
-
-            if (CollectionUtils.isNotEmpty(ffriends)) {
-                if (friend.age() == null) {
-                    Prediction<String> prediction = AnalyticsUtils.predict(VKProfile::age, ffriends);
-                    if (prediction != null) {
-                        friend.age(prediction.value());
-                    }
-                }
-                if (friend.country() == null) {
-                    Prediction<String> prediction = AnalyticsUtils.predict(VKProfile::country, ffriends);
-                    if (prediction != null) {
-                        friend.country(prediction.value());
-                    }
-                }
-                if (friend.city() == null) {
-                    Prediction<String> prediction = AnalyticsUtils.predict(VKProfile::city, ffriends);
-                    if (prediction != null) {
-                        friend.city(prediction.value());
-                    }
-                }
-                if (friend.homeTown() == null) {
-                    Prediction<String> prediction = AnalyticsUtils.predict(VKProfile::homeTown, ffriends);
-                    if (prediction != null) {
-                        friend.homeTown(prediction.value());
-                    }
-                }
-                if (friend.school() == null) {
-                    List<String> schools = ffriends.stream()
-                            .map(VKProfile::school)
-                            .flatMap(List::stream)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toList());
-                    Prediction<String> prediction = AnalyticsUtils.predict(schools);
-                    if (prediction != null) {
-                        friend.school(Collections.singletonList(
-                                prediction.value()
-                        ));
-                    }
-                }
-                if (friend.university() == null) {
-                    List<String> universities = ffriends.stream()
-                            .map(VKProfile::university)
-                            .flatMap(List::stream)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toList());
-                    Prediction<String> prediction = AnalyticsUtils.predict(universities);
-                    if (prediction != null) {
-                        friend.university(Collections.singletonList(
-                                prediction.value()
-                        ));
-                    }
-                }
-                if (friend.job() == null) {
-                    List<String> jobs = ffriends.stream()
-                            .map(VKProfile::job)
-                            .flatMap(List::stream)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toList());
-                    Prediction<String> prediction = AnalyticsUtils.predict(jobs);
-                    if (prediction != null) {
-                        friend.job(Collections.singletonList(
-                                prediction.value()
-                        ));
-                    }
-                }
-            }
-            progress.bar(SocialNetwork.VK, "Friends of friends", friends, friend);
-        }
+//        for (VKProfile friend : friends) {
+//            List<VKProfile> ffriends = publicEnemy.vk().service().api().friends(friend.id()).stream()
+//                    .map(VKProfile::new)
+//                    .collect(Collectors.toList());
+//
+//            if (CollectionUtils.isNotEmpty(ffriends)) {
+//                if (friend.age() == null) {
+//                    Prediction<String> prediction = AnalyticsUtils.predict(VKProfile::age, ffriends);
+//                    if (prediction != null) {
+//                        friend.age(prediction.value());
+//                    }
+//                }
+//                if (friend.country() == null) {
+//                    Prediction<String> prediction = AnalyticsUtils.predict(VKProfile::country, ffriends);
+//                    if (prediction != null) {
+//                        friend.country(prediction.value());
+//                    }
+//                }
+//                if (friend.city() == null) {
+//                    Prediction<String> prediction = AnalyticsUtils.predict(VKProfile::city, ffriends);
+//                    if (prediction != null) {
+//                        friend.city(prediction.value());
+//                    }
+//                }
+//                if (friend.homeTown() == null) {
+//                    Prediction<String> prediction = AnalyticsUtils.predict(VKProfile::homeTown, ffriends);
+//                    if (prediction != null) {
+//                        friend.homeTown(prediction.value());
+//                    }
+//                }
+//                if (friend.school() == null) {
+//                    List<String> schools = ffriends.stream()
+//                            .map(VKProfile::school)
+//                            .flatMap(List::stream)
+//                            .filter(Objects::nonNull)
+//                            .collect(Collectors.toList());
+//                    Prediction<String> prediction = AnalyticsUtils.predict(schools);
+//                    if (prediction != null) {
+//                        friend.school(Collections.singletonList(
+//                                prediction.value()
+//                        ));
+//                    }
+//                }
+//                if (friend.university() == null) {
+//                    List<String> universities = ffriends.stream()
+//                            .map(VKProfile::university)
+//                            .flatMap(List::stream)
+//                            .filter(Objects::nonNull)
+//                            .collect(Collectors.toList());
+//                    Prediction<String> prediction = AnalyticsUtils.predict(universities);
+//                    if (prediction != null) {
+//                        friend.university(Collections.singletonList(
+//                                prediction.value()
+//                        ));
+//                    }
+//                }
+//                if (friend.job() == null) {
+//                    List<String> jobs = ffriends.stream()
+//                            .map(VKProfile::job)
+//                            .flatMap(List::stream)
+//                            .filter(Objects::nonNull)
+//                            .collect(Collectors.toList());
+//                    Prediction<String> prediction = AnalyticsUtils.predict(jobs);
+//                    if (prediction != null) {
+//                        friend.job(Collections.singletonList(
+//                                prediction.value()
+//                        ));
+//                    }
+//                }
+//            }
+//            progress.bar(SocialNetwork.VK, "Friends of friends", friends, friend);
+//        }
 
         List<String> predictions = Lists.newArrayList();
         predictions.add(prediction("Age", VKProfile::age, friends));
@@ -275,7 +271,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                                      Function<A, B> function,
                                      List<A> predictionGroup) {
         Prediction<B> prediction = AnalyticsUtils.predict(function, predictionGroup);
-        if (prediction != null && prediction.sufficient(20)) {
+        if (prediction != null && prediction.sufficient(10)) {
             return message(title, prediction.message());
         }
         return null;

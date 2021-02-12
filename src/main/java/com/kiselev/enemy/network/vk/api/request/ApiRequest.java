@@ -69,11 +69,11 @@ public abstract class ApiRequest<R, T> {
             try {
                 return executeWithoutRetry();
             } catch (ApiPrivateProfileException e) {
-                LOG.warn("API Private profile error", e);
+//                LOG.warn("API Private profile error", e);
                 exception = e;
 //                return null
             } catch (ApiUserDeletedException e) {
-                LOG.warn("API Banned or deleted profile error", e);
+//                LOG.warn("API Banned or deleted profile error", e);
                 exception = e;
 //                return null
             } catch (ApiServerException e) {
@@ -102,7 +102,7 @@ public abstract class ApiRequest<R, T> {
 
             ApiException exception = ExceptionMapper.parseException(error);
 
-            LOG.error("API error", exception);
+//            LOG.error("API error", exception);
             throw exception;
         }
 
@@ -115,7 +115,7 @@ public abstract class ApiRequest<R, T> {
 //            System.out.println(response);
             return gson.fromJson(response, responseClass);
         } catch (JsonSyntaxException e) {
-            LOG.error("Invalid JSON: " + textResponse, e);
+            //LOG.error("Invalid JSON: " + textResponse, e);
             throw new ClientException("Can't parse json response");
         }
     }
