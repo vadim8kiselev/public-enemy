@@ -11,9 +11,7 @@ import com.kiselev.enemy.utils.flow.annotation.EnemyValues;
 import com.kiselev.enemy.utils.flow.model.Info;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import com.vk.api.sdk.objects.base.BoolInt;
-import com.vk.api.sdk.objects.users.Career;
-import com.vk.api.sdk.objects.users.School;
-import com.vk.api.sdk.objects.users.University;
+import com.vk.api.sdk.objects.users.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -26,7 +24,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -39,6 +36,9 @@ import static com.kiselev.enemy.network.vk.model.constants.VKMessages.*;
 @Accessors(fluent = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class VKProfile implements Info {
+
+    @ToString.Exclude
+    private Profile profile;
 
     @Id
     @EqualsAndHashCode.Include
@@ -163,6 +163,7 @@ public class VKProfile implements Info {
 
     public VKProfile(Profile profile) {
         this.timestamp = LocalDateTime.now();
+        this.profile = profile;
 
         this.id = profile.id();
         this.username = profile.username();
@@ -170,7 +171,11 @@ public class VKProfile implements Info {
         this.lastName = profile.lastName();
         this.fullName = profile.firstName() + " " + profile.lastName();
         this.status = profile.status();
-        this.sex = profile.sex().name();
+        switch (profile.sex()) {
+            case MALE: this.sex = "Male"; break;
+            case FEMALE: this.sex = "Female"; break;
+            case UNKNOWN: this.sex = "Unknown"; break;
+        }
         this.age = VKUtils.age(profile.birthDate());
         this.birthDate = profile.birthDate();
         this.birthDay = VKUtils.birthDay(profile.birthDate());
@@ -224,11 +229,6 @@ public class VKProfile implements Info {
 //            vkProfile.posts();
 //            vkProfile.relatives();
 //        }
-    }
-
-    public boolean isActive() {
-        return StringUtils.isEmpty(isDeactivated)
-                && (isFriend || !Boolean.parseBoolean(isPrivate));
     }
 
     @Override

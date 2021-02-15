@@ -77,7 +77,7 @@ public class InstagramProfile implements Info {
     @ToString.Exclude
     private List<InstagramProfile> likes;
 
-    private ProfileType profileType;
+    private String profileType;
 
     private boolean isBot;
 
@@ -125,9 +125,10 @@ public class InstagramProfile implements Info {
                 ? profile.getAddress()
                 : null;
 
-        this.profileType = profileType(profile);
+        ProfileType type = profileType(profile);
+        this.profileType = type.value();
 
-        this.isBot = ProfileType.BOT == profileType;
+        this.isBot = ProfileType.BOT == type;
 
         this.followerCount = profile.getFollowerCount();
         this.followingCount = profile.getFollowingCount();
@@ -156,11 +157,7 @@ public class InstagramProfile implements Info {
                 rate(mediaCount < 10),
                 rate(followings > followers)
         ));
-        rating.put(ProfileType.NORMAL, sum(
-                rate(isNotAnonymous),
-                rate(isNotEmptyBiography)
-        ));
-        rating.put(ProfileType.SHOWER, sum(
+        rating.put(ProfileType.CREATOR, sum(
                 rate(isNotAnonymous),
                 rate(isNotEmptyBiography),
                 rate(mediaCount >= 10),

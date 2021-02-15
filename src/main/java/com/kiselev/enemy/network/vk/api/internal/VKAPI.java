@@ -72,7 +72,11 @@ public class VKAPI extends ProgressableAPI {
         List<Photo> photos = Lists.newArrayList();
         photos.addAll(albumPhotos(profileId, VKConstants.PROFILE_ALBUM));
         photos.addAll(albumPhotos(profileId, VKConstants.WALL_ALBUM));
-        //photos.addAll(albumPhotos(profileId, VKConstants.SAVED_ALBUM)); // TODO
+//        try {
+//            photos.addAll(albumPhotos(profileId, VKConstants.SAVED_ALBUM)); TODO
+//        } catch (Exception exception) {
+//            log.warn(exception.getMessage(), exception);
+//        }
 
         return photos.stream()
                 .sorted(Comparator.comparing(Photo::date, Comparator.reverseOrder()))

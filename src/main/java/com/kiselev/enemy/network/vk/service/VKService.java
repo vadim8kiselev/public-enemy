@@ -12,6 +12,8 @@ import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ApiPrivateProfileException;
 import com.vk.api.sdk.objects.likes.Type;
+import com.vk.api.sdk.objects.users.Relative;
+import com.vk.api.sdk.objects.users.UserRelation;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ObjectUtils;
@@ -157,6 +159,26 @@ public class VKService {
         likes.addAll(postslikes);
 
         return likes;
+    }
+
+    public List<VKProfile> relatives(Profile profile) {
+        List<VKProfile> relatives = Lists.newArrayList();
+
+        List<Relative> rawRelatives = profile.relatives();
+
+        if (rawRelatives != null) {
+            List<String> relativesIds = rawRelatives.stream()
+                    .map(Relative::getId)
+                    .map(String::valueOf)
+                    .collect(Collectors.toList());
+
+            List<Profile> profiles = api.profiles(relativesIds);
+            relatives.addAll(profiles.stream()
+                    .map(VKInternalProfile::new)
+                    .collect(Collectors.toList()));
+        }
+
+        return relatives;
     }
 
     public Map<VKProfile, Set<Message>> history() {
@@ -412,25 +434,13 @@ public class VKService {
             return super.posts();
         }
 
-//            @Override
-//            public List<VKProfile> relatives() {
-//                if (relatives == null && isActive()) {
-//                    List<Relative> relatives = profile.relatives();
-//
-//                    if (relatives != null) {
-//                        List<String> relativesIds = relatives.stream()
-//                                .map(Relative::getId)
-//                                .map(String::valueOf)
-//                                .collect(Collectors.toList());
-//
-//                        this.relatives = wrap(api, api.profiles(relativesIds), force);
-//                    }
-//                }
-//                if (relatives == null) {
-//                    this.relatives = Lists.newArrayList();
-//                }
-//                return relatives;
-//            }
+        @Override
+        public List<VKProfile> relatives() {
+            if (super.relatives() == null) {
+                super.relatives(VKService.this.relatives(super.profile()));
+            }
+            return super.relatives();
+        }
 
         @Override
         public List<VKProfile> likes() {

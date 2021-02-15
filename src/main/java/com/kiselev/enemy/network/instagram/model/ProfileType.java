@@ -2,10 +2,20 @@ package com.kiselev.enemy.network.instagram.model;
 
 public enum ProfileType {
 
-    BOT,
-    VIEWER,
-    NORMAL,
-    SHOWER,
-    BLOGGER,
-    STAR
+    DEAD("Dead"),
+    BOT("Bot"),
+    VIEWER("Viewer"),
+    CREATOR("Creator"),
+    BLOGGER("Blogger"),
+    STAR("Star");
+
+    private String value;
+
+    ProfileType(String value) {
+        this.value = value;
+    }
+
+    public String value() {
+        return value;
+    }
 }
