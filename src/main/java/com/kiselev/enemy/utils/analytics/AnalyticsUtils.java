@@ -53,22 +53,36 @@ public class AnalyticsUtils {
         return null;
     }
 
-    public static <Profile extends Info> List<Prediction<Profile>> top(List<Profile> group, Integer limit) {
-        Map<Profile, Long> likersHeatMap = group.stream()
+    public static <Type> List<Prediction<Type>> top(List<Type> group, Integer limit) {
+        Map<Type, Long> heatMap = group.stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        return likersHeatMap.entrySet().stream()
-                .sorted(Map.Entry.<Profile, Long>comparingByValue().reversed())
+        return heatMap.entrySet().stream()
+                .sorted(Map.Entry.<Type, Long>comparingByValue().reversed())
                 .map(entry -> Prediction.of(entry.getKey(), entry.getValue()))
                 .limit(limit)
                 .collect(Collectors.toList());
     }
 
-    public static <Profile extends Info> List<Profile> topObjects(List<Profile> group, Integer limit) {
-        Map<Profile, Long> likersHeatMap = group.stream()
+    public static <Type> List<Type> topObjects(List<Type> group, Integer limit) {
+        Map<Type, Long> heatMap = group.stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        return likersHeatMap.entrySet().stream()
+        return heatMap.entrySet().stream()
+                .sorted(Map.Entry.<Type, Long>comparingByValue().reversed())
+                .map(Map.Entry::getKey)
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    public static <Profile extends Info, Type> List<Profile> similar(List<Profile> group,
+                                                                     Function<Object, Type> function,
+                                                                     Type value,
+                                                                     Integer limit) {
+        Map<Profile, Long> heatMap = group.stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        return heatMap.entrySet().stream()
                 .sorted(Map.Entry.<Profile, Long>comparingByValue().reversed())
                 .map(Map.Entry::getKey)
                 .limit(limit)

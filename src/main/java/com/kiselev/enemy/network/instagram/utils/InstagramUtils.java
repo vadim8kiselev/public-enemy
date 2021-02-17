@@ -18,10 +18,10 @@ public class InstagramUtils {
                 : collection.stream();
     }
 
-    public static String dateAndTime(Long timestamp) {
+    public static LocalDateTime dateAndTime(Long timestamp) {
         return LocalDateTime
-                .ofInstant(Instant.ofEpochSecond(timestamp), ZoneId.systemDefault())
-                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                .ofInstant(Instant.ofEpochSecond(timestamp), ZoneId.systemDefault());
+//                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 
     @SneakyThrows

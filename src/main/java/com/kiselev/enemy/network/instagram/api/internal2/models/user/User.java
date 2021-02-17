@@ -99,6 +99,9 @@ public class User extends Profile {
 
 //            "account_badges": []
 
+    public boolean isActive() {
+        return !isDeleted();
+    }
 
     public static User deleted(String username) {
         User deletedUser = new User();

@@ -42,7 +42,11 @@ public interface VKMessages {
 
     String NEW_FRIEND_MESSAGE = "New friend: %s";
 
-    String DELETED_FRIEND_MESSAGE = "Unfriended: %s";
+    String DELETED_FRIEND_MESSAGE = "Friend deleted: %s";
+
+    String NEW_HIDDEN_FRIEND_MESSAGE = "New hidden friend: %s";
+
+    String DELETED_HIDDEN_FRIEND_MESSAGE = "Hidden friend deleted: %s";
 
     String NEW_GROUP_MESSAGE = "New group: %s";
 

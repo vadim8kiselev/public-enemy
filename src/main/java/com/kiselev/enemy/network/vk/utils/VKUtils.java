@@ -1,9 +1,13 @@
 package com.kiselev.enemy.network.vk.utils;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.kiselev.enemy.network.vk.model.Zodiac;
 import com.vk.api.sdk.objects.base.BaseObject;
 import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
@@ -32,7 +36,7 @@ public class VKUtils {
 
     @SneakyThrows
     public static void timeout() {
-        Thread.sleep(300 + (long) (new Random().nextDouble() * (double) (500 - 300)));
+        Thread.sleep(200 + (long) (new Random().nextDouble() * (double) (400 - 200)));
     }
 
     public static String code(BaseObject baseObject) {
@@ -49,6 +53,10 @@ public class VKUtils {
             return baseObject.getTitle();
         }
         return null;
+    }
+
+    public static boolean areFamilyMembers(String a_lastName, String b_lastName) {
+        return a_lastName.contains(b_lastName) || b_lastName.contains(a_lastName);
     }
 
     public static String age(String birthDate) {
@@ -90,5 +98,161 @@ public class VKUtils {
             }
         }
         return null;
+    }
+
+    public static List<Zodiac> zodiacs(String birthDate) {
+        return Lists.newArrayList(
+                Sets.newHashSet(
+                        zodiac_eng(birthDate),
+                        zodiac_rus(birthDate)
+                )
+        );
+    }
+
+    public static Zodiac zodiac_eng(String birthDate) {
+        LocalDate date = LocalDate.of(
+                LocalDate.now().getYear(),
+                birthMonth(birthDate),
+                birthDay(birthDate));
+
+        if (between(date, date(21, 3), date(19, 4))) {
+            return Zodiac.ARIES;
+        }
+        if (between(date, date(20, 4), date(20, 5))) {
+            return Zodiac.TAURUS;
+        }
+        if (between(date, date(21, 5), date(20, 6))) {
+            return Zodiac.GEMINI;
+        }
+        if (between(date, date(21, 6), date(22, 7))) {
+            return Zodiac.CANCER;
+        }
+        if (between(date, date(23, 7), date(22, 8))) {
+            return Zodiac.LEO;
+        }
+        if (between(date, date(23, 8), date(22, 9))) {
+            return Zodiac.VIRGO;
+        }
+        if (between(date, date(23, 9), date(22, 10))) {
+            return Zodiac.LIBRA;
+        }
+        if (between(date, date(23, 10), date(22, 11))) { // wtf
+            return Zodiac.SCORPIO;
+        }
+        if (between(date, date(23, 11), date(21, 12))) {
+            return Zodiac.SAGITTARIUS;
+        }
+        if (between(date, date(22, 12), date(19, 1))) {
+            return Zodiac.CAPRICORN;
+        }
+        if (between(date, date(20, 1), date(18, 2))) {
+            return Zodiac.AQUARIUS;
+        }
+        if (between(date, date(19, 2), date(20, 3))) {
+            return Zodiac.PISCES;
+        }
+
+        throw new RuntimeException("Zodiac cannot be determined!");
+    }
+
+    public static Zodiac zodiac_rus(String birthDate) {
+        LocalDate date = LocalDate.of(
+                LocalDate.now().getYear(),
+                birthMonth(birthDate),
+                birthDay(birthDate));
+
+        if (between(date, date(21, 3), date(19, 4))) {
+            return Zodiac.ARIES;
+        }
+        if (between(date, date(20, 4), date(20, 5))) {
+            return Zodiac.TAURUS;
+        }
+        if (between(date, date(21, 5), date(20, 6))) {
+            return Zodiac.GEMINI;
+        }
+        if (between(date, date(21, 6), date(22, 7))) {
+            return Zodiac.CANCER;
+        }
+        if (between(date, date(23, 7), date(22, 8))) {
+            return Zodiac.LEO;
+        }
+        if (between(date, date(23, 8), date(22, 9))) {
+            return Zodiac.VIRGO;
+        }
+        if (between(date, date(23, 9), date(22, 10))) {
+            return Zodiac.LIBRA;
+        }
+        if (between(date, date(23, 10), date(21, 11))) {
+            return Zodiac.SCORPIO;
+        }
+        if (between(date, date(22, 11), date(21, 12))) {
+            return Zodiac.SAGITTARIUS;
+        }
+        if (between(date, date(22, 12), date(19, 1))) {
+            return Zodiac.CAPRICORN;
+        }
+        if (between(date, date(20, 1), date(18, 2))) {
+            return Zodiac.AQUARIUS;
+        }
+        if (between(date, date(19, 2), date(20, 3))) {
+            return Zodiac.PISCES;
+        }
+
+        throw new RuntimeException("Zodiac cannot be determined!");
+    }
+
+    /*public static Zodiac zodiacSign_rus_2(String birthDate) {
+        LocalDate date = LocalDate.of(
+                LocalDate.now().getYear(),
+                birthMonth(birthDate),
+                birthDay(birthDate));
+
+        if (between(date, date(21, 3), date(20, 4))) {
+            return Zodiac.ARIES;
+        }
+        if (between(date, date(21, 4), date(21, 5))) {
+            return Zodiac.TAURUS;
+        }
+        if (between(date, date(22, 5), date(21, 6))) {
+            return Zodiac.GEMINI;
+        }
+        if (between(date, date(22, 6), date(22, 7))) {
+            return Zodiac.CANCER;
+        }
+        if (between(date, date(23, 7), date(21, 8))) {
+            return Zodiac.LEO;
+        }
+        if (between(date, date(22, 8), date(23, 9))) {
+            return Zodiac.VIRGO;
+        }
+        if (between(date, date(24, 9), date(23, 10))) {
+            return Zodiac.LIBRA;
+        }
+        if (between(date, date(24, 10), date(22, 11))) {
+            return Zodiac.SCORPIO;
+        }
+        if (between(date, date(23, 11), date(22, 12))) {
+            return Zodiac.SAGITTARIUS;
+        }
+        if (between(date, date(23, 12), date(20, 1))) {
+            return Zodiac.CAPRICORN;
+        }
+        if (between(date, date(21, 1), date(19, 2))) {
+            return Zodiac.AQUARIUS;
+        }
+        if (between(date, date(20, 2), date(20, 3))) {
+            return Zodiac.PISCES;
+        }
+
+        return null;
+    }*/
+
+    private static boolean between(LocalDate date, LocalDate from, LocalDate to) {
+        return !date.isBefore(from) && !date.isAfter(to);
+    }
+
+    private static LocalDate date(Integer day, Integer month) {
+        int year = LocalDate.now().getYear();
+        return LocalDate.of(year, month, day);
     }
 }

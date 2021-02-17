@@ -14,6 +14,7 @@ import lombok.experimental.Accessors;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -29,7 +30,7 @@ public class InstagramPost {
 
     private String postId;
 
-    private String date;
+    private LocalDateTime date;
 
     private MediaType type;
 

@@ -189,10 +189,16 @@ public class InstagramProfile implements Info {
     }
 
     private boolean xTimesMore(int a, int b, int x) {
+        if (b == 0) {
+            return false;
+        }
         return a / b > x;
     }
 
     private boolean xTimesLess(int a, int b, int x) {
+        if (b == 0) {
+            return false;
+        }
         return a / b < x;
     }
 

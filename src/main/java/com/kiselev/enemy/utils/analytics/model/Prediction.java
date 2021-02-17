@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor(staticName = "of")
 public class Prediction<Type> {
 
-    public static final String MESSAGE = "%s \\(%s%%\\)";
+    public static final String MESSAGE = "%s (%s%%)";
 
     private Type value;
 

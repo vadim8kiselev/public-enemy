@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.time.LocalDateTime;
+
 @Data
 @Accessors(fluent = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -17,7 +19,7 @@ public class InstagramCommentary {
 
     private String text;
 
-    private String date;
+    private LocalDateTime date;
 
     private Integer likesCount;
 

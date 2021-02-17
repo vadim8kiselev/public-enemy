@@ -4,10 +4,7 @@ import com.kiselev.enemy.network.telegram.api.bot.internal.TelegramBotClient;
 import com.kiselev.enemy.network.telegram.utils.TelegramUtils;
 import com.pengrad.telegrambot.model.File;
 import com.pengrad.telegrambot.model.VideoNote;
-import com.pengrad.telegrambot.model.request.ForceReply;
-import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
-import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
-import com.pengrad.telegrambot.model.request.ParseMode;
+import com.pengrad.telegrambot.model.request.*;
 import com.pengrad.telegrambot.request.*;
 import com.pengrad.telegrambot.response.BaseResponse;
 import com.pengrad.telegrambot.response.GetFileResponse;
@@ -72,6 +69,7 @@ public class TelegramBotAPI {
     public void sendRaw(Integer id, String message) {
         SendResponse response = api.send(
                 new SendMessage(id, message)
+                        .disableWebPagePreview(true)
         );
         processResponse(response, id, message);
     }
@@ -133,16 +131,22 @@ public class TelegramBotAPI {
         return api.download(file.filePath());
     }
 
+//    public void sendMenu(Integer id, String message) {
+//        SendResponse response = api.send(
+//                new SendMessage(id, message)
+//                        .replyMarkup(new InlineKeyboardMarkup(
+//                                new InlineKeyboardButton("Button 1").url("vk.com/kiselev"),
+//                                new InlineKeyboardButton("Button 2").url("vk.com/kiselev"),
+//                                new InlineKeyboardButton("Button 3").url("vk.com/kiselev")
+//                        ))
+//        );
+//        processResponse(response, id, message);
+//    }
 
-    public void sendMenu(Integer id, String message) {
-        SendResponse response = api.send(
-                new SendMessage(id, message)
-                .replyMarkup(new InlineKeyboardMarkup(
-                        new InlineKeyboardButton("Button 1").url("vk.com/kiselev"),
-                        new InlineKeyboardButton("Button 2").url("vk.com/kiselev"),
-                        new InlineKeyboardButton("Button 3").url("vk.com/kiselev")
-                ))
+    public void sendTyping(Integer id) {
+        BaseResponse response = api.send(
+                new SendChatAction(id, ChatAction.typing)
         );
-        processResponse(response, id, message);
+        processResponse(response, id, response.description());
     }
 }

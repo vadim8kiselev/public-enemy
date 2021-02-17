@@ -17,6 +17,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
@@ -25,6 +26,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -124,10 +126,9 @@ public class VKProfile implements Info {
 
     private boolean isFriend;
 
-    private String isPrivate;
+    private boolean isPrivate;
 
-    @EnemyValue(message = DEACTIVATED_MESSAGE)
-    private String isDeactivated;
+    private boolean isDeactivated;
 
     @ToString.Exclude
     @EnemyValues(newMessage = NEW_PHOTO_MESSAGE, deleteMessage = DELETED_PHOTO_MESSAGE)
@@ -136,6 +137,14 @@ public class VKProfile implements Info {
     @ToString.Exclude
     @EnemyValues(newMessage = NEW_FRIEND_MESSAGE, deleteMessage = DELETED_FRIEND_MESSAGE)
     private List<VKProfile> friends;
+
+    @ToString.Exclude
+    @EnemyValues
+    private Map<VKProfile, List<VKProfile>> area;
+
+    @ToString.Exclude
+    @EnemyValues(newMessage = NEW_HIDDEN_FRIEND_MESSAGE, deleteMessage = DELETED_HIDDEN_FRIEND_MESSAGE)
+    private List<VKProfile> hiddenFriends;
 
     @ToString.Exclude
     @EnemyValues(newMessage = NEW_FOLLOWER_MESSAGE, deleteMessage = DELETED_FOLLOWER_MESSAGE)
@@ -200,8 +209,8 @@ public class VKProfile implements Info {
                 ProfilingUtils.identifier(SocialNetwork.TG, profile.site()),
                 ProfilingUtils.identifier(SocialNetwork.TG, profile.status()));
         this.isFriend = BoolInt.YES == profile.isFriend();
-        this.isPrivate = profile.isPrivate();
-        this.isDeactivated = profile.deactivated();
+        this.isPrivate = Boolean.parseBoolean(profile.isPrivate());
+        this.isDeactivated = StringUtils.isNotEmpty(profile.deactivated());
 
         this.university = VKUtils.safeStream(profile.universities())
                 .map(University::getName)
@@ -219,16 +228,10 @@ public class VKProfile implements Info {
                 .map(Career::getCompany)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
 
-//        if (force) {
-//            vkProfile.photos();
-//            vkProfile.friends();
-//            vkProfile.followers();
-//            vkProfile.following();
-//            vkProfile.communities();
-//            vkProfile.posts();
-//            vkProfile.relatives();
-//        }
+    public boolean isActive() {
+        return !isPrivate && !isDeactivated;
     }
 
     @Override

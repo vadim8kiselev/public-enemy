@@ -147,7 +147,6 @@ public class InstagramAPI extends ProgressableAPI {
 
         String next = null;
         do {
-
             FeedUserResponse response = client.request(
                     new FeedUserRequest(profilePk, next)
             );

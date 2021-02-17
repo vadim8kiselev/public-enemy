@@ -17,6 +17,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class InstagramStory {
 
     private String postId;
 
-    private String date;
+    private LocalDateTime date;
 
     private MediaType type;
 

@@ -20,7 +20,10 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -87,16 +90,31 @@ public class VKService {
         List<Photo> photos = api.photos(id);
 
         for (Photo photo : photos) {
-            photo.likes(
-                    api.likes(id, photo.id(), Type.PHOTO).stream()
-                            .map(VKInternalProfile::new)
-                            .collect(Collectors.toList()));
+            LocalDateTime timestamp =
+                    LocalDateTime.ofInstant(
+                            Instant.ofEpochSecond(photo.date()),
+                            ZoneId.systemDefault());
+
+            if (timestamp.isAfter(LocalDateTime.now().minusYears(1))) {
+                photo.likes(
+                        api.likes(id, photo.id(), Type.PHOTO).stream()
+                                .map(VKInternalProfile::new)
+                                .collect(Collectors.toList()));
+            }
         }
 
         return photos;
     }
 
     public List<VKProfile> friends(String id) {
+        List<Profile> friends = api.friends(id);
+
+        return friends.stream()
+                .map(VKInternalProfile::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<VKProfile> hiddenFriends(String id) {
         List<Profile> friends = api.friends(id);
 
         return friends.stream()
@@ -130,10 +148,17 @@ public class VKService {
         List<Post> posts = api.posts(id);
 
         for (Post post : posts) {
-            post.likes(
-                    api.likes(id, post.id(), Type.POST).stream()
-                            .map(VKInternalProfile::new)
-                            .collect(Collectors.toList()));
+            LocalDateTime timestamp =
+                    LocalDateTime.ofInstant(
+                            Instant.ofEpochSecond(post.date()),
+                            ZoneId.systemDefault());
+
+            if (timestamp.isAfter(LocalDateTime.now().minusYears(1))) {
+                post.likes(
+                        api.likes(id, post.id(), Type.POST).stream()
+                                .map(VKInternalProfile::new)
+                                .collect(Collectors.toList()));
+            }
         }
 
         return posts;
@@ -258,26 +283,37 @@ public class VKService {
         if (birthday != null) {
             String[] numbers = birthday.split("\\.");
             if (numbers.length == 3) {
-                int day = Integer.parseInt(numbers[0]);
-                int month = Integer.parseInt(numbers[1]);
-                int year = Integer.parseInt(numbers[2]);
-                return searchBirthDate(profile, day, month, year);
+                return birthday;
+//                int day = Integer.parseInt(numbers[0]);
+//                int month = Integer.parseInt(numbers[1]);
+//                int year = Integer.parseInt(numbers[2]);
+//                String birthDate = searchBirthDate(profile, day, month, year);
+//                return birthDate != null ? birthDate : birthday;
             } else if (numbers.length == 2) {
                 int day = Integer.parseInt(numbers[0]);
                 int month = Integer.parseInt(numbers[1]);
-                return searchBirthDate(profile, day, month, null);
+                String birthDate = searchBirthDate(profile, day, month);
+                return birthDate != null ? birthDate : birthday;
             }
         }
 
+        return searchBirthDate(profile, null, null);
+    }
+
+    private String searchBirthDate(VKProfile profile, Integer day, Integer month) {
         String age = searchAge(profile);
         if (age != null) {
             int year = LocalDate.now().minusYears(
                     Integer.parseInt(age)
             ).getYear();
             for (int predictedYear = year - 1; predictedYear <= year + 1; predictedYear++) {
-                String predictedBirthDate = searchBirthDate(profile, null, null, predictedYear);
-                if (predictedBirthDate != null) {
-                    return predictedBirthDate;
+                if (isProfileFound(profile, day, month, predictedYear)) {
+                    String predictedBirthDate = searchBirthDate(profile, day, month, predictedYear);
+                    if (predictedBirthDate != null) {
+                        return predictedBirthDate;
+                    }
+                } else {
+                    boolean debug = true;
                 }
             }
         }
@@ -400,6 +436,14 @@ public class VKService {
                 super.friends(VKService.this.friends(id()));
             }
             return super.friends();
+        }
+
+        @Override
+        public List<VKProfile> hiddenFriends() {
+            if (super.hiddenFriends() == null) {
+                super.hiddenFriends(VKService.this.hiddenFriends(id()));
+            }
+            return super.hiddenFriends();
         }
 
         @Override
