@@ -45,19 +45,18 @@ public class PublicEnemyApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-
-        InstagramProfile vadim8kiselev = publicEnemy.ig().profile("vadim8kiselev");
-        for (InstagramProfile following : vadim8kiselev.following()) {
-            List<Profile> followers = publicEnemy.ig().service().api().raw().followers(following.id());
-            List<Profile> unique = followers.stream()
-                    .distinct()
-                    .collect(Collectors.toList());
-
-//            publicEnemy.tg().send(TelegramMessage.raw(following.username() + ": " + unique.size() + " / " + followers.size() +
-//                    " (" + Math.abs(unique.size() - followers.size()) + ")"));
-
-            publicEnemy.tg().send(TelegramMessage.raw(following.username() + ";" + followers.size() + ";" + unique.size() + ";" + Math.abs(unique.size() - followers.size())));
-        }
+//        InstagramProfile vadim8kiselev = publicEnemy.ig().profile("vadim8kiselev");
+//        for (InstagramProfile following : vadim8kiselev.following()) {
+//            List<Profile> followers = publicEnemy.ig().service().api().raw().followers(following.id());
+//            List<Profile> unique = followers.stream()
+//                    .distinct()
+//                    .collect(Collectors.toList());
+//
+////            publicEnemy.tg().send(TelegramMessage.raw(following.username() + ": " + unique.size() + " / " + followers.size() +
+////                    " (" + Math.abs(unique.size() - followers.size()) + ")"));
+//
+//            publicEnemy.tg().send(TelegramMessage.raw(following.username() + ";" + followers.size() + ";" + unique.size() + ";" + Math.abs(unique.size() - followers.size())));
+//        }
     }
 //    @Override
 //    public void run(String... args) {
