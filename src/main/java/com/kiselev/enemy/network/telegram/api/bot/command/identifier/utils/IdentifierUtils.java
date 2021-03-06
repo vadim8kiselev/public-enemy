@@ -1,11 +1,14 @@
 package com.kiselev.enemy.network.telegram.api.bot.command.identifier.utils;
 
 import com.google.common.collect.Lists;
+import com.kiselev.enemy.network.vk.utils.VKUtils;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
 import com.kiselev.enemy.utils.analytics.model.Prediction;
+import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -49,11 +52,24 @@ public class IdentifierUtils {
         return null;
     }
 
-    public static String link(String title, String site, Object field) {
+    public static String link(String title, SocialNetwork site, Object field) {
         if (field != null) {
             String string = field.toString();
             if (StringUtils.isNotEmpty(string)) {
-                return title + ": " + site + field.toString();
+                return title + ": " + site.link(field.toString(), field.toString());
+            }
+        }
+        return null;
+    }
+
+    public static String link(String title, SocialNetwork site, Object name, Object field) {
+        if (field != null) {
+            String string = field.toString();
+            if (StringUtils.isNotEmpty(string)) {
+                if (name == null) {
+                    name = field;
+                }
+                return title + ": " + site.link(name.toString(), field.toString());
             }
         }
         return null;
@@ -69,20 +85,21 @@ public class IdentifierUtils {
         return null;
     }
 
-    public static String messages(String title, List<String> fields, Integer repeat) {
-        if (CollectionUtils.isNotEmpty(fields)) {
-            String indent = StringUtils.repeat(">", repeat);
+    public static String messages(String title, Collection<String> fields) {
+        return messages(null, title, fields);
+    }
 
+    public static String messages(String emoji, String title, Collection<String> fields) {
+        if (fields.size() == 1) {
+            return message(title, fields.iterator().next());
+        }
+
+        if (VKUtils.isNotEmpty(fields)) {
             List<String> page = Lists.newArrayList();
-            for (int index = 0; index < fields.size(); index++) {
-                String field = fields.get(index);
-                if (index == 0) {
-                    page.add(title + ": " + field);
-                } else {
-                    page.add(indent + "  " + field);
-                }
+            page.add(title + ":");
+            for (String field : fields) {
+                page.add((emoji == null ? " - " : emoji + " ") + field);
             }
-
             return String.join("\n", page);
         }
         return null;

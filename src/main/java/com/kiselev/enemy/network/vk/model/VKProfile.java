@@ -196,7 +196,7 @@ public class VKProfile implements Info {
         this.countryCode = VKUtils.code(profile.country());
         this.cityCode = VKUtils.code(profile.city());
         this.homeTown = StringUtils.isNotEmpty(profile.homeTown()) ? profile.homeTown() : null;
-        this.phone = ObjectUtils.firstNonNull(profile.mobilePhone(), profile.mobilePhone());
+        this.phone = ObjectUtils.firstNonNull(profile.mobilePhone(), profile.homePhone());
         this.site = profile.site();
         this.facebook = profile.facebook();
         this.twitter = profile.twitter();
@@ -234,13 +234,15 @@ public class VKProfile implements Info {
         return !isPrivate && !isDeactivated;
     }
 
+    public String identifier() {
+        return username != null ? username : ("id" + id);
+    }
+
     @Override
     public String name() {
-        return String.format(
-                type().template(),
+        return type().link(
                 fullName,
-                username != null ? username : ("id" + id)
-        );
+                identifier());
     }
 
     @Override

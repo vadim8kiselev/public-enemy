@@ -3,6 +3,8 @@ package com.kiselev.enemy.network.instagram.api.internal2.models.user;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kiselev.enemy.network.instagram.api.internal2.models.IGBaseModel;
 import com.kiselev.enemy.utils.flow.model.Id;
+import com.kiselev.enemy.utils.flow.model.Info;
+import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -10,7 +12,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
-public class Profile extends IGBaseModel implements Id {
+public class Profile extends IGBaseModel implements Info {
 
     @JsonProperty("pk")
     @EqualsAndHashCode.Include
@@ -45,6 +47,15 @@ public class Profile extends IGBaseModel implements Id {
 
     @Override
     public String name() {
-        return username;
+        return String.format(
+                type().template(),
+                username,
+                username
+        );
+    }
+
+    @Override
+    public SocialNetwork type() {
+        return SocialNetwork.IG;
     }
 }

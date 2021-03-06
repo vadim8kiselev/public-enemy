@@ -1,5 +1,6 @@
 package com.kiselev.enemy.network.telegram.utils;
 
+import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import lombok.SneakyThrows;
 
 import java.util.Random;
@@ -8,13 +9,9 @@ public class TelegramUtils {
 
     public static String escapeMessage(String message) {
         return message
-                .replaceAll("\\.", "\\\\.")
-                .replaceAll("\\_", "\\\\_")
-//                .replaceAll("\\[", "\\\\[")
-//                .replaceAll("\\]", "\\\\]")
-//                .replaceAll("\\(", "\\\\(")
-//                .replaceAll("\\)", "\\\\)")
-                .replaceAll("\\-", "\\\\-");
+                .replaceAll("([^\\p{L}\\d\\s📝👤🚻🔞📅♈️♉️♊️♋️♌️♍️♎️♏️♐️♑️♒️♓️🏙🌎🏠📞📧📘✈️🐶📷🐦📟🌐🗣📍💙🧡👥😶🏫🏢🏦🔄№🤝👐🏷⬅️➡️])", "\\\\$1")
+                .replaceAll("\\\\\\*(.+)\\\\\\*", "*$1*")
+                .replaceAll("\\\\\\[(.+)\\\\\\]\\\\\\((.+)\\\\\\)", "[$1]($2)");
     }
 
     @SneakyThrows
@@ -24,5 +21,9 @@ public class TelegramUtils {
 
     public static String truncate(String message) {
         return message != null ? message.substring(0, Math.min(500, message.length())) : message;
+    }
+
+    public static void log(SocialNetwork network, String message) {
+        System.out.println("[" + network.name() + "] " + message);
     }
 }

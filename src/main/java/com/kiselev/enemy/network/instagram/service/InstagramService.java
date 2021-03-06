@@ -47,7 +47,7 @@ public class InstagramService extends ProgressableAPI {
         return new InstagramInternalProfile(instagramUser);
     }
 
-    public String address(InstagramProfile profile) {
+    public String location(InstagramProfile profile) {
         List<InstagramPost> posts = profile.posts();
         Prediction<String> prediction = AnalyticsUtils.predict(InstagramPost::location, posts);
         if (prediction != null && prediction.sufficient(20)) {
@@ -59,6 +59,13 @@ public class InstagramService extends ProgressableAPI {
     public List<InstagramProfile> friends(String id) {
         List<User> friends = api.friends(id);
         return friends.stream()
+                .map(InstagramInternalProfile::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<InstagramProfile> unfollowers(String id) {
+        List<User> unfollowers = api.unfollowers(id);
+        return unfollowers.stream()
                 .map(InstagramInternalProfile::new)
                 .collect(Collectors.toList());
     }
@@ -191,11 +198,11 @@ public class InstagramService extends ProgressableAPI {
         }
 
         @Override
-        public String address() {
-            if (super.address() == null) {
-                super.address(InstagramService.this.address(this));
+        public String location() {
+            if (super.location() == null) {
+                super.location(InstagramService.this.location(this));
             }
-            return super.address();
+            return super.location();
         }
 
         @Override
@@ -212,6 +219,14 @@ public class InstagramService extends ProgressableAPI {
                 super.friends(InstagramService.this.friends(id()));
             }
             return super.friends();
+        }
+
+        @Override
+        public List<InstagramProfile> unfollowers() {
+            if (super.unfollowers() == null) {
+                super.unfollowers(InstagramService.this.unfollowers(id()));
+            }
+            return super.unfollowers();
         }
 
         @Override

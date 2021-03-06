@@ -63,26 +63,29 @@ public abstract class ApiRequest<R, T> {
         accessToken(token);
     }
 
-    public T execute() throws ApiException, ClientException {
-        ApiException exception = null;
-        for (int i = 0; i < retryAttempts; i++) {
-            try {
-                return executeWithoutRetry();
-            } catch (ApiPrivateProfileException e) {
+    public T execute() throws Exception {
+        synchronized (ApiRequest.class) {
+            Exception exception = null;
+            for (int index = 0; index < retryAttempts; index++) {
+                try {
+                    return executeWithoutRetry();
+                } catch (ApiPrivateProfileException e) {
 //                LOG.warn("API Private profile error", e);
-                exception = e;
-//                return null
-            } catch (ApiUserDeletedException e) {
+                    exception = e;
+                } catch (ApiUserDeletedException e) {
 //                LOG.warn("API Banned or deleted profile error", e);
-                exception = e;
-//                return null
-            } catch (ApiServerException e) {
-                LOG.warn("API Server error", e);
-                exception = e;
+                    exception = e;
+                } catch (ApiServerException e) {
+                    LOG.warn("API Server error", e);
+                    exception = e;
+                } catch (ClientException e) {
+//                LOG.warn("Client exception", e);
+                    exception = e;
+                }
             }
-        }
 
-        throw exception;
+            throw exception;
+        }
     }
 
     private T executeWithoutRetry() throws ClientException, ApiException {

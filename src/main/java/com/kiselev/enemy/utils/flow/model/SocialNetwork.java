@@ -4,9 +4,12 @@ import java.util.regex.Pattern;
 
 public enum SocialNetwork {
 
-    TG("[%s](https://t.me/%s)", Pattern.compile("^((https?://)?t\\.me/)(\\w+)$")),
-    IG("[%s](https://instagram.com/%s)", Pattern.compile("^((https?://)?instagram\\.com/)(\\w+)$")),
-    VK("[%s](https://vk.com/%s)", Pattern.compile("^((https?://)?vk\\.com/)(id\\d+|\\w+)$"));
+    TG("[%s](https://t.me/%s)", Pattern.compile("^((https?://)?t\\.me/)(\\S+)$")),
+    IG("[%s](https://instagram.com/%s)", Pattern.compile("^((https?://)?instagram\\.com/)(\\S+)$")),
+    VK("[%s](https://vk.com/%s)", Pattern.compile("^((https?://)?vk\\.com/)(id\\d+|\\S+)$")),
+    FB("[%s](https://facebook.com/%s)", null),
+    TW("[%s](https://twitter.com/%s)", null),
+    SK("", null);
 
     private final String template;
 
@@ -19,6 +22,13 @@ public enum SocialNetwork {
 
     public String template() {
         return template;
+    }
+
+    public String link(String name, String username) {
+        return String.format(
+                template,
+                name,
+                username);
     }
 
     public Pattern pattern() {

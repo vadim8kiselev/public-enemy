@@ -3,6 +3,7 @@ package com.kiselev.enemy.network.instagram.model;
 import com.google.common.collect.Lists;
 import com.kiselev.enemy.network.instagram.api.internal2.models.location.Location;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.ImageVersionsMeta;
+import com.kiselev.enemy.network.instagram.api.internal2.models.media.UserTags;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.VideoVersionsMeta;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.*;
 import com.kiselev.enemy.network.instagram.utils.InstagramUtils;
@@ -15,9 +16,8 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Data
@@ -88,9 +88,23 @@ public class InstagramPost {
             }
         }
 
+        this.tags = parseTags(post);
+
         this.likeCount = post.getLike_count();
 
         this.commentariesCount = post.getComment_count();
+    }
+
+    private List<InstagramProfile> parseTags(TimelineMedia post) {
+        List<UserTags.UserTag> userTags = Optional.of(post)
+                .map(TimelineMedia::getUsertags)
+                .map(UserTags::getIn)
+                .orElse(Collections.emptyList());
+
+        return userTags.stream()
+                .map(UserTags.UserTag::getUser)
+                .map(InstagramProfile::new)
+                .collect(Collectors.toList());
     }
 
     private String location(Location location) {

@@ -11,10 +11,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,7 +23,7 @@ public class VKUtils {
                 : collection.stream();
     }
 
-    public static boolean isNotEmpty(List<String> list) {
+    public static boolean isNotEmpty(Collection<String> list) {
         List<String> nonNull = list.stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -34,9 +31,15 @@ public class VKUtils {
         return CollectionUtils.isNotEmpty(nonNull);
     }
 
+    public static Set<String> set(String... strings) {
+        return Arrays.stream(strings)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
     @SneakyThrows
     public static void timeout() {
-        Thread.sleep(200 + (long) (new Random().nextDouble() * (double) (400 - 200)));
+        Thread.sleep(200 + (long) (new Random().nextDouble() * (double) (500 - 200)));
     }
 
     public static String code(BaseObject baseObject) {
@@ -136,13 +139,14 @@ public class VKUtils {
         if (between(date, date(23, 9), date(22, 10))) {
             return Zodiac.LIBRA;
         }
-        if (between(date, date(23, 10), date(22, 11))) { // wtf
+        if (between(date, date(23, 10), date(22, 11))) {
             return Zodiac.SCORPIO;
         }
         if (between(date, date(23, 11), date(21, 12))) {
             return Zodiac.SAGITTARIUS;
         }
-        if (between(date, date(22, 12), date(19, 1))) {
+        if (between(date, date(22, 12), date(31, 12))
+                || between(date, date(1, 1), date(19, 1))) {
             return Zodiac.CAPRICORN;
         }
         if (between(date, date(20, 1), date(18, 2))) {
@@ -188,7 +192,8 @@ public class VKUtils {
         if (between(date, date(22, 11), date(21, 12))) {
             return Zodiac.SAGITTARIUS;
         }
-        if (between(date, date(22, 12), date(19, 1))) {
+        if (between(date, date(22, 12), date(31, 12))
+                || between(date, date(1, 1), date(19, 1))) {
             return Zodiac.CAPRICORN;
         }
         if (between(date, date(20, 1), date(18, 2))) {

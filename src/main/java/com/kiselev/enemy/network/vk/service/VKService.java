@@ -27,6 +27,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -86,24 +87,28 @@ public class VKService {
         return null;
     }
 
-    public List<Photo> photos(String id) {
+    public List<Photo> photos(String id, boolean needAll) {
         List<Photo> photos = api.photos(id);
+        Stream<Photo> photoStream = photos.stream();
 
-        for (Photo photo : photos) {
-            LocalDateTime timestamp =
-                    LocalDateTime.ofInstant(
-                            Instant.ofEpochSecond(photo.date()),
-                            ZoneId.systemDefault());
-
-            if (timestamp.isAfter(LocalDateTime.now().minusYears(1))) {
-                photo.likes(
-                        api.likes(id, photo.id(), Type.PHOTO).stream()
-                                .map(VKInternalProfile::new)
-                                .collect(Collectors.toList()));
-            }
+        if (!needAll) {
+            photoStream = photoStream
+                    .filter(photo -> {
+                        LocalDateTime timestamp =
+                                LocalDateTime.ofInstant(
+                                        Instant.ofEpochSecond(photo.date()),
+                                        ZoneId.systemDefault());
+                        return timestamp.isAfter(LocalDateTime.now().minusYears(1));
+                    });
         }
 
-        return photos;
+        return photoStream
+                .peek(photo ->
+                        photo.likes(
+                                api.likes(id, photo.id(), Type.PHOTO).stream()
+                                        .map(VKInternalProfile::new)
+                                        .collect(Collectors.toList())))
+                .collect(Collectors.toList());
     }
 
     public List<VKProfile> friends(String id) {
@@ -144,30 +149,34 @@ public class VKService {
         );
     }
 
-    public List<Post> posts(String id) {
+    public List<Post> posts(String id, boolean needAll) {
         List<Post> posts = api.posts(id);
+        Stream<Post> postStream = posts.stream();
 
-        for (Post post : posts) {
-            LocalDateTime timestamp =
-                    LocalDateTime.ofInstant(
-                            Instant.ofEpochSecond(post.date()),
-                            ZoneId.systemDefault());
-
-            if (timestamp.isAfter(LocalDateTime.now().minusYears(1))) {
-                post.likes(
-                        api.likes(id, post.id(), Type.POST).stream()
-                                .map(VKInternalProfile::new)
-                                .collect(Collectors.toList()));
-            }
+        if (!needAll) {
+            postStream = postStream
+                    .filter(post -> {
+                        LocalDateTime timestamp =
+                                LocalDateTime.ofInstant(
+                                        Instant.ofEpochSecond(post.date()),
+                                        ZoneId.systemDefault());
+                        return timestamp.isAfter(LocalDateTime.now().minusYears(1));
+                    });
         }
 
-        return posts;
+        return postStream
+                .peek(post ->
+                        post.likes(
+                                api.likes(id, post.id(), Type.POST).stream()
+                                        .map(VKInternalProfile::new)
+                                        .collect(Collectors.toList())))
+                .collect(Collectors.toList());
     }
 
     public List<VKProfile> likes(String id) {
         List<VKProfile> likes = Lists.newArrayList();
 
-        List<Photo> photos = photos(id);
+        List<Photo> photos = photos(id, true);
         List<VKProfile> photoslikes = photos.stream()
                 .map(Photo::likes)
                 .filter(Objects::nonNull)
@@ -175,7 +184,7 @@ public class VKService {
                 .collect(Collectors.toList());
         likes.addAll(photoslikes);
 
-        List<Post> posts = posts(id);
+        List<Post> posts = posts(id, true);
         List<VKProfile> postslikes = posts.stream()
                 .map(Post::likes)
                 .filter(Objects::nonNull)
@@ -425,7 +434,7 @@ public class VKService {
         @Override
         public List<Photo> photos() {
             if (super.photos() == null) {
-                super.photos(VKService.this.photos(id()));
+                super.photos(VKService.this.photos(id(), true));
             }
             return super.photos();
         }
@@ -473,7 +482,7 @@ public class VKService {
         @Override
         public List<Post> posts() {
             if (super.posts() == null) {
-                super.posts(VKService.this.posts(id()));
+                super.posts(VKService.this.posts(id(), true));
             }
             return super.posts();
         }

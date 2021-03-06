@@ -1,17 +1,18 @@
 package com.kiselev.enemy.network.vk.api.internal;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
 import com.kiselev.enemy.network.vk.api.constants.VKConstants;
+import com.kiselev.enemy.network.vk.api.library.VKLibrary;
 import com.kiselev.enemy.network.vk.api.model.*;
-import com.kiselev.enemy.network.vk.api.request.*;
+import com.kiselev.enemy.network.vk.api.request.SearchRequest;
+import com.kiselev.enemy.network.vk.api.response.FriendResponse;
+import com.kiselev.enemy.network.vk.utils.VKUtils;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import com.kiselev.enemy.utils.progress.ProgressableAPI;
 import com.vk.api.sdk.exceptions.ApiAccessAlbumException;
-import com.vk.api.sdk.exceptions.ApiException;
-import com.vk.api.sdk.objects.base.UserGroupFields;
 import com.vk.api.sdk.objects.likes.Type;
-import com.vk.api.sdk.objects.users.Fields;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +21,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.BlockingQueue;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -35,13 +37,36 @@ public class VKAPI extends ProgressableAPI {
     private String vkIdentifier;
 
     @Value("${com.kiselev.enemy.vk.access.tokens}")
-    private List<String> tokens;
+    private List<String> raw_tokens;
 
+//    private BlockingQueue<String> tokens;
+//
+//    @PostConstruct
+//    public void initialize() {
+//        this.tokens = Queues.newArrayBlockingQueue(raw_tokens.size());
+//        this.tokens.addAll(raw_tokens);
+//    }
+//
+//    @SneakyThrows
+//    private String token() {
+//        String token = tokens.take();
+//        VKUtils.timeout();
+//        tokens.offer(token);
+//        return token;
+//    }
+
+    private Queue<String> tokens;
+
+    @PostConstruct
+    public void initialize() {
+        this.tokens = Lists.newLinkedList(raw_tokens);
+    }
+
+    @SneakyThrows
     private String token() {
-        return tokens.stream()
-                .sorted((o1, o2) -> ThreadLocalRandom.current().nextInt(-1, 2))
-                .findAny()
-                .orElseThrow(() -> new RuntimeException("No vk tokens found!"));
+        String token = tokens.poll();
+        tokens.add(token);
+        return token;
     }
 
     public Profile me() {
@@ -61,9 +86,7 @@ public class VKAPI extends ProgressableAPI {
 
     @SneakyThrows
     public List<Profile> profiles(List<String> profileIds) {
-        return new ProfileRequest(token())
-                .userIds(profileIds)
-                .fields(Fields.values())
+        return VKLibrary.profiles(token(), profileIds)
                 .execute();
     }
 
@@ -89,17 +112,13 @@ public class VKAPI extends ProgressableAPI {
             int offset = 0;
             List<Photo> photos = Lists.newArrayList();
 
-            PhotoRequest request = new PhotoRequest(token())
-                    .ownerId(profileId)
-                    .extended(true)
-                    .albumId(albumId)
-                    .count(VKConstants.PHOTOS);
-
-            List<Photo> page = request.offset(offset).execute().getPhotos();
+            List<Photo> page = VKLibrary.albumPhotos(token(), profileId, albumId)
+                    .offset(offset).execute().getPhotos();
             photos.addAll(page);
 
             while (VKConstants.PHOTOS.equals(page.size())) {
-                page = request.offset(offset).execute().getPhotos();
+                page = VKLibrary.albumPhotos(token(), profileId, albumId)
+                        .offset(offset).execute().getPhotos();
                 photos.addAll(page);
                 offset += VKConstants.PHOTOS;
             }
@@ -117,24 +136,20 @@ public class VKAPI extends ProgressableAPI {
             int offset = 0;
             List<Profile> friends = Lists.newArrayList();
 
-            FriendRequest request = new FriendRequest(token())
-                    .fields(com.vk.api.sdk.objects.users.Fields.values())
-                    .userId(profileId)
-                    .count(VKConstants.FRIENDS);
+            FriendResponse response = VKLibrary.friends(token(), profileId)
+                    .offset(offset).execute();
+            List<Profile> page = response.getFriends();
+            friends.addAll(page);
 
-            List<Profile> page = request.offset(offset).execute().getFriends();
-            if (page != null) {
+            while (VKConstants.FRIENDS.equals(page.size())) {
+                page = VKLibrary.friends(token(), profileId)
+                        .offset(offset).execute().getFriends();
                 friends.addAll(page);
-
-                while (VKConstants.FRIENDS.equals(page.size())) {
-                    page = request.offset(offset).execute().getFriends();
-                    friends.addAll(page);
-                    offset += VKConstants.FRIENDS;
-                }
+                offset += VKConstants.FRIENDS;
             }
+
             return friends;
         } catch (Exception exception) {
-//            log.warn("API Exception: ", exception);
             return Collections.emptyList();
         }
     }
@@ -144,16 +159,13 @@ public class VKAPI extends ProgressableAPI {
         int offset = 0;
         List<Profile> followers = Lists.newArrayList();
 
-        FollowersRequest request = new FollowersRequest(token())
-                .fields(com.vk.api.sdk.objects.users.Fields.values())
-                .userId(profileId)
-                .count(VKConstants.FOLLOWERS);
-
-        List<Profile> page = request.offset(offset).execute().getFollowers();
+        List<Profile> page = VKLibrary.followers(token(), profileId)
+                .offset(offset).execute().getFollowers();
         followers.addAll(page);
 
         while (VKConstants.FOLLOWERS.equals(page.size())) {
-            page = request.offset(offset).execute().getFollowers();
+            page = VKLibrary.followers(token(), profileId)
+                    .offset(offset).execute().getFollowers();
             followers.addAll(page);
             offset += VKConstants.FOLLOWERS;
         }
@@ -166,17 +178,13 @@ public class VKAPI extends ProgressableAPI {
         int offset = 0;
         List<Profile> following = Lists.newArrayList();
 
-        FollowingRequest request = new FollowingRequest(token())
-                .fields(com.vk.api.sdk.objects.users.Fields.values())
-                .userId(profileId)
-                .extended(true)
-                .count(VKConstants.SUBSCRIPTIONS);
-
-        List<Profile> page = request.offset(offset).execute().profiles();
+        List<Profile> page = VKLibrary.following(token(), profileId)
+                .offset(offset).execute().profiles();
         following.addAll(page);
 
         while (VKConstants.SUBSCRIPTIONS.equals(page.size())) {
-            page = request.offset(offset).execute().profiles();
+            page = VKLibrary.following(token(), profileId)
+                    .offset(offset).execute().profiles();
             following.addAll(page);
             offset += VKConstants.SUBSCRIPTIONS;
         }
@@ -197,17 +205,13 @@ public class VKAPI extends ProgressableAPI {
         int offset = 0;
         List<Group> subscriptions = Lists.newArrayList();
 
-        FollowingRequest request = new FollowingRequest(token())
-                .fields(com.vk.api.sdk.objects.users.Fields.values())
-                .userId(profileId)
-                .extended(true)
-                .count(VKConstants.SUBSCRIPTIONS);
-
-        List<Group> page = request.offset(offset).execute().subscriptions();
+        List<Group> page = VKLibrary.subscriptions(token(), profileId)
+                .offset(offset).execute().subscriptions();
         subscriptions.addAll(page);
 
         while (VKConstants.SUBSCRIPTIONS.equals(page.size())) {
-            page = request.offset(offset).execute().subscriptions();
+            page = VKLibrary.subscriptions(token(), profileId)
+                    .offset(offset).execute().subscriptions();
             subscriptions.addAll(page);
             offset += VKConstants.SUBSCRIPTIONS;
         }
@@ -220,17 +224,13 @@ public class VKAPI extends ProgressableAPI {
         int offset = 0;
         List<Group> groups = Lists.newArrayList();
 
-        GroupsRequest request = new GroupsRequest(token())
-                .userId(profileId)
-                .fields(com.vk.api.sdk.objects.groups.Fields.values())
-                .extended(true)
-                .count(VKConstants.GROUPS);
-
-        List<Group> page = request.offset(offset).execute().getGroups();
+        List<Group> page = VKLibrary.groups(token(), profileId)
+                .offset(offset).execute().getGroups();
         groups.addAll(page);
 
         while (VKConstants.GROUPS.equals(page.size())) {
-            page = request.offset(offset).execute().getGroups();
+            page = VKLibrary.groups(token(), profileId)
+                    .offset(offset).execute().getGroups();
             groups.addAll(page);
             offset += VKConstants.GROUPS;
         }
@@ -243,16 +243,13 @@ public class VKAPI extends ProgressableAPI {
         int offset = 0;
         List<Post> posts = Lists.newArrayList();
 
-        WallRequest request = new WallRequest(token())
-                .fields(UserGroupFields.values())
-                .ownerId(profileId)
-                .count(VKConstants.WALL);
-
-        List<Post> page = request.offset(offset).execute().getPosts();
+        List<Post> page = VKLibrary.posts(token(), profileId)
+                .offset(offset).execute().getPosts();
         posts.addAll(page);
 
         while (VKConstants.WALL.equals(page.size())) {
-            page = request.offset(offset).execute().getPosts();
+            page = VKLibrary.posts(token(), profileId)
+                    .offset(offset).execute().getPosts();
             posts.addAll(page);
             offset += VKConstants.WALL;
         }
@@ -267,17 +264,13 @@ public class VKAPI extends ProgressableAPI {
         int offset = 0;
         List<Profile> likes = Lists.newArrayList();
 
-        LikesRequest request = new LikesRequest(token(), type)
-                .ownerId(profileId)
-                .itemId(itemId)
-                .extended(true)
-                .count(VKConstants.LIKES);
-
-        List<Profile> page = request.offset(offset).execute().getLikes();
+        List<Profile> page = VKLibrary.likes(token(), profileId, itemId, type)
+                .offset(offset).execute().getLikes();
         likes.addAll(page);
 
         while (VKConstants.LIKES.equals(page.size())) {
-            page = request.offset(offset).execute().getLikes();
+            page = VKLibrary.likes(token(), profileId, itemId, type)
+                    .offset(offset).execute().getLikes();
             likes.addAll(page);
             offset += VKConstants.LIKES;
         }
@@ -304,15 +297,13 @@ public class VKAPI extends ProgressableAPI {
         int offset = 0;
         List<Profile> profiles = Lists.newArrayList();
 
-        ConversationRequest request = new ConversationRequest(token())
-                .extended(true)
-                .count(VKConstants.CONVERSATIONS);
-
-        List<Profile> page = request.offset(offset).execute().getProfiles();
+        List<Profile> page = VKLibrary.conversations(token())
+                .offset(offset).execute().getProfiles();
         profiles.addAll(page);
 
         while (VKConstants.CONVERSATIONS.equals(page.size())) {
-            page = request.offset(offset).execute().getProfiles();
+            page = VKLibrary.conversations(token())
+                    .offset(offset).execute().getProfiles();
             profiles.addAll(page);
             offset += VKConstants.CONVERSATIONS;
         }
@@ -331,16 +322,13 @@ public class VKAPI extends ProgressableAPI {
         int offset = 0;
         Set<Message> messages = Sets.newHashSet();
 
-        MessageRequest request = new MessageRequest(token())
-                .userId(profileId)
-                .extended(true)
-                .count(VKConstants.MESSAGES);
-
-        List<Message> page = request.offset(offset).execute().getMessages();
+        List<Message> page = VKLibrary.messages(token(), profileId)
+                .offset(offset).execute().getMessages();
         messages.addAll(page);
 
         while (VKConstants.MESSAGES.equals(page.size())) {
-            page = request.offset(offset).execute().getMessages();
+            page = VKLibrary.messages(token(), profileId)
+                    .offset(offset).execute().getMessages();
             messages.addAll(page);
             offset += VKConstants.MESSAGES;
         }
@@ -352,15 +340,17 @@ public class VKAPI extends ProgressableAPI {
     public List<Profile> search(SearchRequest.Query query) {
         int offset = 0;
         List<Profile> profiles = Lists.newArrayList();
-        SearchRequest request = new SearchRequest(token())
-                .fields(com.vk.api.sdk.objects.users.Fields.values())
-                .count(VKConstants.SEARCH);
 
-        List<Profile> page = query.build(request).execute().getProfiles();
+        List<Profile> page = query.build(
+                VKLibrary.search(token())
+        ).execute().getProfiles();
+
         profiles.addAll(page);
 
         while (VKConstants.SEARCH.equals(page.size())) {
-            page = request.offset(offset).execute().getProfiles();
+            page = query.build(
+                    VKLibrary.search(token())
+            ).offset(offset).execute().getProfiles();
             profiles.addAll(page);
             offset += VKConstants.SEARCH;
         }

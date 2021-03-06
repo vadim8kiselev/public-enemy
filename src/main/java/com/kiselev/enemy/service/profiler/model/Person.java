@@ -72,7 +72,7 @@ public class Person {
         this.phone = profile.public_phone_number();
         this.email = profile.public_email();
 
-        this.address = profile.address();
+        this.address = profile.location();
 
         this.vk = profile.vk();
         this.telegram = profile.telegram();

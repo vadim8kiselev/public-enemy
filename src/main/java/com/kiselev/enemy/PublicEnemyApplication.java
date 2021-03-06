@@ -1,6 +1,8 @@
 package com.kiselev.enemy;
 
 import com.google.common.collect.Lists;
+import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
+import com.kiselev.enemy.network.instagram.model.InstagramProfile;
 import com.kiselev.enemy.network.telegram.model.TelegramMessage;
 import com.kiselev.enemy.network.vk.api.model.Message;
 import com.kiselev.enemy.network.vk.model.VKProfile;
@@ -27,6 +29,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.kiselev.enemy.network.telegram.api.bot.command.identifier.utils.IdentifierUtils.messages;
+
 @EnableScheduling
 @SpringBootApplication
 @EnableMongoRepositories(basePackages = "com.kiselev.enemy.data.mongo.repository")
@@ -41,20 +45,52 @@ public class PublicEnemyApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-//        InstagramProfile me = publicEnemy.ig().me();
-//        List<InstagramStory> stories = me.stories();
-//
-//        for (InstagramStory story : stories) {
-//            List<InstagramProfile> viewers = story.viewers();
-//        }
-//
-//        boolean debug = true;
 
-//        sortedMessages();
-//        cities();
-//        birthdates();
-//        stats();
+        InstagramProfile vadim8kiselev = publicEnemy.ig().profile("vadim8kiselev");
+        for (InstagramProfile following : vadim8kiselev.following()) {
+            List<Profile> followers = publicEnemy.ig().service().api().raw().followers(following.id());
+            List<Profile> unique = followers.stream()
+                    .distinct()
+                    .collect(Collectors.toList());
+
+//            publicEnemy.tg().send(TelegramMessage.raw(following.username() + ": " + unique.size() + " / " + followers.size() +
+//                    " (" + Math.abs(unique.size() - followers.size()) + ")"));
+
+            publicEnemy.tg().send(TelegramMessage.raw(following.username() + ";" + followers.size() + ";" + unique.size() + ";" + Math.abs(unique.size() - followers.size())));
+        }
     }
+//    @Override
+//    public void run(String... args) {
+//        List<String> ids = Lists.newArrayList(
+//                "42597474",
+//                "39218747",
+//                "280512823",
+//                "57565927",
+//                "86763052",
+//                "83412390"
+//        );
+//
+//        List<List<VKProfile>> friends = ids.stream()
+//                .map(id -> publicEnemy.vk().service().api()
+//                        .friends(id).stream()
+//                        .map(VKProfile::new)
+//                        .collect(Collectors.toList()))
+//                .collect(Collectors.toList());
+//
+//        Map<VKProfile, Long> heatMap = friends.stream()
+//                .flatMap(List::stream)
+//                .filter(friend -> !ids.contains(friend.id()))
+//                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+//
+//        String message = heatMap.entrySet().stream()
+//                .sorted(Map.Entry.<VKProfile, Long>comparingByValue().reversed())
+//                .limit(30)
+//                .map(entry -> entry.getKey().name() + " - " + entry.getValue() + " / " + friends.size())
+//                .collect(Collectors.joining("\n"));
+//
+//        publicEnemy.tg().send(TelegramMessage.text("Closest friends\n" + message));
+//        System.exit(0);
+//    }
 
     private void sortedMessages() {
         VKProfile vk_me = publicEnemy.vk().me();

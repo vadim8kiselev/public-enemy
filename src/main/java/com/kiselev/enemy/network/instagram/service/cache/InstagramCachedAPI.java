@@ -54,12 +54,29 @@ public class InstagramCachedAPI extends ProgressableAPI {
     public List<User> friends(String profilePk) {
         List<Profile> friends = api.friends(profilePk);
 
-        return friends.stream()
-                .peek(friend -> progress.bar(SocialNetwork.IG, "Friends", friends, friend))
-                .map(Profile::username)
-                .map(this::profile)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        if (friends != null) {
+            return friends.stream()
+                    .peek(friend -> progress.bar(SocialNetwork.IG, "Friends", friends, friend))
+                    .map(Profile::username)
+                    .map(this::profile)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    public List<User> unfollowers(String profilePk) {
+        List<Profile> unfollowers = api.unfollowers(profilePk);
+
+        if (unfollowers != null) {
+            return unfollowers.stream()
+                    .peek(friend -> progress.bar(SocialNetwork.IG, "Unfollowers", unfollowers, friend))
+                    .map(Profile::username)
+                    .map(this::profile)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+        return null;
     }
 
     public List<User> followers(String profilePk) {

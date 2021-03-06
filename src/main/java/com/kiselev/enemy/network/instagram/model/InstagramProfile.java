@@ -1,6 +1,8 @@
 package com.kiselev.enemy.network.instagram.model;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
 import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
 import com.kiselev.enemy.utils.flow.model.Info;
@@ -57,13 +59,16 @@ public class InstagramProfile implements Info {
     private String public_phone_number;
     private String public_email;
 
-    private String address;
+    private String location;
 
     @ToString.Exclude
     private List<InstagramStory> stories;
 
     @ToString.Exclude
     private List<InstagramProfile> friends;
+
+    @ToString.Exclude
+    private List<InstagramProfile> unfollowers;
 
     @ToString.Exclude
     private List<InstagramProfile> followers;
@@ -86,6 +91,21 @@ public class InstagramProfile implements Info {
     private Integer followingCount;
 
     private LocalDateTime timestamp;
+
+    public InstagramProfile(Profile profile) {
+        this.timestamp = LocalDateTime.now();
+
+        this.id = String.valueOf(profile.id());
+        this.username = profile.username();
+        this.fullName = profile.fullName();
+
+        this.has_anonymous_profile_picture = profile.hasAnonymousPhoto();
+
+        this.is_private = profile.isPrivate();
+        this.is_deleted = profile.isDeleted();
+
+        this.is_verified = profile.isVerified();
+    }
 
     public InstagramProfile(User profile) {
         this.timestamp = LocalDateTime.now();
@@ -121,7 +141,7 @@ public class InstagramProfile implements Info {
 
         this.public_email = profile.getEmail();
 
-        this.address = StringUtils.isNotEmpty(profile.getAddress())
+        this.location = StringUtils.isNotEmpty(profile.getAddress())
                 ? profile.getAddress()
                 : null;
 
@@ -146,34 +166,35 @@ public class InstagramProfile implements Info {
         Map<ProfileType, Integer> rating = Maps.newHashMap();
 
         rating.put(ProfileType.BOT, sum(
-                rate(isAnonymous),
-                rate(isEmptyBiography),
-                rate(mediaCount < 10),
-                rate(xTimesMore(followings, followers, 5))
+                rate(isAnonymous, 100)
+//                rate(isEmptyBiography),
+//                rate(mediaCount < 10),
+//                rate(xTimesMore(followings, followers, 5))
         ));
         rating.put(ProfileType.VIEWER, sum(
-                rate(isNotAnonymous),
-                rate(isNotEmptyBiography),
-                rate(mediaCount < 10),
-                rate(followings > followers)
+//                rate(isNotAnonymous),
+//                rate(isNotEmptyBiography),
+//                rate(mediaCount < 10),
+                rate(followings > followers, 100)
         ));
         rating.put(ProfileType.CREATOR, sum(
-                rate(isNotAnonymous),
-                rate(isNotEmptyBiography),
-                rate(mediaCount >= 10),
-                rate(xTimesMore(followers, followings, 5))
+//                rate(isNotAnonymous),
+//                rate(isNotEmptyBiography),
+//                rate(mediaCount >= 10),
+//                rate(xTimesMore(followers, followings, 5))
+                rate(followings < followers, 100)
         ));
         rating.put(ProfileType.BLOGGER, sum(
-                rate(isNotAnonymous),
-                rate(mediaCount >= 100),
-                rate(isNotEmptyBiography),
-                rate(xTimesMore(followers, followings, 10))
+//                rate(isNotAnonymous),
+                rate(mediaCount >= 100)
+//                rate(isNotEmptyBiography),
+//                rate(xTimesMore(followers, followings, 10))
         ));
         rating.put(ProfileType.STAR, sum(
-                rate(isNotAnonymous),
-                rate(isNotEmptyBiography),
-                rate(mediaCount >= 1000),
-                rate(followers >= 1_000_000)
+//                rate(isNotAnonymous),
+//                rate(isNotEmptyBiography),
+//                rate(mediaCount >= 1000),
+                rate(followers >= 1_000_000, 100)
         ));
 
         return rating.entrySet().stream()
@@ -210,11 +231,29 @@ public class InstagramProfile implements Info {
         return expression ? rate : 0;
     }
 
+    public List<InstagramProfile> followers() {
+        if (followers != null) {
+            return Lists.newArrayList(followers);
+        }
+        return null;
+    }
+
+    public List<InstagramProfile> following() {
+        if (following != null) {
+            return Lists.newArrayList(following);
+        }
+        return null;
+    }
+
+    public String identifier() {
+        return username;
+    }
+
     @Override
     public String name() {
         return String.format(
                 type().template(),
-                username, //StringUtils.isNoneEmpty(fullName) ? fullName : username,
+                username,
                 username
         );
     }

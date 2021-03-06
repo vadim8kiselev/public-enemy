@@ -29,6 +29,7 @@ import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUser
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaGetCommentsResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaListReelMediaViewerResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.users.UserResponse;
+import com.kiselev.enemy.network.instagram.utils.InstagramUtils;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import com.kiselev.enemy.utils.progress.ProgressableAPI;
 import lombok.RequiredArgsConstructor;
@@ -78,13 +79,49 @@ public class InstagramAPI extends ProgressableAPI {
         List<Profile> followers = followers(profilePk);
         List<Profile> following = following(profilePk);
 
-        friends.addAll(followers);
-        friends.retainAll(following);
-
-        return friends;
+        if (followers != null && following != null) {
+            friends.addAll(followers);
+            friends.retainAll(following);
+            return friends;
+        }
+        return null;
     }
 
+    public List<Profile> unfollowers(String profilePk) {
+        List<Profile> unfollowers = Lists.newArrayList();
+
+        List<Profile> followers = followers(profilePk);
+        List<Profile> following = following(profilePk);
+
+        if (followers != null && following != null) {
+            unfollowers.addAll(following);
+            unfollowers.removeAll(followers);
+            return unfollowers;
+        }
+        return null;
+    }
+
+    // TODO: Ugly
     public List<Profile> followers(String profilePk) {
+        List<Profile> followers = internalFollowers(profilePk);
+        Set<Profile> set = Sets.newHashSet(followers);
+        for (int retry = 0; retry < 3; retry++) {
+            if (set.size() == followers.size()) {
+                return Lists.newArrayList(set);
+            } else {
+                set.addAll(
+                        internalFollowers(profilePk)
+                );
+            }
+        }
+        if (set.size() == followers.size()) {
+            return Lists.newArrayList(set);
+        } else {
+            return null;
+        }
+    }
+
+    public List<Profile> internalFollowers(String profilePk) {
         List<Profile> followers = Lists.newArrayList();
 
         String next = null;
@@ -105,24 +142,33 @@ public class InstagramAPI extends ProgressableAPI {
                     : null;
         } while (next != null);
 
-        if (followers.size() != followers.stream().distinct().count()) {
-            boolean d = true;
-        }
-
         return followers;
     }
 
     public List<Profile> following(String profilePk) {
+        List<Profile> following = internalFollowing(profilePk);
+        Set<Profile> set = Sets.newHashSet(following);
+        for (int retry = 0; retry < 3; retry++) {
+            if (set.size() == following.size()) {
+                return Lists.newArrayList(set);
+            } else {
+                set.addAll(
+                        internalFollowing(profilePk)
+                );
+            }
+        }
+        if (set.size() == following.size()) {
+            return Lists.newArrayList(set);
+        } else {
+            return null;
+        }
+    }
+
+    public List<Profile> internalFollowing(String profilePk) {
         List<Profile> following = Lists.newArrayList();
 
         String next = null;
         do {
-//            InstagramGetUserFollowersResult profileFollowing =
-//                    client.request(new InstagramGetUserFollowingRequest(
-//                            profilePk,
-//                            next
-//                    ));
-
             FeedUsersResponse response = client.request(
                     new FriendshipsFeedsRequest(profilePk,
                             FriendshipsFeedsRequest.FriendshipsFeeds.FOLLOWING,
