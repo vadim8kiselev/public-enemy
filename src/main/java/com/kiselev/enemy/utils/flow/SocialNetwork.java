@@ -9,7 +9,7 @@ public interface SocialNetwork<Profile extends Info> {
 
     Profile profile(String identifier);
 
-    EnemyMessage<Profile> info(String identifier);
-
-    EnemyMessage<Profile> version(String identifier);
+//    EnemyMessage<Profile> info(String identifier);
+//
+//    EnemyMessage<Profile> version(String identifier);
 }

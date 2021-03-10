@@ -112,7 +112,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
         String igId = ProfilingUtils.identifier(IG, request);
         if (igId != null) {
-            TelegramUtils.log(VK, "Recognized ig identifier: " + igId);
+            TelegramUtils.log(IG, "Recognized ig identifier: " + igId);
             String igResponse = ig(igId);
             publicEnemy.tg().send(requestId, TelegramMessage.text(igResponse));
             return;
@@ -149,7 +149,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
     // Main
     private String ig(String identifier) {
-        InstagramProfile profile = new InstagramProfile(publicEnemy.ig().service().api().raw().profile(identifier));
+        InstagramProfile profile = new InstagramProfile(publicEnemy.ig().service().api().profile(identifier));
         if (profile.username() != null) {
             TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded instagram profile: " + profile.username());
         } else {
@@ -280,7 +280,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
         if (profile != null) {
             profile.posts(
-                    publicEnemy.ig().service().api().raw().posts(profile.id()).stream()
+                    publicEnemy.ig().service().api().posts(profile.id()).stream()
                             .map(InstagramPost::new)
                             .collect(Collectors.toList()));
             if (profile.posts() != null) {
@@ -289,7 +289,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                 TelegramUtils.log(IG, "[" + profile.identifier() + "] No ig posts");
             }
 
-            List<Profile> followers = publicEnemy.ig().service().api().raw().followers(profile.id());
+            List<Profile> followers = publicEnemy.ig().service().api().followers(profile.id());
             if (followers != null) {
                 profile.followers(
                         followers.stream()
@@ -302,7 +302,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                 TelegramUtils.log(IG, "[" + profile.identifier() + "] No ig followers");
             }
 
-            List<Profile> following = publicEnemy.ig().service().api().raw().following(profile.id());
+            List<Profile> following = publicEnemy.ig().service().api().following(profile.id());
             if (following != null) {
                 profile.following(following.stream()
                         .map(InstagramProfile::new)
@@ -660,6 +660,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
         List<String> information = Lists.newArrayList();
 
+        information.add(message("👤 Username", profile.name()));
         information.add(message("🗣 Type", profile.profileType()));
         information.add(message("📷 Category", profile.category()));
         if (StringUtils.isNotEmpty(profile.biography())) {
@@ -761,7 +762,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
         int totalNumberOfItems = latestInstagramPosts.size();
 
         List<Profile> igLikes = latestInstagramPosts.stream()
-                .map(post -> publicEnemy.ig().service().api().raw().likes(post.id()))
+                .map(post -> publicEnemy.ig().service().api().likes(post.id()))
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
 

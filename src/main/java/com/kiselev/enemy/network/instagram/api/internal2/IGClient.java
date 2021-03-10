@@ -206,14 +206,14 @@ public class IGClient {
                             url,
                             IGUtils.truncate(body));
 
-                    try {
-                        FileUtils.writeStringToFile(
-                                new File("response/" + url.toString() + ".json"),
-                                body,
-                                Charset.defaultCharset());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+//                    try {
+//                        FileUtils.writeStringToFile(
+//                                new File("response/" + url.toString() + ".json"),
+//                                body,
+//                                Charset.defaultCharset());
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
 
                     return request.parseResponse(res);
                 })

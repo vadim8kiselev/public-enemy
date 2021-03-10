@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+//import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.util.ReflectionUtils;
 
@@ -33,7 +33,7 @@ import static com.kiselev.enemy.network.telegram.api.bot.command.identifier.util
 
 @EnableScheduling
 @SpringBootApplication
-@EnableMongoRepositories(basePackages = "com.kiselev.enemy.data.mongo.repository")
+//@EnableMongoRepositories(basePackages = "com.kiselev.enemy.data.mongo.repository")
 public class PublicEnemyApplication implements CommandLineRunner {
 
     @Autowired
@@ -45,7 +45,7 @@ public class PublicEnemyApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-//        InstagramProfile vadim8kiselev = publicEnemy.ig().profile("vadim8kiselev");
+//        InstagramProfile vadim8kiselev = publicEnemy.ig().profile("vadEmbeddedMongoim8kiselev");
 //        for (InstagramProfile following : vadim8kiselev.following()) {
 //            List<Profile> followers = publicEnemy.ig().service().api().raw().followers(following.id());
 //            List<Profile> unique = followers.stream()

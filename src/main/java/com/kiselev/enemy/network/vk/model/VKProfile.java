@@ -20,8 +20,8 @@ import lombok.experimental.Accessors;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+//import org.springframework.data.annotation.Id;
+//import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import static com.kiselev.enemy.network.vk.model.constants.VKMessages.*;
 
 @Data
-@Document
+//@Document
 @NoArgsConstructor
 @Accessors(fluent = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -42,7 +42,7 @@ public class VKProfile implements Info {
     @ToString.Exclude
     private Profile profile;
 
-    @Id
+//    @Id
     @EqualsAndHashCode.Include
     private String id;
 

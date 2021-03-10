@@ -6,40 +6,50 @@ import com.kiselev.enemy.network.instagram.api.internal2.requests.IGRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.IGResponse;
 import com.kiselev.enemy.network.instagram.utils.InstagramUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Queue;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InstagramClient {
 
-    private List<IGClient> clients;
-
     @Value("${com.kiselev.enemy.instagram.credentials}")
     private List<String> credentials;
 
+    private Queue<IGClient> clients;
+
+    private Queue<IGClient> unavailableClients;
+
     public <T extends IGResponse> T request(IGRequest<T> request) {
         authenticate();
-//        reanimate();
-        IGClient client = client(clients);
+        IGClient client = client();
         InstagramUtils.timeout();
 
         try {
             return client.sendRequest(request).join();
         } catch (Exception exception) {
-            client.markUnavailable();
+            if ("Not authorized to view user".equals(exception.getCause().getMessage())) {
+                // Private profile
+                return null;
+            }
+            unavailable(client);
             return request(request);
         }
     }
 
     private void authenticate() {
-        if (clients == null) {
-            clients = credentials.stream()
+        if (this.clients == null) {
+            this.clients = credentials.stream()
                     .map(credential -> {
                         try {
                             String[] usernameAndPassword = credential.split(":");
@@ -53,50 +63,47 @@ public class InstagramClient {
                         }
                     })
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toCollection(Lists::newLinkedList));
+        }
+        if (this.unavailableClients == null) {
+            this.unavailableClients = Lists.newLinkedList();
         }
     }
 
-    private IGClient client(List<IGClient> clients) {
-        return clients.stream()
-                .filter(IGClient::isAvailable)
-                .sorted((o1, o2) -> ThreadLocalRandom.current().nextInt(-1, 2))
-                .findAny()
-                .orElseGet(this::lastChance);
+    private IGClient client() {
+        IGClient client = clients.poll();
+        if (client != null) {
+            clients.add(client);
+            return client;
+        } else {
+            reanimate();
+
+            IGClient reanimatedClient = clients.poll();
+            if (reanimatedClient != null) {
+                return reanimatedClient;
+            } else {
+                throw new RuntimeException("All clients are currently unavailable");
+            }
+        }
+    }
+
+    private void unavailable(IGClient client) {
+        client.markUnavailable();
+        clients.remove(client);
+        unavailableClients.add(client);
     }
 
     private void reanimate() {
-        for (IGClient client : clients) {
+        for (IGClient client : unavailableClients) {
             if (client.isNotAvailable()) {
                 try {
                     InstagramUtils.timeout();
                     client.actions().account().currentUser().join();
                     client.markAvailable();
                 } catch (Exception exception) {
-                    // Skip
-                    boolean debug = true;
+                    log.error(exception.getMessage(), exception);
                 }
             }
         }
-    }
-
-    private IGClient lastChance() {
-        InstagramUtils.sleep(60000);
-
-        List<IGClient> availableClients = Lists.newArrayList();
-
-        for (IGClient client : clients) {
-            try {
-                client.actions().account().currentUser().join();
-                client.markAvailable();
-                availableClients.add(client);
-            } catch (Exception exception) {
-                // Skip
-            }
-        }
-
-        return availableClients.stream()
-                .findAny()
-                .orElseThrow(() -> new RuntimeException("No clients available"));
     }
 }
