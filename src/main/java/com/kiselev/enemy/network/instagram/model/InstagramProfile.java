@@ -14,8 +14,8 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+//import org.springframework.data.annotation.Id;
+//import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Data
-@Document
+//@Document
 @NoArgsConstructor
 @Accessors(fluent = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -33,7 +33,7 @@ public class InstagramProfile implements Info {
 
     private String id;
 
-    @Id
+//    @Id
     @EqualsAndHashCode.Include
     private String username;
 

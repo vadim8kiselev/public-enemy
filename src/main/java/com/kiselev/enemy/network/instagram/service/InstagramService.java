@@ -1,5 +1,6 @@
 package com.kiselev.enemy.network.instagram.service;
 
+import com.kiselev.enemy.network.instagram.api.InstagramAPI;
 import com.kiselev.enemy.network.instagram.api.internal2.models.direct.item.ThreadItem;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.UserTags;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
@@ -11,15 +12,17 @@ import com.kiselev.enemy.network.instagram.model.InstagramCommentary;
 import com.kiselev.enemy.network.instagram.model.InstagramPost;
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
 import com.kiselev.enemy.network.instagram.model.InstagramStory;
-import com.kiselev.enemy.network.instagram.service.cache.InstagramCachedAPI;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
 import com.kiselev.enemy.utils.analytics.model.Prediction;
+import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import com.kiselev.enemy.utils.progress.ProgressableAPI;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,15 +30,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class InstagramService extends ProgressableAPI {
 
-    private final InstagramCachedAPI api;
+    private final InstagramAPI api;
 
-    public InstagramCachedAPI api() {
+    @Value("${com.kiselev.enemy.instagram.identifier:}")
+    private String igIdentifier;
+
+    public InstagramAPI api() {
         return api;
     }
 
     public InstagramProfile me() {
-        User me = api.me();
-        return new InstagramInternalProfile(me);
+        return profile(igIdentifier);
     }
 
     public InstagramProfile profile(String username) {
@@ -57,31 +62,23 @@ public class InstagramService extends ProgressableAPI {
     }
 
     public List<InstagramProfile> friends(String id) {
-        List<User> friends = api.friends(id);
-        return friends.stream()
-                .map(InstagramInternalProfile::new)
-                .collect(Collectors.toList());
+        List<Profile> friends = api.friends(id);
+        return convert(friends);
     }
 
     public List<InstagramProfile> unfollowers(String id) {
-        List<User> unfollowers = api.unfollowers(id);
-        return unfollowers.stream()
-                .map(InstagramInternalProfile::new)
-                .collect(Collectors.toList());
+        List<Profile> unfollowers = api.unfollowers(id);
+        return convert(unfollowers);
     }
 
     public List<InstagramProfile> followers(String id) {
-        List<User> followers = api.followers(id);
-        return followers.stream()
-                .map(InstagramInternalProfile::new)
-                .collect(Collectors.toList());
+        List<Profile> followers = api.followers(id);
+        return convert(followers);
     }
 
     public List<InstagramProfile> following(String id) {
-        List<User> following = api.following(id);
-        return following.stream()
-                .map(InstagramInternalProfile::new)
-                .collect(Collectors.toList());
+        List<Profile> following = api.following(id);
+        return convert(following);
     }
 
     public List<InstagramPost> posts(String id) {
@@ -92,10 +89,8 @@ public class InstagramService extends ProgressableAPI {
     }
 
     public List<InstagramProfile> likes(String id) {
-        List<User> likes = api.likes(id);
-        return likes.stream()
-                .map(InstagramInternalProfile::new)
-                .collect(Collectors.toList());
+        List<Profile> likes = api.likes(id);
+        return convert(likes);
     }
 
     public List<InstagramCommentary> commentaries(String id) {
@@ -113,10 +108,8 @@ public class InstagramService extends ProgressableAPI {
     }
 
     public List<InstagramProfile> viewers(String id) {
-        List<User> viewers = api.viewers(id);
-        return viewers.stream()
-                .map(InstagramInternalProfile::new)
-                .collect(Collectors.toList());
+        List<Profile> viewers = api.viewers(id);
+        return convert(viewers);
     }
 
     public Map<InstagramProfile, Set<ThreadItem>> history() {
@@ -190,6 +183,14 @@ public class InstagramService extends ProgressableAPI {
 //        }
 //        return Collections.emptyList();
 //    }
+
+    private List<InstagramProfile> convert(List<Profile> profiles) {
+        return profiles.stream()
+                .map(Profile::username)
+                .map(this::profile)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
 
     private class InstagramInternalProfile extends InstagramProfile {
 

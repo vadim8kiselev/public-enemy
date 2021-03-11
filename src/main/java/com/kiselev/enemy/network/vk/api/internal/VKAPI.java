@@ -39,22 +39,6 @@ public class VKAPI extends ProgressableAPI {
     @Value("${com.kiselev.enemy.vk.access.tokens}")
     private List<String> raw_tokens;
 
-//    private BlockingQueue<String> tokens;
-//
-//    @PostConstruct
-//    public void initialize() {
-//        this.tokens = Queues.newArrayBlockingQueue(raw_tokens.size());
-//        this.tokens.addAll(raw_tokens);
-//    }
-//
-//    @SneakyThrows
-//    private String token() {
-//        String token = tokens.take();
-//        VKUtils.timeout();
-//        tokens.offer(token);
-//        return token;
-//    }
-
     private Queue<String> tokens;
 
     @PostConstruct
@@ -65,8 +49,11 @@ public class VKAPI extends ProgressableAPI {
     @SneakyThrows
     private String token() {
         String token = tokens.poll();
-        tokens.add(token);
-        return token;
+        if (token != null) {
+            tokens.add(token);
+            return token;
+        }
+        throw new RuntimeException("No available clients found");
     }
 
     public Profile me() {

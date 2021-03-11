@@ -2,17 +2,10 @@ package com.kiselev.enemy.network.instagram;
 
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
 import com.kiselev.enemy.network.instagram.service.InstagramService;
-import com.kiselev.enemy.network.instagram.service.analyst.InstagramAnalyst;
-import com.kiselev.enemy.network.instagram.service.cache.InstagramCachedAPI;
-import com.kiselev.enemy.network.instagram.service.tracker.InstagramTracker;
 import com.kiselev.enemy.utils.flow.SocialNetwork;
-import com.kiselev.enemy.utils.flow.message.Analysis;
-import com.kiselev.enemy.utils.flow.message.EnemyMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -21,9 +14,9 @@ public class Instagram implements SocialNetwork<InstagramProfile> {
 
     private final InstagramService ig;
 
-    private final InstagramTracker tracker;
-
-    private final InstagramAnalyst analyst;
+//    private final InstagramTracker tracker;
+//
+//    private final InstagramAnalyst analyst;
 
     public InstagramService service() {
         return ig;
@@ -40,15 +33,15 @@ public class Instagram implements SocialNetwork<InstagramProfile> {
         return ig.profile(identifier);
     }
 
-    @Override
-    public EnemyMessage<InstagramProfile> info(String identifier) {
-        log.info("Instagram profile information for identifier {}", identifier);
-        return null;
-    }
-
-    @Override
-    public EnemyMessage<InstagramProfile> version(String identifier) {
-        log.info("Instagram profile version for identifier {}", identifier);
-        return null;
-    }
+//    @Override
+//    public EnemyMessage<InstagramProfile> info(String identifier) {
+//        log.info("Instagram profile information for identifier {}", identifier);
+//        return null;
+//    }
+//
+//    @Override
+//    public EnemyMessage<InstagramProfile> version(String identifier) {
+//        log.info("Instagram profile version for identifier {}", identifier);
+//        return null;
+//    }
 }
