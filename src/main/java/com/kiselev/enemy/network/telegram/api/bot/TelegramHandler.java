@@ -61,41 +61,45 @@ public class TelegramHandler {
     }
 
     public void handle(Update update) {
-        Integer requestId = Optional.ofNullable(update)
+        Message message = Optional.ofNullable(update)
                 .map(Update::message)
-                .map(Message::from)
-                .map(User::id)
                 .orElse(null);
 
-        String request = Optional.ofNullable(update)
-                .map(Update::message)
-                .map(Message::text)
-                .orElse(null);
+        if (message != null) {
+            Integer requestId = Optional.of(message)
+                    .map(Message::from)
+                    .map(User::id)
+                    .orElse(null);
 
-        if (requestId != null && request != null) {
-            TelegramCommand command = recognizeCommand(update);
+            String request = Optional.of(message)
+                    .map(Message::text)
+                    .orElse(null);
 
-            if (command != null) {
-                api.sendTyping(requestId);
-                try {
-                    command.execute(update);
-                } catch (Exception exception) {
-                    String exceptionMessage = exception.getMessage();
-                    String truncatedExceptionMessage = TelegramUtils.truncate(exceptionMessage);
-                    String message = String.format("Id: \"%s\", Text: \"%s\", Error:\n%s",
-                            requestId, request, truncatedExceptionMessage);
+            if (requestId != null && request != null) {
+                TelegramCommand command = recognizeCommand(update);
 
-                    log.warn(exceptionMessage, exception);
-                    api.sendRaw(requestId, message);
-                    if (ObjectUtils.notEqual(requestId, me)) {
-                        api.sendRaw(me, message);
+                if (command != null) {
+                    api.sendTyping(requestId);
+                    try {
+                        command.execute(update);
+                    } catch (Exception exception) {
+                        String exceptionMessage = exception.getMessage();
+                        String truncatedExceptionMessage = TelegramUtils.truncate(exceptionMessage);
+                        String text = String.format("Id: \"%s\", Text: \"%s\", Error:\n%s",
+                                requestId, request, truncatedExceptionMessage);
+
+                        log.warn(exceptionMessage, exception);
+                        api.sendRaw(requestId, text);
+                        if (ObjectUtils.notEqual(requestId, me)) {
+                            api.sendRaw(me, text);
+                        }
                     }
+                } else {
+                    api.sendRaw(requestId, String.format("Unknown command: \"%s\"", request));
                 }
             } else {
                 api.sendRaw(requestId, String.format("Unknown command: \"%s\"", request));
             }
-        } else {
-            api.sendRaw(requestId, String.format("Unknown command: \"%s\"", request));
         }
     }
 
