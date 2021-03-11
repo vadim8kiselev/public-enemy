@@ -7,3 +7,4 @@ git commit --allow-empty -m "Trigger Heroku deploy";
 git push heroku master; 
 heroku scale web=1; 
 heroku logs --tail;
+
