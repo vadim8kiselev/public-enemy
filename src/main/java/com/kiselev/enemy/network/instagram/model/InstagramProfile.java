@@ -71,6 +71,9 @@ public class InstagramProfile implements Info {
     private List<InstagramProfile> unfollowers;
 
     @ToString.Exclude
+    private List<InstagramProfile> unfollowings;
+
+    @ToString.Exclude
     private List<InstagramProfile> followers;
 
     @ToString.Exclude

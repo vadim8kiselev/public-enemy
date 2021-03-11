@@ -74,31 +74,21 @@ public class InstagramAPI extends ProgressableAPI {
     }
 
     public List<Profile> friends(String profilePk) {
-        List<Profile> friends = Lists.newArrayList();
-
         List<Profile> followers = followers(profilePk);
         List<Profile> following = following(profilePk);
-
-        if (followers != null && following != null) {
-            friends.addAll(followers);
-            friends.retainAll(following);
-            return friends;
-        }
-        return null;
+        return InstagramUtils.friends(followers, following);
     }
 
     public List<Profile> unfollowers(String profilePk) {
-        List<Profile> unfollowers = Lists.newArrayList();
-
         List<Profile> followers = followers(profilePk);
         List<Profile> following = following(profilePk);
+        return InstagramUtils.unfollowers(followers, following);
+    }
 
-        if (followers != null && following != null) {
-            unfollowers.addAll(following);
-            unfollowers.removeAll(followers);
-            return unfollowers;
-        }
-        return null;
+    public List<Profile> unfollowings(String profilePk) {
+        List<Profile> followers = followers(profilePk);
+        List<Profile> following = following(profilePk);
+        return InstagramUtils.unfollowings(followers, following);
     }
 
     // TODO: Ugly

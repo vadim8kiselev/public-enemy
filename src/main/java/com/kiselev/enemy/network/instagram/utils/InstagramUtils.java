@@ -1,8 +1,8 @@
 package com.kiselev.enemy.network.instagram.utils;
 
 import com.google.common.collect.Lists;
-import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
+import com.kiselev.enemy.utils.flow.model.Info;
 import lombok.SneakyThrows;
 
 import java.time.Instant;
@@ -41,9 +41,9 @@ public class InstagramUtils {
         return null;
     }
 
-    public static List<InstagramProfile> friends(List<InstagramProfile> followers,
-                                                 List<InstagramProfile> following) {
-        List<InstagramProfile> friends = Lists.newArrayList();
+    public static <Type extends Info> List<Type> friends(List<Type> followers,
+                                                         List<Type> following) {
+        List<Type> friends = Lists.newArrayList();
 
         if (followers != null && following != null) {
             friends.addAll(followers);
@@ -67,9 +67,9 @@ public class InstagramUtils {
         return null;
     }
 
-    public static List<InstagramProfile> unfollowers(List<InstagramProfile> followers,
-                                                     List<InstagramProfile> following) {
-        List<InstagramProfile> unfollowers = Lists.newArrayList();
+    public static <Type extends Info> List<Type> unfollowers(List<Type> followers,
+                                                             List<Type> following) {
+        List<Type> unfollowers = Lists.newArrayList();
 
         if (followers != null && following != null) {
             unfollowers.addAll(following);
@@ -79,23 +79,23 @@ public class InstagramUtils {
         return null;
     }
 
-    public static List<InstagramProfile> unfollowing(InstagramProfile profile) {
-        List<InstagramProfile> unfollowing = Lists.newArrayList();
+    public static List<InstagramProfile> unfollowings(InstagramProfile profile) {
+        List<InstagramProfile> unfollowings = Lists.newArrayList();
 
         List<InstagramProfile> followers = profile.followers();
         List<InstagramProfile> following = profile.following();
 
         if (followers != null && following != null) {
-            unfollowing.addAll(followers);
-            unfollowing.removeAll(following);
-            return unfollowing;
+            unfollowings.addAll(followers);
+            unfollowings.removeAll(following);
+            return unfollowings;
         }
         return null;
     }
 
-    public static List<InstagramProfile> unfollowing(List<InstagramProfile> followers,
-                                                     List<InstagramProfile> following) {
-        List<InstagramProfile> unfollowing = Lists.newArrayList();
+    public static <Type extends Info> List<Type> unfollowings(List<Type> followers,
+                                                             List<Type> following) {
+        List<Type> unfollowing = Lists.newArrayList();
 
         if (followers != null && following != null) {
             unfollowing.addAll(followers);

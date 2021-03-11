@@ -71,6 +71,11 @@ public class InstagramService extends ProgressableAPI {
         return convert(unfollowers);
     }
 
+    public List<InstagramProfile> unfollowings(String id) {
+        List<Profile> unfollowings = api.unfollowings(id);
+        return convert(unfollowings);
+    }
+
     public List<InstagramProfile> followers(String id) {
         List<Profile> followers = api.followers(id);
         return convert(followers);
@@ -228,6 +233,14 @@ public class InstagramService extends ProgressableAPI {
                 super.unfollowers(InstagramService.this.unfollowers(id()));
             }
             return super.unfollowers();
+        }
+
+        @Override
+        public List<InstagramProfile> unfollowings() {
+            if (super.unfollowings() == null) {
+                super.unfollowings(InstagramService.this.unfollowings(id()));
+            }
+            return super.unfollowings();
         }
 
         @Override

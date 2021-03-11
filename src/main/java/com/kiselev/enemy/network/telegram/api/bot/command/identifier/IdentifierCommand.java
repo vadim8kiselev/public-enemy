@@ -2,12 +2,9 @@ package com.kiselev.enemy.network.telegram.api.bot.command.identifier;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.UserTags;
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.TimelineMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
 import com.kiselev.enemy.network.instagram.model.InstagramPost;
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
-import com.kiselev.enemy.network.instagram.service.InstagramService;
 import com.kiselev.enemy.network.instagram.utils.InstagramUtils;
 import com.kiselev.enemy.network.telegram.api.bot.command.TelegramCommand;
 import com.kiselev.enemy.network.telegram.api.bot.command.identifier.utils.IdentifierUtils;
@@ -17,7 +14,6 @@ import com.kiselev.enemy.network.vk.api.model.Photo;
 import com.kiselev.enemy.network.vk.api.model.Post;
 import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.network.vk.model.Zodiac;
-import com.kiselev.enemy.network.vk.service.VKService;
 import com.kiselev.enemy.network.vk.utils.VKUtils;
 import com.kiselev.enemy.service.PublicEnemyService;
 import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
@@ -28,21 +24,16 @@ import com.kiselev.enemy.utils.progress.ProgressableAPI;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.User;
-import com.vk.api.sdk.objects.likes.Type;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.kiselev.enemy.network.telegram.api.bot.command.identifier.utils.IdentifierUtils.*;
 import static com.kiselev.enemy.utils.flow.model.SocialNetwork.*;
@@ -51,6 +42,8 @@ import static com.kiselev.enemy.utils.flow.model.SocialNetwork.*;
 @Service
 @RequiredArgsConstructor
 public class IdentifierCommand extends ProgressableAPI implements TelegramCommand {
+
+    public static final Integer LIMIT = 10;
 
     private final PublicEnemyService publicEnemy;
 
@@ -333,6 +326,15 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                 TelegramUtils.log(IG, "[" + profile.identifier() + "] No ig unfollowers");
             }
 
+            profile.unfollowings(
+                    InstagramUtils.unfollowings(profile)
+            );
+            if (profile.unfollowings() != null) {
+                TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded ig unfollowings: " + profile.unfollowings().size() + " unfollowings");
+            } else {
+                TelegramUtils.log(IG, "[" + profile.identifier() + "] No ig unfollowings");
+            }
+
             Map<Integer, Function<InstagramProfile, List<String>>> ig = ImmutableMap
                     .<Integer, Function<InstagramProfile, List<String>>>builder()
                     .put(1, this::igInformation)
@@ -489,9 +491,19 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
         Map<VKProfile, Long> vkLikersHeatMap = vkLikes.stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
+        Long maxRate = vkLikersHeatMap.values().stream()
+                .max(Long::compareTo)
+                .orElse(null);
+
+        long limit = Math.max(
+                vkLikersHeatMap.values().stream()
+                        .filter(heat -> Objects.equals(heat, maxRate))
+                        .count() + 1,
+                LIMIT);
+
         List<String> likes = vkLikersHeatMap.entrySet().stream()
                 .sorted(Map.Entry.<VKProfile, Long>comparingByValue().reversed())
-                .limit(10)
+                .limit(limit)
                 .map(liker -> like("💙", liker.getKey().name(), liker.getValue(), totalNumberOfItems))
                 .collect(Collectors.toList());
 
@@ -725,7 +737,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
         List<InstagramProfile> friends = profile.friends();
         if (CollectionUtils.isNotEmpty(friends)) {
-            if (friends.size() <= 5) {
+            if (friends.size() <= LIMIT) {
                 people.add("\nFriends:");
                 for (InstagramProfile friend : friends) {
                     people.add(message("🤝 Friend", friend.name()));
@@ -737,13 +749,25 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
         List<InstagramProfile> unfollowers = profile.unfollowers();
         if (CollectionUtils.isNotEmpty(unfollowers)) {
-            if (unfollowers.size() <= 5) {
+            if (unfollowers.size() <= LIMIT) {
                 people.add("\nUnfollowers:");
                 for (InstagramProfile unfollower : unfollowers) {
                     people.add(message("👐 Unfollower", unfollower.name()));
                 }
             } else {
                 people.add(message("👐 Unfollowers", unfollowers.size(), "people"));
+            }
+        }
+
+        List<InstagramProfile> unfollowings = profile.unfollowings();
+        if (CollectionUtils.isNotEmpty(unfollowings)) {
+            if (unfollowings.size() <= LIMIT) {
+                people.add("\nUnfollowings:");
+                for (InstagramProfile unfollowing : unfollowings) {
+                    people.add(message("👐 Unfollowing", unfollowing.name()));
+                }
+            } else {
+                people.add(message("👐 Unfollowings", unfollowings.size(), "people"));
             }
         }
 
@@ -779,9 +803,19 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
         Map<Profile, Long> igLikersHeatMap = igLikes.stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
+        Long maxRate = igLikersHeatMap.values().stream()
+                .max(Long::compareTo)
+                .orElse(null);
+
+        long limit = Math.max(
+                igLikersHeatMap.values().stream()
+                        .filter(heat -> Objects.equals(heat, maxRate))
+                        .count() + 1,
+                LIMIT);
+
         List<String> likes = igLikersHeatMap.entrySet().stream()
                 .sorted(Map.Entry.<Profile, Long>comparingByValue().reversed())
-                .limit(10)
+                .limit(limit)
                 .map(liker -> like("🧡", liker.getKey().name(), liker.getValue(), totalNumberOfItems))
                 .collect(Collectors.toList());
 
@@ -810,7 +844,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
         List<String> tags = igTagsHeatMap.entrySet().stream()
                 .sorted(Map.Entry.<InstagramProfile, Long>comparingByValue().reversed())
-                .limit(10)
+                .limit(LIMIT)
                 .map(this::tag)
                 .collect(Collectors.toList());
 
@@ -840,7 +874,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                         .map(InstagramPost::location)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()),
-                10);
+                LIMIT);
 
         List<String> locations = topLocations.stream()
                 .map(location -> {
