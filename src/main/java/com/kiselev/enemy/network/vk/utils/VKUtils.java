@@ -39,7 +39,7 @@ public class VKUtils {
 
     @SneakyThrows
     public static void timeout() {
-        Thread.sleep(200 + (long) (new Random().nextDouble() * (double) (500 - 200)));
+        Thread.sleep(250 + (long) (new Random().nextDouble() * (double) (600 - 250)));
     }
 
     public static String code(BaseObject baseObject) {
@@ -59,7 +59,8 @@ public class VKUtils {
     }
 
     public static boolean areFamilyMembers(String a_lastName, String b_lastName) {
-        return a_lastName.contains(b_lastName) || b_lastName.contains(a_lastName);
+        return Math.abs(a_lastName.length() - b_lastName.length()) <= 3
+                && (a_lastName.contains(b_lastName) || b_lastName.contains(a_lastName));
     }
 
     public static String age(String birthDate) {

@@ -41,6 +41,18 @@ public class InstagramUtils {
         return null;
     }
 
+    public static List<InstagramProfile> friends(List<InstagramProfile> followers,
+                                                 List<InstagramProfile> following) {
+        List<InstagramProfile> friends = Lists.newArrayList();
+
+        if (followers != null && following != null) {
+            friends.addAll(followers);
+            friends.retainAll(following);
+            return friends;
+        }
+        return null;
+    }
+
     public static List<InstagramProfile> unfollowers(InstagramProfile profile) {
         List<InstagramProfile> unfollowers = Lists.newArrayList();
 
@@ -51,6 +63,44 @@ public class InstagramUtils {
             unfollowers.addAll(following);
             unfollowers.removeAll(followers);
             return unfollowers;
+        }
+        return null;
+    }
+
+    public static List<InstagramProfile> unfollowers(List<InstagramProfile> followers,
+                                                     List<InstagramProfile> following) {
+        List<InstagramProfile> unfollowers = Lists.newArrayList();
+
+        if (followers != null && following != null) {
+            unfollowers.addAll(following);
+            unfollowers.removeAll(followers);
+            return unfollowers;
+        }
+        return null;
+    }
+
+    public static List<InstagramProfile> unfollowing(InstagramProfile profile) {
+        List<InstagramProfile> unfollowing = Lists.newArrayList();
+
+        List<InstagramProfile> followers = profile.followers();
+        List<InstagramProfile> following = profile.following();
+
+        if (followers != null && following != null) {
+            unfollowing.addAll(followers);
+            unfollowing.removeAll(following);
+            return unfollowing;
+        }
+        return null;
+    }
+
+    public static List<InstagramProfile> unfollowing(List<InstagramProfile> followers,
+                                                     List<InstagramProfile> following) {
+        List<InstagramProfile> unfollowing = Lists.newArrayList();
+
+        if (followers != null && following != null) {
+            unfollowing.addAll(followers);
+            unfollowing.removeAll(following);
+            return unfollowing;
         }
         return null;
     }
