@@ -92,13 +92,15 @@ public class VKService {
         Stream<Photo> photoStream = photos.stream();
 
         if (!needAll) {
+            boolean isAvailableToGetAll = photos.size() < 100;
+
             photoStream = photoStream
                     .filter(photo -> {
                         LocalDateTime timestamp =
                                 LocalDateTime.ofInstant(
                                         Instant.ofEpochSecond(photo.date()),
                                         ZoneId.systemDefault());
-                        return timestamp.isAfter(LocalDateTime.now().minusYears(1));
+                        return isAvailableToGetAll || timestamp.isAfter(LocalDateTime.now().minusYears(1));
                     });
         }
 
@@ -154,13 +156,15 @@ public class VKService {
         Stream<Post> postStream = posts.stream();
 
         if (!needAll) {
+            boolean isAvailableToGetAll = posts.size() < 100;
+
             postStream = postStream
                     .filter(post -> {
                         LocalDateTime timestamp =
                                 LocalDateTime.ofInstant(
                                         Instant.ofEpochSecond(post.date()),
                                         ZoneId.systemDefault());
-                        return timestamp.isAfter(LocalDateTime.now().minusYears(1));
+                        return isAvailableToGetAll || timestamp.isAfter(LocalDateTime.now().minusYears(1));
                     });
         }
 

@@ -484,18 +484,24 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
         int totalNumberOfItems = photos.size() + posts.size();
 
+        boolean isAvailableToGetAll = totalNumberOfItems < 200;
+
         Map<VKProfile, Long> vkLikersHeatMap = vkLikes.stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         List<String> likes = vkLikersHeatMap.entrySet().stream()
                 .sorted(Map.Entry.<VKProfile, Long>comparingByValue().reversed())
-                .limit(5)
+                .limit(10)
                 .map(liker -> like("💙", liker.getKey().name(), liker.getValue(), totalNumberOfItems))
                 .collect(Collectors.toList());
 
         if (VKUtils.isNotEmpty(likes)) {
             TelegramUtils.log(VK, "[" + profile.identifier() + "] Downloaded likes");
-            messages.add("\nLikes for the last year:");
+            if (isAvailableToGetAll) {
+                messages.add("\nLikes:");
+            } else {
+                messages.add("\nLikes for the last year:");
+            }
             messages.addAll(likes);
         } else {
             TelegramUtils.log(VK, "[" + profile.identifier() + "] No likes");
@@ -755,8 +761,12 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
     private List<String> igLikes(InstagramProfile profile) {
         List<String> messages = Lists.newArrayList();
 
-        List<InstagramPost> latestInstagramPosts = profile.posts().stream()
-                .filter(post -> post.date().isAfter(LocalDateTime.now().minusYears(1)))
+        List<InstagramPost> posts = profile.posts();
+
+        boolean isAvaiableToGetAll = posts.size() < 100;
+
+        List<InstagramPost> latestInstagramPosts = posts.stream()
+                .filter(post -> isAvaiableToGetAll || post.date().isAfter(LocalDateTime.now().minusYears(1)))
                 .collect(Collectors.toList());
 
         int totalNumberOfItems = latestInstagramPosts.size();
@@ -771,13 +781,17 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
         List<String> likes = igLikersHeatMap.entrySet().stream()
                 .sorted(Map.Entry.<Profile, Long>comparingByValue().reversed())
-                .limit(5)
+                .limit(10)
                 .map(liker -> like("🧡", liker.getKey().name(), liker.getValue(), totalNumberOfItems))
                 .collect(Collectors.toList());
 
         if (VKUtils.isNotEmpty(likes)) {
             TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded likes");
-            messages.add("\nLikes for the last year:");
+            if (isAvaiableToGetAll) {
+                messages.add("\nLikes:");
+            } else {
+                messages.add("\nLikes for the last year:");
+            }
             messages.addAll(likes);
         } else {
             TelegramUtils.log(IG, "[" + profile.identifier() + "] No likes");
@@ -796,7 +810,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
         List<String> tags = igTagsHeatMap.entrySet().stream()
                 .sorted(Map.Entry.<InstagramProfile, Long>comparingByValue().reversed())
-                .limit(5)
+                .limit(10)
                 .map(this::tag)
                 .collect(Collectors.toList());
 
@@ -826,7 +840,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                         .map(InstagramPost::location)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()),
-                5);
+                10);
 
         List<String> locations = topLocations.stream()
                 .map(location -> {
