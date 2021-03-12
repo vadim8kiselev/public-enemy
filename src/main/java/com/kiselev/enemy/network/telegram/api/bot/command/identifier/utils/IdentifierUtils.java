@@ -8,6 +8,7 @@ import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -40,6 +41,22 @@ public class IdentifierUtils {
             return message(title, prediction.message());
         }
         return null;
+    }
+
+    public static String card(String title, List<String> lines, boolean completed) {
+        List<String> card = Lists.newArrayList();
+        card.add(title);
+        card.addAll(lines);
+        if (!completed) {
+            card.add("...");
+        }
+        return card.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining("\n"));
+    }
+
+    public static String bold(String message) {
+        return "*" + message + "*";
     }
 
     public static String message(String title, Object field) {

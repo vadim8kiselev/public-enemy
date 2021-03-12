@@ -12,7 +12,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
@@ -47,6 +46,8 @@ public class InstagramPost {
 
     private String caption;
 
+    private List<String> hashTags;
+
     @ToString.Exclude
     private List<InstagramProfile> likes;
 
@@ -62,7 +63,7 @@ public class InstagramPost {
 
         this.postId = post.getId();
 
-        this.date = InstagramUtils.dateAndTime(post.getTaken_at());
+        this.date = InstagramUtils.timestampToDateAndTime(post.getTaken_at());
 
         this.type = MediaType.by(post.getMedia_type());
 
@@ -71,6 +72,7 @@ public class InstagramPost {
         Comment.Caption caption = post.getCaption();
         if (caption != null) {
             this.caption = caption.getText();
+            this.hashTags = InstagramUtils.hashTags(caption.getText());
         }
 
         switch (type) {
@@ -109,10 +111,11 @@ public class InstagramPost {
 
     private String location(Location location) {
         if (location != null) {
-            return Stream.of(location.getCity(),
-                    location.getAddress(),
+            return Stream.of(
+                    location.getName(),
                     location.getShort_name(),
-                    location.getName())
+                    location.getCity(),
+                    location.getAddress())
                     .filter(StringUtils::isNotEmpty)
                     .findFirst()
                     .orElse(null);

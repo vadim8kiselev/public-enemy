@@ -6,6 +6,7 @@ import com.kiselev.enemy.network.instagram.model.InstagramProfile;
 import com.kiselev.enemy.network.telegram.model.TelegramMessage;
 import com.kiselev.enemy.network.vk.api.model.Message;
 import com.kiselev.enemy.network.vk.model.VKProfile;
+import com.kiselev.enemy.network.vk.utils.VKUtils;
 import com.kiselev.enemy.service.PublicEnemyService;
 import com.kiselev.enemy.service.profiler.model.Conversation;
 import com.kiselev.enemy.service.profiler.model.Person;
@@ -13,6 +14,10 @@ import com.kiselev.enemy.service.profiler.model.Text;
 import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
 import com.kiselev.enemy.utils.analytics.model.Prediction;
+import com.pengrad.telegrambot.request.EditMessageText;
+import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.BaseResponse;
+import com.pengrad.telegrambot.response.SendResponse;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +50,22 @@ public class PublicEnemyApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+
+//        SendResponse response = publicEnemy.tg().service().api().bot().raw().send(
+////                new SendMessage(63756324, "Hello")
+////                        .disableWebPagePreview(true)
+////        );
+////
+////        for (int index = 0; index < 10; index++) {
+////
+////            VKUtils.timeout();
+////
+////            BaseResponse x = publicEnemy.tg().service().api().bot().raw().send(
+////                    new EditMessageText(63756324, response.message().messageId(), "Hello " + index)
+////                            .disableWebPagePreview(true)
+////            );
+////        }
+
 //        InstagramProfile vadim8kiselev = publicEnemy.ig().profile("vadEmbeddedMongoim8kiselev");
 //        for (InstagramProfile following : vadim8kiselev.following()) {
 //            List<Profile> followers = publicEnemy.ig().service().api().raw().followers(following.id());

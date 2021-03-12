@@ -8,12 +8,29 @@ import lombok.SneakyThrows;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.SignStyle;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static java.time.temporal.ChronoField.*;
+
 public class InstagramUtils {
+
+    private static final Pattern HASH_TAG = Pattern.compile("#[^\\s#]+");
+
+    private static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()
+            .appendValue(DAY_OF_MONTH, 2)
+            .appendLiteral('.')
+            .appendValue(MONTH_OF_YEAR, 2)
+            .appendLiteral('.')
+            .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+            .toFormatter();
 
     public static <T> Stream<T> safeStream(Collection<T> collection) {
         return collection == null
@@ -21,10 +38,27 @@ public class InstagramUtils {
                 : collection.stream();
     }
 
-    public static LocalDateTime dateAndTime(Long timestamp) {
+    public static String dateToString(LocalDateTime timestamp) {
+        return timestamp.format(FORMATTER);
+    }
+
+    public static LocalDateTime timestampToDateAndTime(Long timestamp) {
         return LocalDateTime
                 .ofInstant(Instant.ofEpochSecond(timestamp), ZoneId.systemDefault());
 //                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    }
+
+    public static List<String> hashTags(String caption) {
+        List<String> hashTags = Lists.newArrayList();
+
+        final Matcher matcher = HASH_TAG.matcher(caption);
+        while (matcher.find()) {
+            hashTags.add(
+                    matcher.group()
+            );
+        }
+
+        return hashTags;
     }
 
     public static List<InstagramProfile> friends(InstagramProfile profile) {
@@ -94,7 +128,7 @@ public class InstagramUtils {
     }
 
     public static <Type extends Info> List<Type> unfollowings(List<Type> followers,
-                                                             List<Type> following) {
+                                                              List<Type> following) {
         List<Type> unfollowing = Lists.newArrayList();
 
         if (followers != null && following != null) {

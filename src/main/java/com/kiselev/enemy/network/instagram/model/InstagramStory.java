@@ -7,9 +7,6 @@ import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelI
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelVideoMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.Comment;
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.TimelineImageMedia;
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.TimelineMedia;
-import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.TimelineVideoMedia;
 import com.kiselev.enemy.network.instagram.utils.InstagramUtils;
 import com.kiselev.enemy.utils.image.Media;
 import lombok.Data;
@@ -50,7 +47,7 @@ public class InstagramStory {
 
         this.postId = story.getId();
 
-        this.date = InstagramUtils.dateAndTime(story.getTaken_at());
+        this.date = InstagramUtils.timestampToDateAndTime(story.getTaken_at());
 
         this.type = MediaType.by(story.getMedia_type());
 

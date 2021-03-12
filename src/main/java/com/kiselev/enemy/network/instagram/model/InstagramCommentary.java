@@ -30,7 +30,7 @@ public class InstagramCommentary {
 
         this.text = commentary.getText();
 
-        this.date = InstagramUtils.dateAndTime(commentary.getCreated_at_utc());
+        this.date = InstagramUtils.timestampToDateAndTime(commentary.getCreated_at_utc());
 
         this.likesCount = commentary.getComment_like_count();
     }

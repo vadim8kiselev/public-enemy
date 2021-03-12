@@ -79,7 +79,6 @@ public class TelegramHandler {
                 TelegramCommand command = recognizeCommand(update);
 
                 if (command != null) {
-                    api.sendTyping(requestId);
                     try {
                         command.execute(update);
                     } catch (Exception exception) {

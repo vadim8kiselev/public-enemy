@@ -33,29 +33,7 @@ public class TelegramBotAPI {
         return api;
     }
 
-    public void ask(Integer id, String question) {
-        SendResponse response = api.send(
-                new SendMessage(id, question)
-                        .replyMarkup(new ForceReply())
-                        .parseMode(ParseMode.MarkdownV2)
-                        .disableWebPagePreview(true)
-        );
-        processResponse(response, id, question);
-    }
-
-    public void send(Integer id, List<String> messages) {
-        for (String message : messages) {
-            send(id, message);
-        }
-    }
-
-    public void sendPhoto(Integer id, byte[] photo, List<String> messages) {
-        for (String message : messages) {
-            sendPhoto(id, photo, message);
-        }
-    }
-
-    public void send(Integer id, String message) {
+    public SendResponse send(Integer id, String message) {
         String escapedMessage = TelegramUtils.escapeMessage(message);
 
         SendResponse response = api.send(
@@ -64,25 +42,37 @@ public class TelegramBotAPI {
                         .disableWebPagePreview(true)
         );
         processResponse(response, id, message);
+        return response;
     }
 
-    public void sendRaw(Integer id, String message) {
+    public SendResponse sendRaw(Integer id, String message) {
         SendResponse response = api.send(
                 new SendMessage(id, message)
                         .disableWebPagePreview(true)
         );
         processResponse(response, id, message);
+        return response;
     }
 
-    public void sendPhoto(Integer id, byte[] photo, String message) {
+    public BaseResponse update(Integer id, Integer messageId, String message) {
         String escapedMessage = TelegramUtils.escapeMessage(message);
 
-        SendResponse response = api.send(
-                new SendPhoto(id, photo)
-                        .caption(escapedMessage)
+        BaseResponse response = api.send(
+                new EditMessageText(id, messageId, escapedMessage)
                         .parseMode(ParseMode.MarkdownV2)
+                        .disableWebPagePreview(true)
         );
         processResponse(response, id, message);
+        return response;
+    }
+
+    public BaseResponse updateRaw(Integer id, Integer messageId, String message) {
+        BaseResponse response = api.send(
+                new EditMessageText(id, messageId, message)
+                        .disableWebPagePreview(true)
+        );
+        processResponse(response, id, message);
+        return response;
     }
 
     private void processResponse(BaseResponse response,
@@ -101,35 +91,68 @@ public class TelegramBotAPI {
         }
     }
 
-    public void sendPhoto(Integer id, byte[] photo) {
-        SendResponse response = api.send(
-                new SendPhoto(id, photo)
-        );
-        processResponse(response, id, "Photo file");
-    }
-
-    public void sendVideo(Integer id, byte[] video) {
-        SendResponse response = api.send(
-                new SendVideo(id, video)
-        );
-        processResponse(response, id, "Video file");
-    }
-
-    public void sendVideoNote(Integer id, byte[] videoNote) {
-        SendResponse response = api.send(
-                new SendVideoNote(id, videoNote)
-        );
-        processResponse(response, id, "Video note file");
-    }
-
-    public byte[] download(String fileId) {
-        GetFileResponse response = api.send(
-                new GetFile(fileId)
-        );
-
-        File file = response.file();
-        return api.download(file.filePath());
-    }
+//    public void ask(Integer id, String question) {
+//        SendResponse response = api.send(
+//                new SendMessage(id, question)
+//                        .replyMarkup(new ForceReply())
+//                        .parseMode(ParseMode.MarkdownV2)
+//                        .disableWebPagePreview(true)
+//        );
+//        processResponse(response, id, question);
+//    }
+//
+//    public void send(Integer id, List<String> messages) {
+//        for (String message : messages) {
+//            send(id, message);
+//        }
+//    }
+//
+//    public void sendPhoto(Integer id, byte[] photo, List<String> messages) {
+//        for (String message : messages) {
+//            sendPhoto(id, photo, message);
+//        }
+//    }
+//
+//    public void sendPhoto(Integer id, byte[] photo, String message) {
+//        String escapedMessage = TelegramUtils.escapeMessage(message);
+//
+//        SendResponse response = api.send(
+//                new SendPhoto(id, photo)
+//                        .caption(escapedMessage)
+//                        .parseMode(ParseMode.MarkdownV2)
+//        );
+//        processResponse(response, id, message);
+//    }
+//
+//    public void sendPhoto(Integer id, byte[] photo) {
+//        SendResponse response = api.send(
+//                new SendPhoto(id, photo)
+//        );
+//        processResponse(response, id, "Photo file");
+//    }
+//
+//    public void sendVideo(Integer id, byte[] video) {
+//        SendResponse response = api.send(
+//                new SendVideo(id, video)
+//        );
+//        processResponse(response, id, "Video file");
+//    }
+//
+//    public void sendVideoNote(Integer id, byte[] videoNote) {
+//        SendResponse response = api.send(
+//                new SendVideoNote(id, videoNote)
+//        );
+//        processResponse(response, id, "Video note file");
+//    }
+//
+//    public byte[] download(String fileId) {
+//        GetFileResponse response = api.send(
+//                new GetFile(fileId)
+//        );
+//
+//        File file = response.file();
+//        return api.download(file.filePath());
+//    }
 
 //    public void sendMenu(Integer id, String message) {
 //        SendResponse response = api.send(

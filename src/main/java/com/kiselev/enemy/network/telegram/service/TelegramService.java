@@ -4,6 +4,8 @@ import com.kiselev.enemy.network.telegram.api.TelegramAPI;
 import com.kiselev.enemy.network.telegram.api.client.model.TelegramProfile;
 import com.kiselev.enemy.network.telegram.model.TelegramMessage;
 import com.kiselev.enemy.utils.flow.model.Info;
+import com.pengrad.telegrambot.response.BaseResponse;
+import com.pengrad.telegrambot.response.SendResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Service;
@@ -55,25 +57,36 @@ public class TelegramService {
                 ));
     }
 
-    public <Profile extends Info> void send(Integer id, TelegramMessage<Profile> message) {
+    public <Profile extends Info> SendResponse send(Integer id, TelegramMessage<Profile> message) {
         TelegramMessage.MessageType type = message.getType();
 
         switch (type) {
-            case ANALYSIS:
-                api.bot().sendPhoto(id, message.data(), message.analysis());
-                return;
-            case MULTI:
-                api.bot().send(id, message.messages());
-                return;
-            case SINGLE:
-                api.bot().send(id, message.message());
-                return;
+//            case ANALYSIS:
+//                api.bot().sendPhoto(id, message.data(), message.analysis());
+//                return;
+//            case MULTI:
+//                api.bot().send(id, message.messages());
+//                return;
+//            case SINGLE:
+//                api.bot().send(id, message.message());
+//                return;
             case TEXT:
-                api.bot().send(id, message.text());
-                return;
+                return api.bot().send(id, message.text());
             case RAW:
-                api.bot().sendRaw(id, message.text());
-                return;
+                return api.bot().sendRaw(id, message.text());
+            default:
+                throw new RuntimeException("Unknown type of the message");
+        }
+    }
+
+    public <Profile extends Info> BaseResponse update(Integer id, Integer messageId, TelegramMessage<Profile> message) {
+        TelegramMessage.MessageType type = message.getType();
+
+        switch (type) {
+            case TEXT:
+                return api.bot().update(id, messageId, message.text());
+            case RAW:
+                return api.bot().updateRaw(id, messageId, message.text());
             default:
                 throw new RuntimeException("Unknown type of the message");
         }
