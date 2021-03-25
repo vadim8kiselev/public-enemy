@@ -25,14 +25,25 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.vk.api.sdk.objects.likes.Type;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -837,6 +848,26 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
         List<InstagramProfile> friends = profile.friends();
         if (CollectionUtils.isNotEmpty(friends)) {
+            Set<InstagramProfile> tags = profile.posts().stream()
+                    .map(InstagramPost::tags)
+                    .flatMap(List::stream)
+                    .collect(Collectors.toSet());
+
+            List<InstagramProfile> bestFriends = friends.stream()
+                    .filter(tags::contains)
+                    .collect(Collectors.toList());
+
+            if (CollectionUtils.isNotEmpty(bestFriends)) {
+                if (bestFriends.size() <= LIMIT) {
+                    people.add("Best friends:");
+                    for (InstagramProfile bestFriend : bestFriends) {
+                        people.add(message("⭐️ Best friend", bestFriend.name()));
+                    }
+                } else {
+                    people.add(message("⭐️ Best friends", bestFriends.size(), "people"));
+                }
+            }
+
             if (friends.size() <= LIMIT) {
                 people.add("Friends:");
                 for (InstagramProfile friend : friends) {
@@ -988,15 +1019,37 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
     private List<String> igTags(InstagramProfile profile) {
         List<String> messages = Lists.newArrayList();
 
-        Map<InstagramProfile, Long> igTagsHeatMap = profile.posts().stream()
-                .map(InstagramPost::tags)
-                .flatMap(List::stream)
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        List<InstagramPost> posts = profile.posts();
+        List<InstagramProfile> topTags = AnalyticsUtils.topObjects(
+                posts.stream()
+                        .map(InstagramPost::tags)
+                        .filter(Objects::nonNull)
+                        .flatMap(List::stream)
+                        .collect(Collectors.toList()),
+                LIMIT);
 
-        List<String> tags = igTagsHeatMap.entrySet().stream()
-                .sorted(Map.Entry.<InstagramProfile, Long>comparingByValue().reversed())
-                .limit(LIMIT)
-                .map(this::tag)
+        List<String> tags = topTags.stream()
+                .map(tag -> {
+                    List<InstagramPost> tagPosts = posts.stream()
+                            .filter(post -> post.tags() != null && post.tags().contains(tag))
+                            .collect(Collectors.toList());
+
+                    return Statistics.of(
+                            "🏷 " + tag.name(),
+                            label(tagPosts.size(), "tag"),
+                            tagPosts.stream()
+                                    .min(Comparator.comparing(InstagramPost::date))
+                                    .map(InstagramPost::date)
+                                    .orElse(null),
+                            tagPosts.stream()
+                                    .max(Comparator.comparing(InstagramPost::date))
+                                    .map(InstagramPost::date)
+                                    .orElse(null)
+                    );
+                })
+                .sorted(Comparator.comparing(Statistics::to, Comparator.reverseOrder()))
+                .map(Statistics::toString)
+
                 .collect(Collectors.toList());
 
         if (VKUtils.isNotEmpty(tags)) {
@@ -1013,17 +1066,50 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
     private List<String> igHashTags(InstagramProfile profile) {
         List<String> messages = Lists.newArrayList();
 
-        Map<String, Long> igHashTagsHeatMap = profile.posts().stream()
-                .map(InstagramPost::hashTags)
-                .filter(Objects::nonNull)
-                .flatMap(List::stream)
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        List<InstagramPost> posts = profile.posts();
+        List<String> topHashTags = AnalyticsUtils.topObjects(
+                posts.stream()
+                        .map(InstagramPost::hashTags)
+                        .filter(Objects::nonNull)
+                        .flatMap(List::stream)
+                        .collect(Collectors.toList()),
+                LIMIT);
 
-        List<String> hashTags = igHashTagsHeatMap.entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .limit(LIMIT)
-                .map(this::hashTag)
+        List<String> hashTags = topHashTags.stream()
+                .map(hashTag -> {
+                    List<InstagramPost> hashTagPosts = posts.stream()
+                            .filter(post -> post.hashTags() != null && post.hashTags().contains(hashTag))
+                            .collect(Collectors.toList());
+
+                    return Statistics.of(
+                            "🔗 " + hashTag,
+                            label(hashTagPosts.size(), "hash tag"),
+                            hashTagPosts.stream()
+                                    .min(Comparator.comparing(InstagramPost::date))
+                                    .map(InstagramPost::date)
+                                    .orElse(null),
+                            hashTagPosts.stream()
+                                    .max(Comparator.comparing(InstagramPost::date))
+                                    .map(InstagramPost::date)
+                                    .orElse(null)
+                    );
+                })
+                .sorted(Comparator.comparing(Statistics::to, Comparator.reverseOrder()))
+                .map(Statistics::toString)
+
                 .collect(Collectors.toList());
+
+//        Map<String, Long> igHashTagsHeatMap = profile.posts().stream()
+//                .map(InstagramPost::hashTags)
+//                .filter(Objects::nonNull)
+//                .flatMap(List::stream)
+//                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+//
+//        List<String> hashTags = igHashTagsHeatMap.entrySet().stream()
+//                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+//                .limit(LIMIT)
+//                .map(this::hashTag)
+//                .collect(Collectors.toList());
 
         if (VKUtils.isNotEmpty(hashTags)) {
             TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded hash tags");
@@ -1053,24 +1139,21 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                             .filter(post -> location.equals(post.location()))
                             .collect(Collectors.toList());
 
-                    String from = locationPosts.stream()
-                            .min(Comparator.comparing(InstagramPost::date))
-                            .map(InstagramPost::date)
-                            .map(date -> String.format("%02d", date.getMonthValue()) + "." + date.getYear())
-                            .orElse(null);
-
-                    String to = locationPosts.stream()
-                            .max(Comparator.comparing(InstagramPost::date))
-                            .map(InstagramPost::date)
-                            .map(date -> String.format("%02d", date.getMonthValue()) + "." + date.getYear())
-                            .orElse(null);
-
-                    if (Objects.equals(from, to)) {
-                        return "📍 " + location + " (" + locationPosts.size() + ": " + from + ")";
-                    } else {
-                        return "📍 " + location + " (" + locationPosts.size() + ": " + from + " - " + to + ")";
-                    }
+                    return Statistics.of(
+                            "📍 " + location,
+                            label(locationPosts.size(), "photo"),
+                            locationPosts.stream()
+                                    .min(Comparator.comparing(InstagramPost::date))
+                                    .map(InstagramPost::date)
+                                    .orElse(null),
+                            locationPosts.stream()
+                                    .max(Comparator.comparing(InstagramPost::date))
+                                    .map(InstagramPost::date)
+                                    .orElse(null)
+                    );
                 })
+                .sorted(Comparator.comparing(Statistics::to, Comparator.reverseOrder()))
+                .map(Statistics::toString)
                 .collect(Collectors.toList());
 
         if (VKUtils.isNotEmpty(locations)) {
@@ -1128,15 +1211,34 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                 (number + " / " + totalNumberOfItems) + (number == 1 ? " like" : " likes"));
     }
 
-    private String tag(Map.Entry<InstagramProfile, Long> entry) {
-        String name = entry.getKey().name();
-        Long tags = entry.getValue();
-        return message("🏷", name, tags + (tags == 1 ? " tag" : " tags"));
+    private String label(Integer number, String label) {
+        return number + (number == 1 ? " " + label : " " + label + "s");
     }
 
-    private String hashTag(Map.Entry<String, Long> entry) {
-        String hashTag = entry.getKey();
-        Long number = entry.getValue();
-        return message("🔗", hashTag, number + (number == 1 ? " hash tag" : " hash tags"));
+    @Data
+    @Accessors(fluent = true)
+    @AllArgsConstructor(staticName = "of")
+    private static class Statistics {
+        private String name;
+        private String label;
+        private LocalDateTime from;
+        private LocalDateTime to;
+
+        @Override
+        public String toString() {
+            String from = Optional.of(this.from())
+                    .map(date -> String.format("%02d", date.getMonthValue()) + "." + date.getYear())
+                    .get();
+
+            String to = Optional.of(this.to())
+                    .map(date -> String.format("%02d", date.getMonthValue()) + "." + date.getYear())
+                    .get();
+
+            if (Objects.equals(from, to)) {
+                return this.name() + " (" + this.label() + ": " + from + ")";
+            } else {
+                return this.name() + " (" + this.label() + ": " + from + " - " + to + ")";
+            }
+        }
     }
 }
