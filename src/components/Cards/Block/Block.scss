@@ -1,0 +1,16 @@
+.content {
+    word-break: break-all;
+    white-space: pre-line;
+    margin: 10px;
+    &__title {
+        display: flex;
+        flex: inherit;
+        background: gray;
+        color: #ffff;
+    }
+    &__main-info {
+        padding: 20px;
+        text-align: left;
+
+    }
+}

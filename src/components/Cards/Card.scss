@@ -1,0 +1,10 @@
+.main {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-auto-flow: column;
+}
+
+.ss-title {
+    padding: 15px;
+    text-align: left;
+}
