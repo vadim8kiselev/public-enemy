@@ -2,14 +2,14 @@ package com.kiselev.enemy.network.vk.utils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.kiselev.enemy.network.instagram.model.InstagramProfile;
 import com.kiselev.enemy.network.vk.model.Zodiac;
+import com.kiselev.enemy.utils.flow.model.Info;
 import com.vk.api.sdk.objects.base.BaseObject;
 import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Period;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,6 +21,12 @@ public class VKUtils {
         return collection == null
                 ? Stream.empty()
                 : collection.stream();
+    }
+
+    public static LocalDateTime timestampToDateAndTime(Integer timestamp) {
+        return LocalDateTime
+                .ofInstant(Instant.ofEpochSecond(timestamp), ZoneId.systemDefault());
+//                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 
     public static boolean isNotEmpty(Collection<String> list) {

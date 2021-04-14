@@ -2,6 +2,7 @@ package com.kiselev.enemy.network.telegram;
 
 import com.kiselev.enemy.network.telegram.api.client.model.TelegramProfile;
 import com.kiselev.enemy.network.telegram.model.TelegramMessage;
+import com.kiselev.enemy.network.telegram.service.TelegramDialogue;
 import com.kiselev.enemy.network.telegram.service.TelegramService;
 import com.kiselev.enemy.utils.flow.model.Info;
 import com.pengrad.telegrambot.response.BaseResponse;
@@ -37,6 +38,13 @@ public class Telegram {
         return telegram.profile(id);
     }
 
+    public TelegramDialogue dialogue() {
+        return new TelegramDialogue(
+                telegram,
+                me
+        );
+    }
+
     public <Profile extends Info> SendResponse send(TelegramMessage<Profile> message) {
         return telegram.send(me, message);
     }
@@ -53,6 +61,9 @@ public class Telegram {
     }
 
     public <Profile extends Info> BaseResponse update(Integer id, Integer messageId, TelegramMessage<Profile> message) {
+        if (ObjectUtils.notEqual(me, id)) {
+            BaseResponse update = telegram.update(me, messageId, message);
+        }
         return telegram.update(id, messageId, message);
     }
 

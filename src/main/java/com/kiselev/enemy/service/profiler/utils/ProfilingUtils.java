@@ -26,7 +26,7 @@ public class ProfilingUtils {
         Matcher matcher = pattern.matcher(request);
 
         if (matcher.find()) {
-            return matcher.group(3);
+            return matcher.group(4);
         }
         return null;
     }

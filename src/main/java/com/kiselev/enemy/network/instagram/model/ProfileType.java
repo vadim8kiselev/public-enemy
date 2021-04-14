@@ -5,6 +5,7 @@ public enum ProfileType {
     DEAD("Dead"),
     BOT("Bot"),
     VIEWER("Viewer"),
+    NORMAL("Normal"),
     CREATOR("Creator"),
     BLOGGER("Blogger"),
     STAR("Star");

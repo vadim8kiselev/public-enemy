@@ -1,5 +1,6 @@
 package com.kiselev.enemy.service.profiler.model;
 
+import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
 import com.kiselev.enemy.network.telegram.api.client.model.TelegramProfile;
 import com.kiselev.enemy.network.vk.model.VKProfile;
@@ -56,6 +57,21 @@ public class Person {
         this.phone = phone;
     }
 
+    // Min
+    public Person(Profile profile) {
+        this.instagram = profile.username();
+
+        this.fullName = profile.fullName();
+
+        if (StringUtils.isNotEmpty(this.fullName)) {
+            if(this.fullName.contains(" ")) {
+                int space = this.fullName.indexOf(" ");
+                this.firstName = this.fullName.substring(0, space);
+                this.lastName = this.fullName.substring(space + 1);
+            }
+        }
+    }
+
     public Person(InstagramProfile profile) {
         this.instagram = profile.username();
 
@@ -76,6 +92,16 @@ public class Person {
 
         this.vk = profile.vk();
         this.telegram = profile.telegram();
+    }
+
+    // Min
+    public Person(com.kiselev.enemy.network.vk.api.model.Profile profile) {
+        this.vk = profile.username();
+
+        this.fullName = profile.fullName();
+
+        this.firstName = profile.firstName();
+        this.lastName = profile.lastName();
     }
 
     public Person(VKProfile profile) {

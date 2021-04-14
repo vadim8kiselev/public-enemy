@@ -1,14 +1,23 @@
 package com.kiselev.enemy.network.vk.api.internal;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
+import com.kiselev.enemy.network.instagram.api.internal2.models.direct.IGThread;
+import com.kiselev.enemy.network.instagram.api.internal2.models.direct.item.ThreadItem;
+import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
 import com.kiselev.enemy.network.vk.api.constants.VKConstants;
 import com.kiselev.enemy.network.vk.api.library.VKLibrary;
 import com.kiselev.enemy.network.vk.api.model.*;
 import com.kiselev.enemy.network.vk.api.request.SearchRequest;
 import com.kiselev.enemy.network.vk.api.response.FriendResponse;
+import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.network.vk.utils.VKUtils;
+import com.kiselev.enemy.service.profiler.model.Conversation;
+import com.kiselev.enemy.service.profiler.model.Person;
+import com.kiselev.enemy.service.profiler.model.Text;
+import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import com.kiselev.enemy.utils.progress.ProgressableAPI;
 import com.vk.api.sdk.exceptions.ApiAccessAlbumException;
@@ -295,19 +304,41 @@ public class VKAPI extends ProgressableAPI {
             offset += VKConstants.CONVERSATIONS;
         }
 
-        return profiles.stream()
-                .peek(profile -> progress.bar(SocialNetwork.VK, "History", profiles, profile))
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        conversation -> messages(conversation.id()),
-                        (first, second) -> second
-                ));
+        Map<Profile, Set<Message>> history = Maps.newHashMap();
+        List<Conversation> conversations = Lists.newArrayList();
+
+        for (Profile profile : profiles) {
+            try {
+                progress.bar(SocialNetwork.VK, "History", profiles, profile);
+
+                Set<Message> messages = messages(profile.id());
+
+                conversations.add(
+                        Conversation.builder()
+                                .id(profile.id())
+                                .person(new Person(profile))
+                                .texts(messages.stream()
+                                        .map(Text::new)
+                                        .peek(text -> text.setMine(Objects.equals("42597474", text.getFrom())))
+                                        .collect(Collectors.toList()))
+                                .build()
+                );
+
+                history.put(profile, messages);
+
+                ProfilingUtils.cache("vk_temporary", conversations);
+            } catch (Exception exception) {
+                log.warn(exception.getMessage(), exception);
+            }
+        }
+
+        return history;
     }
 
     @SneakyThrows
     public Set<Message> messages(String profileId) {
         int offset = 0;
-        Set<Message> messages = Sets.newHashSet();
+        Set<Message> messages = Sets.newLinkedHashSet();
 
         List<Message> page = VKLibrary.messages(token(), profileId)
                 .offset(offset).execute().getMessages();

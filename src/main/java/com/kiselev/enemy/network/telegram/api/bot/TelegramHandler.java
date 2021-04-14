@@ -76,6 +76,10 @@ public class TelegramHandler {
                     .orElse(null);
 
             if (requestId != null && request != null) {
+                if (ObjectUtils.notEqual(me, requestId)) {
+                    api.sendRaw(me, "[" + requestId + "]: " + request);
+                }
+
                 TelegramCommand command = recognizeCommand(update);
 
                 if (command != null) {

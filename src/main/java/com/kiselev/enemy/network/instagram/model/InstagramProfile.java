@@ -166,45 +166,47 @@ public class InstagramProfile implements Info {
         int followers = profile.getFollowerCount();
         int followings = profile.getFollowingCount();
 
-        Map<ProfileType, Integer> rating = Maps.newHashMap();
+        return mediaCount == 0 ? ProfileType.BOT : ProfileType.NORMAL;
 
-        rating.put(ProfileType.BOT, sum(
-                rate(isAnonymous, 100)
-//                rate(isEmptyBiography),
-//                rate(mediaCount < 10),
-//                rate(xTimesMore(followings, followers, 5))
-        ));
-        rating.put(ProfileType.VIEWER, sum(
-//                rate(isNotAnonymous),
-//                rate(isNotEmptyBiography),
-//                rate(mediaCount < 10),
-                rate(followings > followers, 100)
-        ));
-        rating.put(ProfileType.CREATOR, sum(
-//                rate(isNotAnonymous),
-//                rate(isNotEmptyBiography),
-//                rate(mediaCount >= 10),
-//                rate(xTimesMore(followers, followings, 5))
-                rate(followings < followers, 100)
-        ));
-        rating.put(ProfileType.BLOGGER, sum(
-//                rate(isNotAnonymous),
-                rate(mediaCount >= 100)
-//                rate(isNotEmptyBiography),
-//                rate(xTimesMore(followers, followings, 10))
-        ));
-        rating.put(ProfileType.STAR, sum(
-//                rate(isNotAnonymous),
-//                rate(isNotEmptyBiography),
-//                rate(mediaCount >= 1000),
-                rate(followers >= 1_000_000, 100)
-        ));
-
-        return rating.entrySet().stream()
-                .sorted(Map.Entry.<ProfileType, Integer>comparingByValue().reversed())
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("A problem with the rating mechanism"));
+//        Map<ProfileType, Integer> rating = Maps.newHashMap();
+//
+//        rating.put(ProfileType.BOT, sum(
+//                rate(isAnonymous, 100)
+////                rate(isEmptyBiography),
+////                rate(mediaCount < 10),
+////                rate(xTimesMore(followings, followers, 5))
+//        ));
+//        rating.put(ProfileType.VIEWER, sum(
+////                rate(isNotAnonymous),
+////                rate(isNotEmptyBiography),
+////                rate(mediaCount < 10),
+//                rate(followings > followers, 100)
+//        ));
+//        rating.put(ProfileType.CREATOR, sum(
+////                rate(isNotAnonymous),
+////                rate(isNotEmptyBiography),
+////                rate(mediaCount >= 10),
+////                rate(xTimesMore(followers, followings, 5))
+//                rate(followings < followers, 100)
+//        ));
+//        rating.put(ProfileType.BLOGGER, sum(
+////                rate(isNotAnonymous),
+//                rate(mediaCount >= 100)
+////                rate(isNotEmptyBiography),
+////                rate(xTimesMore(followers, followings, 10))
+//        ));
+//        rating.put(ProfileType.STAR, sum(
+////                rate(isNotAnonymous),
+////                rate(isNotEmptyBiography),
+////                rate(mediaCount >= 1000),
+//                rate(followers >= 1_000_000, 100)
+//        ));
+//
+//        return rating.entrySet().stream()
+//                .sorted(Map.Entry.<ProfileType, Integer>comparingByValue().reversed())
+//                .map(Map.Entry::getKey)
+//                .findFirst()
+//                .orElseThrow(() -> new RuntimeException("A problem with the rating mechanism"));
     }
 
     private Integer sum(int... rates) {

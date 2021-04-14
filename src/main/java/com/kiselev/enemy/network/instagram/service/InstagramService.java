@@ -117,18 +117,20 @@ public class InstagramService extends ProgressableAPI {
         return convert(viewers);
     }
 
-    public Map<InstagramProfile, Set<ThreadItem>> history() {
-        Map<Profile, Set<ThreadItem>> history = api.history();
-        return history.entrySet().stream()
-//                .peek(thread -> progress.bar(SocialNetwork.IG, "History messages:", history, thread))
-                .collect(Collectors.toMap(
-                        entry -> profile(entry.getKey().username()),
-                        Map.Entry::getValue,
-                        (first, second) -> {
-                            // TODO: Try to merge
-                            return second;
-                        }
-                ));
+    public Map<Profile, Set<ThreadItem>> history() {
+        return api.history();
+//        Map<Profile, Set<ThreadItem>> history = api.history();
+//        return history.entrySet().stream()
+//                .collect(Collectors.toMap(
+//                        entry -> profile(entry.getKey().username()),
+//                        Map.Entry::getValue,
+//                        (first, second) -> {
+//                            if (first.size() != second.size()) {
+//                                throw new RuntimeException("An error happened while merging");
+//                            }
+//                            return second;
+//                        }
+//                ));
     }
 
     public Set<ThreadItem> messages(String threadId) {

@@ -1,11 +1,24 @@
 package com.kiselev.enemy.network.telegram.api.client;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.kiselev.enemy.network.instagram.api.internal2.models.direct.IGThread;
+import com.kiselev.enemy.network.instagram.api.internal2.models.direct.item.ThreadItem;
+import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
+import com.kiselev.enemy.network.instagram.api.internal2.models.user.User;
 import com.kiselev.enemy.network.telegram.api.client.internal.*;
 import com.kiselev.enemy.network.telegram.api.client.internal.database.DatabaseManagerImpl;
+import com.kiselev.enemy.network.telegram.api.client.model.TelegramProfile;
 import com.kiselev.enemy.network.telegram.utils.TelegramUtils;
+import com.kiselev.enemy.service.profiler.model.Conversation;
+import com.kiselev.enemy.service.profiler.model.Person;
+import com.kiselev.enemy.service.profiler.model.Text;
+import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
+import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import com.kiselev.enemy.utils.progress.ProgressableAPI;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,12 +45,10 @@ import org.telegram.tl.TLIntVector;
 import org.telegram.tl.TLMethod;
 import org.telegram.tl.TLObject;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class TelegramClientAPI extends ProgressableAPI {
 
@@ -115,17 +126,52 @@ public class TelegramClientAPI extends ProgressableAPI {
     public Map<TLUser, Set<TLMessage>> history() {
         List<TLUser> people = people();
 
-        return people.stream()
-//                .peek(person -> progress.bar(SocialNetwork.TG, "History", people, person))
-                .collect(Collectors.toMap(
-                        person -> person,
-                        person -> messages(String.valueOf(person.getId())),
-                        (first, second) -> second
-                ));
+        List<TelegramProfile> profiles = people.stream()
+                .map(TelegramProfile::new)
+                .collect(Collectors.toList());
+
+        Map<TLUser, Set<TLMessage>> history = Maps.newHashMap();
+        List<Conversation> conversations = Lists.newArrayList();
+
+        for (TLUser person : people) {
+            try {
+                TelegramProfile profile = new TelegramProfile(person);
+
+                progress.bar(SocialNetwork.TG, "History messages", profiles, profile);
+
+                Set<TLMessage> messages = messages(String.valueOf(profile.id()));
+
+                conversations.add(
+                        Conversation.builder()
+                                .id(profile.id())
+                                .person(new Person(profile))
+                                .texts(messages.stream()
+                                        .map(Text::new)
+                                        .peek(text -> text.setMine(Objects.equals("63756324", text.getFrom())))
+                                        .collect(Collectors.toList()))
+                                .build()
+                );
+
+                history.put(person, messages);
+
+                ProfilingUtils.cache("tg_temporary", conversations);
+            } catch (Exception exception) {
+                log.warn(exception.getMessage(), exception);
+            }
+        }
+
+        return history;
+
+//        return people.stream()
+//                .collect(Collectors.toMap(
+//                        person -> person,
+//                        person -> messages(String.valueOf(person.getId())),
+//                        (first, second) -> second
+//                ));
     }
 
     public Set<TLMessage> messages(String id) {
-        Set<TLMessage> messages = Sets.newHashSet();
+        Set<TLMessage> messages = Sets.newLinkedHashSet();
         int offset = 0;
         int limit = 100;
 

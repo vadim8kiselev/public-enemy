@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.kiselev.enemy.network.vk.api.internal.VKAPI;
 import com.kiselev.enemy.network.vk.api.model.*;
 import com.kiselev.enemy.network.vk.api.request.SearchRequest;
+import com.kiselev.enemy.network.vk.model.VKPost;
 import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.network.vk.utils.VKUtils;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
@@ -151,7 +152,7 @@ public class VKService {
         );
     }
 
-    public List<Post> posts(String id, boolean needAll) {
+    public List<VKPost> posts(String id, boolean needAll) {
         List<Post> posts = api.posts(id);
         Stream<Post> postStream = posts.stream();
 
@@ -174,6 +175,7 @@ public class VKService {
                                 api.likes(id, post.id(), Type.POST).stream()
                                         .map(VKInternalProfile::new)
                                         .collect(Collectors.toList())))
+                .map(VKPost::new)
                 .collect(Collectors.toList());
     }
 
@@ -188,9 +190,9 @@ public class VKService {
                 .collect(Collectors.toList());
         likes.addAll(photoslikes);
 
-        List<Post> posts = posts(id, true);
+        List<VKPost> posts = posts(id, true);
         List<VKProfile> postslikes = posts.stream()
-                .map(Post::likes)
+                .map(VKPost::likes)
                 .filter(Objects::nonNull)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
@@ -484,7 +486,7 @@ public class VKService {
         }
 
         @Override
-        public List<Post> posts() {
+        public List<VKPost> posts() {
             if (super.posts() == null) {
                 super.posts(VKService.this.posts(id(), true));
             }

@@ -1,6 +1,9 @@
 package com.kiselev.enemy.network.telegram.api.bot.command.identifier;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.TimelineMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.user.Profile;
 import com.kiselev.enemy.network.instagram.model.InstagramPost;
 import com.kiselev.enemy.network.instagram.model.InstagramProfile;
@@ -8,9 +11,11 @@ import com.kiselev.enemy.network.instagram.utils.InstagramUtils;
 import com.kiselev.enemy.network.telegram.api.bot.command.TelegramCommand;
 import com.kiselev.enemy.network.telegram.api.bot.command.identifier.utils.IdentifierUtils;
 import com.kiselev.enemy.network.telegram.model.TelegramMessage;
+import com.kiselev.enemy.network.telegram.service.TelegramDialogue;
 import com.kiselev.enemy.network.telegram.utils.TelegramUtils;
 import com.kiselev.enemy.network.vk.api.model.Photo;
 import com.kiselev.enemy.network.vk.api.model.Post;
+import com.kiselev.enemy.network.vk.model.VKPost;
 import com.kiselev.enemy.network.vk.model.VKProfile;
 import com.kiselev.enemy.network.vk.model.Zodiac;
 import com.kiselev.enemy.network.vk.utils.VKUtils;
@@ -24,6 +29,8 @@ import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.response.SendResponse;
+import com.vk.api.sdk.objects.base.CommentsInfo;
+import com.vk.api.sdk.objects.base.LikesInfo;
 import com.vk.api.sdk.objects.likes.Type;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -127,7 +134,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
     // Main
     private void vk(Integer requestId, String identifier) {
-        VKProfile profile = new VKProfile(publicEnemy.vk().service().api().profile(identifier));
+        VKProfile profile = new VKLazyProfile(publicEnemy.vk().service().api().profile(identifier));
         if (profile.username() != null) {
             TelegramUtils.log(VK, "[" + profile.identifier() + "] Downloaded vk profile: " + profile.username());
         } else {
@@ -150,7 +157,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
     // Main
     private void ig(Integer requestId, String identifier) {
-        InstagramProfile profile = new InstagramProfile(publicEnemy.ig().service().api().profile(identifier));
+        InstagramProfile profile = new InstagramLazyProfile(publicEnemy.ig().service().api().profile(identifier));
         if (profile.username() != null) {
             TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded instagram profile: " + profile.username());
         } else {
@@ -178,7 +185,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
         String instagram = profile.instagram();
 
         if (instagram != null) {
-            foundProfile = new InstagramProfile(publicEnemy.ig().service().api().profile(instagram));
+            foundProfile = new InstagramLazyProfile(publicEnemy.ig().service().api().profile(instagram));
         }
 
         String username = profile.username();
@@ -187,7 +194,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                     publicEnemy.ig().service().api().profile(username);
 
             if (user != null && user.isActive()) {
-                InstagramProfile instagramProfile = new InstagramProfile(user);
+                InstagramProfile instagramProfile = new InstagramLazyProfile(user);
 
                 boolean hasSameFullName = Objects.equals(profile.fullName(), instagramProfile.fullName());
 
@@ -214,7 +221,29 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
         String vk = profile.vk();
 
         if (vk != null) {
-            foundProfile = new VKProfile(publicEnemy.vk().service().api().profile(vk));
+            foundProfile = new VKLazyProfile(publicEnemy.vk().service().api().profile(vk));
+        }
+
+        String username = profile.username();
+        if (username != null) {
+            com.kiselev.enemy.network.vk.api.model.Profile user =
+                    publicEnemy.vk().service().api().profile(username);
+
+            if (user != null) {
+                VKProfile vkProfile = new VKLazyProfile(user);
+
+                boolean hasSameFullName = Objects.equals(profile.fullName(), vkProfile.fullName());
+
+                boolean hasSamePhoneNumber = profile.public_phone_number() != null
+                        && profile.public_phone_number().equals(vkProfile.phone());
+
+                boolean hasBackReference = vkProfile.instagram() != null
+                        && vkProfile.instagram().contains(profile.username());
+
+                if (hasSameFullName || hasSamePhoneNumber || hasBackReference) {
+                    foundProfile = vkProfile;
+                }
+            }
         }
 
         vk(requestId, foundProfile);
@@ -222,78 +251,42 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
     // Content
     private void vk(Integer requestId, VKProfile profile) {
-        List<String> messages = Lists.newArrayList();
+        Map<Integer, List<String>> messages = Maps.newHashMap();
 
         if (profile != null) {
-            SendResponse response = publicEnemy.tg().send(requestId, TelegramMessage.text("\n*VK:*\n..."));
+            TelegramDialogue dialogue = publicEnemy.tg().dialogue();
+            SendResponse response = dialogue.send(requestId, TelegramMessage.text("\n*VK:*\n..."));
 
-            profile.friends(
-                    publicEnemy.vk().service().api().friends(profile.id()).stream()
-                            .map(VKProfile::new)
-                            .collect(Collectors.toList()));
-            if (profile.friends() != null) {
-                TelegramUtils.log(VK, "[" + profile.identifier() + "] Downloaded vk friends: " + profile.friends().size() + " friends");
-            } else {
-                TelegramUtils.log(VK, "[" + profile.identifier() + "] No vk friends");
-            }
+            Map<Integer, Function<VKProfile, List<String>>> vk = ImmutableMap
+                    .<Integer, Function<VKProfile, List<String>>>builder()
+                    .put(1, this::vkInformation)
+                    .put(2, this::vkContacts)
+                    .put(3, this::vkLife)
+                    .put(4, this::vkPeople)
+                    .put(5, this::vkStatistics) // Posts
+                    .put(6, this::vkLikes) // Posts + Photos = Likes
+                    .put(9, this::vkPredictions) // Friends
+                    .put(8, this::vkRelatives) // Friends
+                    .put(7, this::vkHiders) // Friends of friends
+                    .build();
 
-            profile.photos(
-                    publicEnemy.vk().service().photos(profile.id(), false)
-            );
-            if (profile.photos() != null) {
-                TelegramUtils.log(VK, "[" + profile.identifier() + "] Downloaded vk photos: " + profile.photos().size() + " photos");
-            } else {
-                TelegramUtils.log(VK, "[" + profile.identifier() + "] No vk photos");
-            }
-
-            profile.posts(
-                    publicEnemy.vk().service().posts(profile.id(), false)
-            );
-            if (profile.posts() != null) {
-                TelegramUtils.log(VK, "[" + profile.identifier() + "] Downloaded vk posts: " + profile.posts().size() + " posts");
-            } else {
-                TelegramUtils.log(VK, "[" + profile.identifier() + "] No vk posts");
-            }
-
-//        profile.area(
-//                profile.friends().stream()
-//                        .filter(VKProfile::isActive)
-//                        .peek(friend -> friend.friends(
-//                                publicEnemy.vk().service().api().friends(friend.id()).stream()
-//                                        .map(VKProfile::new)
-//                                        .collect(Collectors.toList())))
-//                        .collect(Collectors.toMap(
-//                                friend -> friend,
-//                                VKProfile::friends)));
-//        TelegramUtils.log(VK, "[" + profile.identifier() + "] Downloaded vk area: " + profile.area().size() + " people");
-
-            List<Function<VKProfile, List<String>>> vk = Lists.newArrayList(
-                    this::vkInformation,
-                    this::vkContacts,
-                    this::vkLife,
-                    this::vkStatistics,
-                    this::vkLikes,
-                    this::vkHiders,
-                    this::vkRelatives,
-                    this::vkPredictions
-            );
-
-            for (Function<VKProfile, List<String>> function : vk) {
+            for (Map.Entry<Integer, Function<VKProfile, List<String>>> entry : vk.entrySet()) {
                 publicEnemy.tg().service().api().bot().sendTyping(requestId);
 
-                List<String> page = function.apply(profile);
+                List<String> page = entry.getValue().apply(profile);
                 if (CollectionUtils.isNotEmpty(page)) {
-                    messages.addAll(
+                    messages.put(
+                            entry.getKey(),
                             page
                     );
 
-                    publicEnemy.tg().update(requestId,
+                    dialogue.update(requestId,
                             response.message().messageId(),
                             TelegramMessage.text(card("\n*VK:*", messages, false)));
                 }
             }
 
-            publicEnemy.tg().update(requestId,
+            dialogue.update(requestId,
                     response.message().messageId(),
                     TelegramMessage.text(card("\n*VK:*", messages, true)));
         }
@@ -301,102 +294,43 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
     // Content
     private void ig(Integer requestId, InstagramProfile profile) {
-        List<String> messages = Lists.newArrayList();
+        Map<Integer, List<String>> messages = Maps.newHashMap();
 
         if (profile != null) {
-            SendResponse response = publicEnemy.tg().send(requestId, TelegramMessage.text("\n*Instagram:*\n..."));
+            TelegramDialogue dialogue = publicEnemy.tg().dialogue();
+            SendResponse response = dialogue.send(requestId, TelegramMessage.text("\n*Instagram:*\n..."));
 
-            profile.posts(
-                    publicEnemy.ig().service().api().posts(profile.id()).stream()
-                            .map(InstagramPost::new)
-                            .collect(Collectors.toList()));
-            if (profile.posts() != null) {
-                TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded ig posts: " + profile.posts().size() + " posts");
-            } else {
-                TelegramUtils.log(IG, "[" + profile.identifier() + "] No ig posts");
-            }
+            Map<Integer, Function<InstagramProfile, List<String>>> ig = ImmutableMap
+                    .<Integer, Function<InstagramProfile, List<String>>>builder()
+                    .put(1, this::igInformation)
+                    .put(2, this::igContacts)
+                    .put(3, this::igPeople)
+                    .put(4, this::igStatistics)
+                    .put(5, this::igLikes)
+                    .put(6, this::igTags)
+//                    .put(7, this::igCaptions)
+                    .put(8, this::igHashTags)
+                    .put(9, this::igLocations)
+                    .put(10, this::igPredictions)
+                    .build();
 
-            List<Profile> followers = publicEnemy.ig().service().api().followers(profile.id());
-            if (followers != null) {
-                profile.followers(
-                        followers.stream()
-                                .map(InstagramProfile::new)
-                                .collect(Collectors.toList()));
-            }
-            if (profile.followers() != null) {
-                TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded ig followers: " + profile.followers().size() + " followers");
-            } else {
-                TelegramUtils.log(IG, "[" + profile.identifier() + "] No ig followers");
-            }
-
-            List<Profile> following = publicEnemy.ig().service().api().following(profile.id());
-            if (following != null) {
-                profile.following(following.stream()
-                        .map(InstagramProfile::new)
-                        .collect(Collectors.toList()));
-            }
-            if (profile.following() != null) {
-                TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded ig following: " + profile.following().size() + " following");
-            } else {
-                TelegramUtils.log(IG, "[" + profile.identifier() + "] No ig following");
-            }
-
-
-            profile.friends(
-                    InstagramUtils.friends(profile)
-            );
-            if (profile.friends() != null) {
-                TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded ig friends: " + profile.friends().size() + " friends");
-            } else {
-                TelegramUtils.log(IG, "[" + profile.identifier() + "] No ig friends");
-            }
-
-            profile.unfollowers(
-                    InstagramUtils.unfollowers(profile)
-            );
-            if (profile.unfollowers() != null) {
-                TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded ig unfollowers: " + profile.unfollowers().size() + " unfollowers");
-            } else {
-                TelegramUtils.log(IG, "[" + profile.identifier() + "] No ig unfollowers");
-            }
-
-            profile.unfollowings(
-                    InstagramUtils.unfollowings(profile)
-            );
-            if (profile.unfollowings() != null) {
-                TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded ig unfollowings: " + profile.unfollowings().size() + " unfollowings");
-            } else {
-                TelegramUtils.log(IG, "[" + profile.identifier() + "] No ig unfollowings");
-            }
-
-            List<Function<InstagramProfile, List<String>>> ig = Lists.newArrayList(
-                    this::igInformation,
-                    this::igContacts,
-                    this::igPeople,
-                    this::igStatistics,
-                    this::igLikes,
-                    this::igTags,
-                    this::igHashTags,
-                    this::igLocations,
-                    this::igPredictions
-            );
-
-            for (Function<InstagramProfile, List<String>> function : ig) {
+            for (Map.Entry<Integer, Function<InstagramProfile, List<String>>> entry : ig.entrySet()) {
                 publicEnemy.tg().service().api().bot().sendTyping(requestId);
 
-                List<String> page = function.apply(profile);
+                List<String> page = entry.getValue().apply(profile);
                 if (CollectionUtils.isNotEmpty(page)) {
-                    messages.addAll(
-                            function.apply(profile)
+                    messages.put(
+                            entry.getKey(),
+                            page
                     );
 
-                    publicEnemy.tg().update(requestId,
+                    dialogue.update(requestId,
                             response.message().messageId(),
                             TelegramMessage.text(card("\n*Instagram:*", messages, false)));
                 }
             }
 
-            publicEnemy.tg().update(requestId,
+            dialogue.update(requestId,
                     response.message().messageId(),
                     TelegramMessage.text(card("\n*Instagram:*", messages, true)));
         }
@@ -505,59 +439,134 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
         return messages;
     }
 
+    private List<String> vkPeople(VKProfile profile) {
+        List<String> messages = Lists.newArrayList();
+
+        List<String> people = Lists.newArrayList();
+        List<VKProfile> following = profile.following();
+        if (CollectionUtils.isNotEmpty(following)) {
+            people.add(message("➡️ Following", following.size(), "people"));
+        }
+
+        List<VKProfile> followers = profile.followers();
+        if (CollectionUtils.isNotEmpty(followers)) {
+            people.add(message("⬅️ Followers", followers.size(), "people"));
+        }
+
+        List<VKProfile> friends = profile.friends();
+        if (CollectionUtils.isNotEmpty(friends)) {
+            if (friends.size() <= LIMIT) {
+                people.add("Friends:");
+                for (VKProfile friend : friends) {
+                    people.add(message("🤝 Friend", friend.name()));
+                }
+            } else {
+                people.add(message("🤝 Friends", friends.size(), "people"));
+            }
+        }
+
+        if (VKUtils.isNotEmpty(people)) {
+            TelegramUtils.log(VK, "[" + profile.identifier() + "] Downloaded people");
+            messages.add("\nPeople:");
+            messages.addAll(people);
+        } else {
+            TelegramUtils.log(VK, "[" + profile.identifier() + "] No people");
+        }
+
+        return messages;
+    }
+
     private List<String> vkStatistics(VKProfile profile) {
         List<String> messages = Lists.newArrayList();
 
-//        List<String> statistics = Lists.newArrayList();
-//        List<Post> posts = profile.posts();
+        List<String> statistics = Lists.newArrayList();
+        List<VKPost> posts = profile.posts();
 //        List<Photo> photos = profile.photos();
-//
-//        int totalNumberOfPosts = posts.size() + photos.size();
-//        int totalNumberOfLikes = posts.stream()
-//                .mapToInt(post -> post.likesInfo().getCount())
-//                .sum()
+
+        int totalNumberOfPosts = posts.size(); // + photos.size()
+        int totalNumberOfLikes =
+                posts.stream()
+                        .mapToInt(post -> post.likesInfo().getCount())
+                        .sum();
 //                +
 //                photos.stream()
-//                        .mapToInt(photo -> photo.likesInfo().getCount())
+//                        .map(Photo::likes)
+//                        .mapToLong(List::size)
 //                        .sum();
-//        int totalNumberOfCommentaries = posts.stream()
-//                .mapToInt(post -> post.commentsInfo().getCount())
-//                .sum();
-//
-//        Map<Integer, List<Post>> dateMap = posts.stream()
-//                .sorted(Comparator.comparing(Post::date, Comparator.reverseOrder()))
-//                .collect(Collectors.groupingBy(
-//                        post -> post.date().getYear(),
-//                        LinkedHashMap::new,
-//                        Collectors.toList()));
-//
-//        // TODO: Bold rows for scores
-//
-//        for (Map.Entry<Integer, List<InstagramPost>> entry : dateMap.entrySet()) {
-//            Integer year = entry.getKey();
-//            List<InstagramPost> yearPosts = entry.getValue();
-//
-//            int yearLikes = yearPosts.stream()
-//                    .mapToInt(InstagramPost::likeCount)
-//                    .sum();
-//            int yearCommentaries = yearPosts.stream()
-//                    .mapToInt(InstagramPost::commentariesCount)
-//                    .sum();
-//
-//            statistics.add("🗓 " + year + ":");
-//            statistics.add(message(" - Posts", statistics(yearPosts.size(), totalNumberOfPosts)));
-//            statistics.add(message(" - Types", null));
-//            statistics.add(message(" - Likes", statistics(yearLikes, totalNumberOfLikes)));
-//            statistics.add(message(" - Comments", statistics(yearCommentaries, totalNumberOfCommentaries)));
-//        }
-//
-//        if (VKUtils.isNotEmpty(statistics)) {
-//            TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded statistics");
-//            messages.add("\nStatistics:");
-//            messages.addAll(statistics);
-//        } else {
-//            TelegramUtils.log(IG, "[" + profile.identifier() + "] No statistics");
-//        }
+
+        int totalNumberOfCommentaries =
+                posts.stream()
+                        .mapToInt(post -> post.commentsInfo().getCount())
+                        .sum();
+//                +
+//                photos.stream()
+//                        .map(Photo::commentaries)
+//                        .mapToLong(List::size)
+//                        .sum();
+
+        Map<Integer, List<VKPost>> dateMap = posts.stream()
+                .sorted(Comparator.comparing(VKPost::date, Comparator.reverseOrder()))
+                .collect(Collectors.groupingBy(
+                        post -> post.date().getYear(),
+                        LinkedHashMap::new,
+                        Collectors.toList()));
+
+
+        List<Stat> stats = Lists.newArrayList();
+
+        for (Map.Entry<Integer, List<VKPost>> entry : dateMap.entrySet()) {
+            Integer year = entry.getKey();
+            List<VKPost> yearPosts = entry.getValue();
+
+            int yearLikes = yearPosts.stream()
+                    .map(VKPost::likesInfo)
+                    .mapToInt(LikesInfo::getCount)
+                    .sum();
+            int yearCommentaries = yearPosts.stream()
+                    .map(VKPost::commentsInfo)
+                    .mapToInt(CommentsInfo::getCount)
+                    .sum();
+
+            stats.add(Stat.of(year, yearPosts.size(), yearLikes, yearCommentaries));
+        }
+
+        int maxCount = stats.stream().mapToInt(Stat::count).max().orElse(-1);
+        int minCount = stats.stream().mapToInt(Stat::count).min().orElse(-1);
+
+        int maxLikes = stats.stream().mapToInt(Stat::likes).max().orElse(-1);
+        int minLikes = stats.stream().mapToInt(Stat::likes).min().orElse(-1);
+
+        int maxCommentaries = stats.stream().mapToInt(Stat::commentaries).max().orElse(-1);
+        int minCommentaries = stats.stream().mapToInt(Stat::commentaries).min().orElse(-1);
+
+        for (Stat stat : stats) {
+            String yearLine = "🗓 " + stat.year() + ":";
+            String postsLine = message(" - Posts", statistics(stat.count(), totalNumberOfPosts));
+            String likesLine = message(" - Likes", statistics(stat.likes(), totalNumberOfLikes));
+            String commentariesLine = message(" - Comments", statistics(stat.commentaries(), totalNumberOfCommentaries));
+
+            statistics.add(yearLine);
+
+            statistics.add((maxCount == stat.count() || minCount == stat.count())
+                    ? bold(postsLine + " (" + (maxCount == stat.count() ? ">" : "<") + ")")
+                    : postsLine);
+
+            statistics.add((maxLikes == stat.likes() || minLikes == stat.likes())
+                    ? bold(likesLine + " (" + (maxLikes == stat.likes() ? ">" : "<") + ")")
+                    : likesLine);
+
+            statistics.add((maxCommentaries == stat.commentaries() || minCommentaries == stat.commentaries())
+                    ? bold(commentariesLine + " (" + (maxCommentaries == stat.commentaries() ? ">" : "<") + ")")
+                    : commentariesLine);
+        }
+
+        if (VKUtils.isNotEmpty(statistics)) {
+            TelegramUtils.log(VK, "[" + profile.identifier() + "] Downloaded statistics");
+            messages.add("\nStatistics (posts):");
+            messages.addAll(statistics);
+        } else {
+            TelegramUtils.log(VK, "[" + profile.identifier() + "] No statistics");
+        }
 
         return messages;
     }
@@ -576,7 +585,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                 .collect(Collectors.toList());
         vkLikes.addAll(photoslikes);
 
-        List<Post> posts = profile.posts();
+        List<VKPost> posts = profile.posts();
         List<VKProfile> postslikes = posts.stream()
                 .map(photo -> publicEnemy.vk().service().api().likes(profile.id(), photo.id(), Type.POST))
                 .filter(Objects::nonNull)
@@ -611,9 +620,9 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
         if (VKUtils.isNotEmpty(likes)) {
             TelegramUtils.log(VK, "[" + profile.identifier() + "] Downloaded likes");
             if (isAvailableToGetAll) {
-                messages.add("\nLikes:");
+                messages.add("\nLikes (posts + photos):");
             } else {
-                messages.add("\nLikes for the last year:");
+                messages.add("\nLikes (posts + photos) for the last year:");
             }
             messages.addAll(likes);
         } else {
@@ -793,7 +802,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
         ));
 
         if (StringUtils.isNotEmpty(profile.biography())) {
-            information.add("📝 Biography:");
+            information.add("📝 Status:");
             information.add(profile.biography());
         }
 
@@ -843,7 +852,14 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
         List<InstagramProfile> followers = profile.followers();
         if (CollectionUtils.isNotEmpty(followers)) {
-            people.add(message("⬅️ Followers", followers.size(), "people"));
+            long bots = followers.stream()
+                    .filter(InstagramProfile::isBot)
+                    .count();
+            if (bots == 0) {
+                people.add(message("⬅️ Followers", followers.size(), "people"));
+            } else {
+                people.add(message("⬅️ Followers", followers.size(), "people [" + statistics(bots, followers.size()) + "]"));
+            }
         }
 
         List<InstagramProfile> friends = profile.friends();
@@ -933,7 +949,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                         LinkedHashMap::new,
                         Collectors.toList()));
 
-        // TODO: Bold rows for scores
+        List<Stat> stats = Lists.newArrayList();
 
         for (Map.Entry<Integer, List<InstagramPost>> entry : dateMap.entrySet()) {
             Integer year = entry.getKey();
@@ -946,11 +962,37 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                     .mapToInt(InstagramPost::commentariesCount)
                     .sum();
 
-            statistics.add("🗓 " + year + ":");
-            statistics.add(message(" - Posts", statistics(yearPosts.size(), totalNumberOfPosts)));
-            statistics.add(message(" - Types", null));
-            statistics.add(message(" - Likes", statistics(yearLikes, totalNumberOfLikes)));
-            statistics.add(message(" - Comments", statistics(yearCommentaries, totalNumberOfCommentaries)));
+            stats.add(Stat.of(year, yearPosts.size(), yearLikes, yearCommentaries));
+        }
+
+        int maxCount = stats.stream().mapToInt(Stat::count).max().orElse(-1);
+        int minCount = stats.stream().mapToInt(Stat::count).min().orElse(-1);
+
+        int maxLikes = stats.stream().mapToInt(Stat::likes).max().orElse(-1);
+        int minLikes = stats.stream().mapToInt(Stat::likes).min().orElse(-1);
+
+        int maxCommentaries = stats.stream().mapToInt(Stat::commentaries).max().orElse(-1);
+        int minCommentaries = stats.stream().mapToInt(Stat::commentaries).min().orElse(-1);
+
+        for (Stat stat : stats) {
+            String yearLine = "🗓 " + stat.year() + ":";
+            String postsLine = message(" - Posts", statistics(stat.count(), totalNumberOfPosts));
+            String likesLine = message(" - Likes", statistics(stat.likes(), totalNumberOfLikes));
+            String commentariesLine = message(" - Comments", statistics(stat.commentaries(), totalNumberOfCommentaries));
+
+            statistics.add(yearLine);
+
+            statistics.add((maxCount == stat.count() || minCount == stat.count())
+                    ? bold(postsLine + " (" + (maxCount == stat.count() ? ">" : "<") + ")")
+                    : postsLine);
+
+            statistics.add((maxLikes == stat.likes() || minLikes == stat.likes())
+                    ? bold(likesLine + " (" + (maxLikes == stat.likes() ? ">" : "<") + ")")
+                    : likesLine);
+
+            statistics.add((maxCommentaries == stat.commentaries() || minCommentaries == stat.commentaries())
+                    ? bold(commentariesLine + " (" + (maxCommentaries == stat.commentaries() ? ">" : "<") + ")")
+                    : commentariesLine);
         }
 
         if (VKUtils.isNotEmpty(statistics)) {
@@ -1063,6 +1105,41 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
         return messages;
     }
 
+    private List<String> igCaptions(InstagramProfile profile) {
+        List<String> messages = Lists.newArrayList();
+
+        Map<String, Long> vkCaptionsHeatMap = profile.posts().stream()
+                .map(InstagramPost::caption)
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        Long maxRate = vkCaptionsHeatMap.values().stream()
+                .max(Long::compareTo)
+                .orElse(null);
+
+        long limit = Math.max(
+                vkCaptionsHeatMap.values().stream()
+                        .filter(heat -> Objects.equals(heat, maxRate))
+                        .count() + 1,
+                LIMIT);
+
+        List<String> captions = vkCaptionsHeatMap.entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .limit(limit)
+                .map(caption -> message("💬", caption.getKey() + " - " + label(caption.getValue(), "caption")))
+                .collect(Collectors.toList());
+
+        if (VKUtils.isNotEmpty(captions)) {
+            TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded captions");
+            messages.add("\nCaptions:");
+            messages.addAll(captions);
+        } else {
+            TelegramUtils.log(IG, "[" + profile.identifier() + "] No captions");
+        }
+
+        return messages;
+    }
+
     private List<String> igHashTags(InstagramProfile profile) {
         List<String> messages = Lists.newArrayList();
 
@@ -1099,18 +1176,6 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
                 .collect(Collectors.toList());
 
-//        Map<String, Long> igHashTagsHeatMap = profile.posts().stream()
-//                .map(InstagramPost::hashTags)
-//                .filter(Objects::nonNull)
-//                .flatMap(List::stream)
-//                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-//
-//        List<String> hashTags = igHashTagsHeatMap.entrySet().stream()
-//                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-//                .limit(LIMIT)
-//                .map(this::hashTag)
-//                .collect(Collectors.toList());
-
         if (VKUtils.isNotEmpty(hashTags)) {
             TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded hash tags");
             messages.add("\nHash tags:");
@@ -1125,7 +1190,31 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
     private List<String> igLocations(InstagramProfile profile) {
         List<String> messages = Lists.newArrayList();
 
+        List<String> locations = Lists.newArrayList();
+
         List<InstagramPost> posts = profile.posts();
+        Map<Integer, List<InstagramPost>> yearPosts = posts.stream()
+                .sorted(Comparator.comparing(instagramPost -> instagramPost.date().getYear(), Comparator.reverseOrder()))
+                .collect(Collectors.groupingBy(instagramPost -> instagramPost.date().getYear(), LinkedHashMap::new, Collectors.toList()));
+
+        for (Map.Entry<Integer, List<InstagramPost>> entry : yearPosts.entrySet()) {
+            locations.addAll(
+                    igLocations(entry.getKey(), entry.getValue())
+            );
+        }
+
+        if (VKUtils.isNotEmpty(locations)) {
+            TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded locations");
+            messages.add("\nLocations:");
+            messages.addAll(locations);
+        } else {
+            TelegramUtils.log(IG, "[" + profile.identifier() + "] No locations");
+        }
+
+        return messages;
+    }
+
+    private List<String> igLocations(Integer year, List<InstagramPost> posts) {
         List<String> topLocations = AnalyticsUtils.topObjects(
                 posts.stream()
                         .map(InstagramPost::location)
@@ -1133,7 +1222,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                         .collect(Collectors.toList()),
                 LIMIT);
 
-        List<String> locations = topLocations.stream()
+        List<String> internalLocations = topLocations.stream()
                 .map(location -> {
                     List<InstagramPost> locationPosts = posts.stream()
                             .filter(post -> location.equals(post.location()))
@@ -1156,15 +1245,14 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                 .map(Statistics::toString)
                 .collect(Collectors.toList());
 
-        if (VKUtils.isNotEmpty(locations)) {
-            TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded locations");
-            messages.add("\nLocations:");
-            messages.addAll(locations);
-        } else {
-            TelegramUtils.log(IG, "[" + profile.identifier() + "] No locations");
+        List<String> locations = Lists.newArrayList();
+
+        if (CollectionUtils.isNotEmpty(internalLocations)) {
+            locations.add("🗓 " + year + ":");
+            locations.addAll(internalLocations);
         }
 
-        return messages;
+        return locations;
     }
 
     private List<String> igPredictions(InstagramProfile profile) {
@@ -1201,8 +1289,8 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
 
     //
 
-    private String statistics(Integer current, Integer total) {
-        return current + " / " + total + " (" + ((current * 100) / total) + "%)";
+    private String statistics(long current, long total) {
+        return current + " / " + total + " (" + ((current * 100) / Math.max(total, 1)) + "%)";
     }
 
     private String like(String emoji, String name, Long number, Integer totalNumberOfItems) {
@@ -1211,7 +1299,7 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                 (number + " / " + totalNumberOfItems) + (number == 1 ? " like" : " likes"));
     }
 
-    private String label(Integer number, String label) {
+    private String label(long number, String label) {
         return number + (number == 1 ? " " + label : " " + label + "s");
     }
 
@@ -1240,5 +1328,212 @@ public class IdentifierCommand extends ProgressableAPI implements TelegramComman
                 return this.name() + " (" + this.label() + ": " + from + " - " + to + ")";
             }
         }
+    }
+
+    @Data
+    @Accessors(fluent = true)
+    @AllArgsConstructor(staticName = "of")
+    private static class Stat {
+        private Integer year;
+        private Integer count;
+        private Integer likes;
+        private Integer commentaries;
+    }
+
+    //
+
+    private class VKLazyProfile extends VKProfile {
+
+        public VKLazyProfile(com.kiselev.enemy.network.vk.api.model.Profile profile) {
+            super(profile);
+        }
+
+        @Override
+        public List<VKProfile> followers() {
+            if (super.followers() == null) {
+                List<com.kiselev.enemy.network.vk.api.model.Profile> followers =
+                        publicEnemy.vk().service().api().followers(this.id());
+                if (followers != null) {
+                    super.followers(followers.stream()
+                            .map(VKProfile::new)
+                            .collect(Collectors.toList()));
+                }
+            }
+            log(this, VKProfile::followers, "followers");
+            return super.followers();
+        }
+
+        @Override
+        public List<VKProfile> following() {
+            if (super.following() == null) {
+                List<com.kiselev.enemy.network.vk.api.model.Profile> following =
+                        publicEnemy.vk().service().api().following(this.id());
+                if (following != null) {
+                    super.following(following.stream()
+                            .map(VKProfile::new)
+                            .collect(Collectors.toList()));
+                }
+            }
+            log(this, VKProfile::following, "following");
+            return super.following();
+        }
+
+        @Override
+        public List<VKProfile> friends() {
+            if (super.friends() == null) {
+                List<com.kiselev.enemy.network.vk.api.model.Profile> friends =
+                        publicEnemy.vk().service().api().friends(this.id());
+                if (friends != null) {
+                    super.friends(friends.stream()
+                            .map(VKProfile::new)
+                            .collect(Collectors.toList()));
+                }
+            }
+            log(this, VKProfile::friends, "friends");
+            return super.friends();
+        }
+
+        @Override
+        public List<Photo> photos() {
+            if (super.photos() == null) {
+                List<Photo> photos = publicEnemy.vk().service().api().photos(this.id());
+                if (photos != null) {
+                    super.photos(photos);
+                }
+            }
+            log(this, VKProfile::photos, "photos");
+            return super.photos();
+        }
+
+        @Override
+        public List<VKPost> posts() {
+            if (super.posts() == null) {
+                List<Post> posts = publicEnemy.vk().service().api().posts(this.id());
+                if (posts != null) {
+                    super.posts(posts.stream()
+                            .map(VKPost::new)
+                            .collect(Collectors.toList()));
+                }
+            }
+            log(this, VKProfile::posts, "posts");
+            return super.posts();
+        }
+
+//        profile.area(
+//                profile.friends().stream()
+//                        .filter(VKProfile::isActive)
+//                        .peek(friend -> friend.friends(
+//                                publicEnemy.vk().service().api().friends(friend.id()).stream()
+//                                        .map(VKProfile::new)
+//                                        .collect(Collectors.toList())))
+//                        .collect(Collectors.toMap(
+//                                friend -> friend,
+//                                VKProfile::friends)));
+//        TelegramUtils.log(VK, "[" + profile.identifier() + "] Downloaded vk area: " + profile.area().size() + " people");
+    }
+
+    private class InstagramLazyProfile extends InstagramProfile {
+
+        public InstagramLazyProfile(com.kiselev.enemy.network.instagram.api.internal2.models.user.User profile) {
+            super(profile);
+        }
+
+        @Override
+        public List<InstagramPost> posts() {
+            if (super.posts() == null) {
+                List<TimelineMedia> posts = publicEnemy.ig().service().api().posts(this.id());
+                if (posts != null) {
+                    super.posts(posts.stream()
+                            .map(InstagramPost::new)
+                            .collect(Collectors.toList()));
+                }
+            }
+            log(this, InstagramProfile::posts, "posts");
+            return super.posts();
+        }
+
+        @Override
+        public List<InstagramProfile> unfollowers() {
+            if (super.unfollowers() == null) {
+                super.unfollowers(InstagramUtils.unfollowers(
+                        this.followers(),
+                        this.following()
+                ));
+            }
+            log(this, InstagramProfile::unfollowers, "unfollowers");
+            return super.unfollowers();
+        }
+
+        @Override
+        public List<InstagramProfile> unfollowings() {
+            if (super.unfollowings() == null) {
+                super.unfollowings(InstagramUtils.unfollowings(
+                        this.followers(),
+                        this.following()
+                ));
+            }
+            log(this, InstagramProfile::unfollowings, "unfollowings");
+            return super.unfollowings();
+        }
+
+        @Override
+        public List<InstagramProfile> followers() {
+            if (super.followers() == null) {
+                List<Profile> followers = publicEnemy.ig().service().api().followers(this.id());
+                if (followers != null) {
+                    super.followers(followers.stream()
+                            .map(InstagramProfile::new)
+                            .collect(Collectors.toList()));
+                }
+            }
+            log(this, InstagramProfile::followers, "followers");
+            return super.followers();
+        }
+
+        @Override
+        public List<InstagramProfile> following() {
+            if (super.following() == null) {
+                List<Profile> following = publicEnemy.ig().service().api().following(this.id());
+                if (following != null) {
+                    super.following(following.stream()
+                            .map(InstagramProfile::new)
+                            .collect(Collectors.toList()));
+                }
+            }
+            log(this, InstagramProfile::following, "followings");
+            return super.following();
+        }
+
+        @Override
+        public List<InstagramProfile> friends() {
+            if (super.friends() == null) {
+                List<Profile> friends = publicEnemy.ig().service().api().friends(this.id());
+                if (friends != null) {
+                    super.friends(friends.stream()
+                            .map(InstagramProfile::new)
+                            .collect(Collectors.toList()));
+                }
+            }
+            log(this, InstagramProfile::friends, "friends");
+            return super.friends();
+        }
+    }
+
+    //
+
+    private static <T> void log(VKProfile profile, Function<VKProfile, List<T>> function, String label) {
+//        if (function.apply(profile) != null) {
+//            TelegramUtils.log(VK, "[" + profile.identifier() + "] Downloaded vk " + label + ": " + function.apply(profile).size() + " " + label);
+//        } else {
+//            TelegramUtils.log(VK, "[" + profile.identifier() + "] No vk " + label);
+//        }
+    }
+
+    private static <T> void log(InstagramProfile profile, Function<InstagramProfile, List<T>> function, String label) {
+//        if (function.apply(profile) != null) {
+//            TelegramUtils.log(IG, "[" + profile.identifier() + "] Downloaded ig " + label + ": " + function.apply(profile).size() + " " + label);
+//        } else {
+//            TelegramUtils.log(IG, "[" + profile.identifier() + "] No ig " + label);
+//        }
     }
 }

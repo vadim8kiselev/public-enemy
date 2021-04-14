@@ -1,12 +1,14 @@
 package com.kiselev.enemy.network.instagram.api;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.kiselev.enemy.network.instagram.api.client.InstagramClient;
 import com.kiselev.enemy.network.instagram.api.internal2.models.direct.IGThread;
 import com.kiselev.enemy.network.instagram.api.internal2.models.direct.Inbox;
 import com.kiselev.enemy.network.instagram.api.internal2.models.direct.item.ThreadItem;
 import com.kiselev.enemy.network.instagram.api.internal2.models.feed.Reel;
+import com.kiselev.enemy.network.instagram.api.internal2.models.location.Location;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.reel.ReelMedia;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.Comment;
 import com.kiselev.enemy.network.instagram.api.internal2.models.media.timeline.TimelineMedia;
@@ -17,6 +19,7 @@ import com.kiselev.enemy.network.instagram.api.internal2.requests.direct.DirectT
 import com.kiselev.enemy.network.instagram.api.internal2.requests.feed.FeedUserReelMediaRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.feed.FeedUserRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.friendships.FriendshipsFeedsRequest;
+import com.kiselev.enemy.network.instagram.api.internal2.requests.locationsearch.LocationSearchRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaGetCommentsRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaGetLikersRequest;
 import com.kiselev.enemy.network.instagram.api.internal2.requests.media.MediaListReelMediaViewerRequest;
@@ -26,21 +29,29 @@ import com.kiselev.enemy.network.instagram.api.internal2.responses.direct.Direct
 import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUserReelsMediaResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUserResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.feed.FeedUsersResponse;
+import com.kiselev.enemy.network.instagram.api.internal2.responses.locationsearch.LocationSearchResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaGetCommentsResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.media.MediaListReelMediaViewerResponse;
 import com.kiselev.enemy.network.instagram.api.internal2.responses.users.UserResponse;
 import com.kiselev.enemy.network.instagram.utils.InstagramUtils;
+import com.kiselev.enemy.service.profiler.model.Conversation;
+import com.kiselev.enemy.service.profiler.model.Person;
+import com.kiselev.enemy.service.profiler.model.Text;
+import com.kiselev.enemy.service.profiler.utils.ProfilingUtils;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
 import com.kiselev.enemy.utils.progress.ProgressableAPI;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InstagramAPI extends ProgressableAPI {
@@ -291,29 +302,66 @@ public class InstagramAPI extends ProgressableAPI {
 
         } while (cursor != null);
 
-        return threads.stream()
-//                .peek(thread -> {
-////                    if (CollectionUtils.isEmpty(thread.getUsers())) {
-////                        String json = ProfilingUtils.json(thread);
-////                        List<Profile> left_users = thread.getLeft_users();
-////                        Profile inviter = thread.getInviter();
-////                        ProfilingUtils.file("thread", thread.getThread_id(), json);
-////                    }
-////                })
-////                .filter(thread -> CollectionUtils.isNotEmpty(thread.getUsers()))
-                .peek(thread -> progress.bar(SocialNetwork.IG, "History messages", threads, thread))
-                .collect(Collectors.toMap(
-                        thread -> thread.getUsers().stream().findFirst().orElse(User.deleted(thread.getThread_id())), // look closely
-                        thread -> messages(thread.getThread_id()),
-                        (first, second) -> {
-                            // TODO: Try to merge
-                            return second;
-                        }
-                ));
+        Map<Profile, Set<ThreadItem>> history = Maps.newHashMap();
+        List<Conversation> conversations = Lists.newArrayList();
+
+        for (IGThread thread : threads) {
+            try {
+                progress.bar(SocialNetwork.IG, "History messages", threads, thread);
+
+                Profile profile = thread.getUsers().stream()
+                        .findFirst()
+                        .orElse(User.deleted(thread.getThread_id()));
+
+                Set<ThreadItem> messages = messages(thread.getThread_id());
+
+                conversations.add(
+                        Conversation.builder()
+                                .id(profile.id())
+                                .person(new Person(profile))
+                                .texts(messages.stream()
+                                        .map(Text::new)
+                                        .peek(text -> text.setMine(Objects.equals("1417832744", text.getFrom())))
+                                        .collect(Collectors.toList()))
+                                .build()
+                );
+
+                history.put(profile, messages);
+
+                ProfilingUtils.cache("ig_temporary", conversations);
+            } catch (Exception exception) {
+                log.warn(exception.getMessage(), exception);
+            }
+        }
+
+        return history;
+
+//        return threads.stream()
+////                .peek(thread -> {
+//////                    if (CollectionUtils.isEmpty(thread.getUsers())) {
+//////                        String json = ProfilingUtils.json(thread);
+//////                        List<Profile> left_users = thread.getLeft_users();
+//////                        Profile inviter = thread.getInviter();
+//////                        ProfilingUtils.file("thread", thread.getThread_id(), json);
+//////                    }
+//////                })
+//////                .filter(thread -> CollectionUtils.isNotEmpty(thread.getUsers()))
+//                .peek(thread -> progress.bar(SocialNetwork.IG, "History messages", threads, thread))
+//                .collect(Collectors.toMap(
+//                        thread -> thread.getUsers().stream().findFirst().orElse(User.deleted(thread.getThread_id())), // look closely
+//                        thread -> messages(thread.getThread_id()),
+//                        (first, second) -> {
+//                            // TODO: Try to merge
+//                            if (first.size() != second.size()) {
+//                                throw new RuntimeException("An error happened while merging");
+//                            }
+//                            return second;
+//                        }
+//                ));
     }
 
     public Set<ThreadItem> messages(String threadId) {
-        Set<ThreadItem> messages = Sets.newHashSet();
+        Set<ThreadItem> messages = Sets.newLinkedHashSet();
         String cursor = null;
 
         do {
@@ -327,5 +375,103 @@ public class InstagramAPI extends ProgressableAPI {
         } while (cursor != null);
 
         return messages;
+    }
+
+    public String location(Location location) {
+        if (isLocationPerfect(location.getName())) {
+            return location.getName();
+        }
+        if (isLocationPerfect(location.getAddress())) {
+            return location.getAddress();
+        }
+        if (isLocationPerfect(location.getShort_name())) {
+            return location.getShort_name();
+        }
+
+        if (location.getLng() != null && location.getLat() != null) {
+            String foundLocation = searchLocation(location.getLng(), location.getLat(), "");
+
+            if (StringUtils.isEmpty(foundLocation)) {
+                foundLocation = searchLocation(location.getLng(), location.getLat(), location.getName());
+            }
+
+            if (StringUtils.isNotEmpty(foundLocation)) {
+                return foundLocation;
+            }
+        }
+        return location.getName();
+    }
+
+    private String searchLocation(Double longitude, Double latitude, String name) {
+        LocationSearchResponse locationSearchResponse = client.request(
+                new LocationSearchRequest(
+                        longitude,
+                        latitude,
+                        name));
+
+        List<String> locations = Lists.newArrayList();
+
+        List<String> names = locationSearchResponse.getVenues().stream()
+                .map(Location::getName)
+                .filter(StringUtils::isNotEmpty)
+                .filter(location -> {
+                    Pattern compile = Pattern.compile("[а-яА-Я]");
+                    Matcher matcher = compile.matcher(location);
+                    return !matcher.find();
+                })
+                .collect(Collectors.toList());
+
+        List<String> addresses = locationSearchResponse.getVenues().stream()
+                .map(Location::getAddress)
+                .filter(StringUtils::isNotEmpty)
+                .filter(location -> {
+                    Pattern compile = Pattern.compile("[а-яА-Я]");
+                    Matcher matcher = compile.matcher(location);
+                    return !matcher.find();
+                })
+                .collect(Collectors.toList());
+
+        locations.addAll(names);
+        locations.addAll(addresses);
+
+        String perfectLocation = locations.stream()
+                .filter(this::isLocationPerfect)
+                .findFirst()
+                .orElse(null);
+
+        if (perfectLocation != null) {
+            return perfectLocation;
+        }
+
+        String fineLocation = locations.stream()
+                .filter(this::isLocationFine)
+                .findFirst()
+                .orElse(null);
+
+        if (fineLocation != null) {
+            return fineLocation;
+        }
+
+        return name;
+    }
+
+    private static final Pattern PERFECT_LOCATION = Pattern.compile("^[A-Z][a-z]+\\,\\s[A-Z][a-z]+$");
+
+    private boolean isLocationPerfect(String location) {
+        if (location != null) {
+            Matcher matcher = PERFECT_LOCATION.matcher(location);
+            return matcher.matches();
+        }
+        return false;
+    }
+
+    private static final Pattern FINE_LOCATION = Pattern.compile("^([\\w\\s]+\\,\\s){1,2}[\\w\\s]+$");
+
+    private boolean isLocationFine(String location) {
+        if (location != null) {
+            Matcher matcher = FINE_LOCATION.matcher(location);
+            return matcher.matches();
+        }
+        return false;
     }
 }

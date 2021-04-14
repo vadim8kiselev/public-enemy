@@ -5,13 +5,9 @@ import com.kiselev.enemy.network.vk.utils.VKUtils;
 import com.kiselev.enemy.utils.analytics.AnalyticsUtils;
 import com.kiselev.enemy.utils.analytics.model.Prediction;
 import com.kiselev.enemy.utils.flow.model.SocialNetwork;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -43,12 +39,16 @@ public class IdentifierUtils {
         return null;
     }
 
-    public static String card(String title, List<String> lines, boolean completed) {
+    public static String card(String title, Map<Integer, List<String>> lines, boolean completed) {
         List<String> card = Lists.newArrayList();
         card.add(title);
-        card.addAll(lines);
+        card.addAll(lines.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(Map.Entry::getValue)
+                .flatMap(List::stream)
+                .collect(Collectors.toList()));
         if (!completed) {
-            card.add("...");
+            card.add("\n...");
         }
         return card.stream()
                 .filter(Objects::nonNull)

@@ -160,7 +160,7 @@ public class VKProfile implements Info {
 
     @ToString.Exclude
     @EnemyValues(newMessage = NEW_POST_MESSAGE, deleteMessage = DELETED_POST_MESSAGE)
-    private List<Post> posts;
+    private List<VKPost> posts;
 
     @ToString.Exclude
     private List<VKProfile> relatives;

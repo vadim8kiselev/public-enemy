@@ -53,7 +53,13 @@ public class TelegramService {
                 ))
                 .collect(Collectors.toMap(
                     Map.Entry::getKey,
-                    Map.Entry::getValue
+                    Map.Entry::getValue,
+                    (first, second) -> {
+                        if (first.size() != second.size()) {
+                            throw new RuntimeException("An error happened while merging");
+                        }
+                        return second;
+                    }
                 ));
     }
 
